@@ -1,0 +1,125 @@
+{
+  "kind": "build_request",
+  "title": "Rebrand website name from Veda Botanics to Nature Glow",
+  "projectName": "Nature Glow",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the HTML shell (frontend/index.html), including the page <title> tag and any meta tags.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-17"
+        ],
+        "quotes": [
+          "chnage the name of the website from Veda Botanics to nature glow"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The browser tab title reads 'Nature Glow' instead of 'Veda Botanics'",
+        "No instance of 'Veda Botanics' remains in index.html"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the Navbar component (frontend/src/components/Navbar.tsx), including the logo text and any aria-labels or alt text referencing the brand name.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-17"
+        ],
+        "quotes": [
+          "chnage the name of the website from Veda Botanics to nature glow"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The navbar logo/brand text displays 'Nature Glow'",
+        "No instance of 'Veda Botanics' remains in the Navbar component"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the Footer component (frontend/src/components/Footer.tsx), including the brand name, tagline, and any copyright text.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-17"
+        ],
+        "quotes": [
+          "chnage the name of the website from Veda Botanics to nature glow"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The footer displays 'Nature Glow' as the brand name",
+        "No instance of 'Veda Botanics' remains in the Footer component"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' on the Home page (frontend/src/pages/Home.tsx), including the hero section heading, subheadings, and any other brand name references so the name is prominently visible on the homepage.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-17"
+        ],
+        "quotes": [
+          "nature glow name should also reflect in the home page"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The homepage hero section prominently displays 'Nature Glow'",
+        "No instance of 'Veda Botanics' remains on the Home page",
+        "The brand name 'Nature Glow' is visible without scrolling on the homepage"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the MobileNavDrawer component (frontend/src/components/MobileNavDrawer.tsx) and AdminLayout component (frontend/src/components/admin/AdminLayout.tsx), including any brand name references in the admin sidebar.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-17"
+        ],
+        "quotes": [
+          "chnage the name of the website from Veda Botanics to nature glow"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The mobile nav drawer shows 'Nature Glow' wherever the brand name appears",
+        "The admin sidebar/layout shows 'Nature Glow' wherever the brand name appears",
+        "No instance of 'Veda Botanics' remains in these components"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Search all remaining frontend source files (pages, components, hooks, utils, CSS files) for any remaining string 'Veda Botanics' and replace with 'Nature Glow' to ensure a complete rebrand.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-17"
+        ],
+        "quotes": [
+          "chnage the name of the website from Veda Botanics to nature glow"
+        ]
+      },
+      "acceptanceCriteria": [
+        "No instance of 'Veda Botanics' exists anywhere in the frontend source code",
+        "All user-facing text that previously said 'Veda Botanics' now says 'Nature Glow'"
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not alter any backend logic, data models, or API endpoints",
+    "Do not modify immutable frontend paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui"
+  ],
+  "nonGoals": [
+    "Changing the logo graphic or visual design beyond the text name",
+    "Updating any backend canister name or ICP configuration",
+    "Adding new features or pages"
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

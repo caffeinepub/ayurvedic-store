@@ -1,0 +1,115 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-26T15:45:23.332Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 6,
+    "implemented": 6,
+    "items": [
+      {
+        "id": "REQ-1",
+        "summary": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the HTML shell (frontend/index.html), including the page <title> tag and any meta tags.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/index.html"
+        ],
+        "matchedFiles": [
+          "frontend/index.html"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the Navbar component (frontend/src/components/Navbar.tsx), including the logo text and any aria-labels or alt text referencing the brand name.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/Navbar.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/Navbar.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the Footer component (frontend/src/components/Footer.tsx), including the brand name, tagline, and any copyright text.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/Footer.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/Footer.tsx"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' on the Home page (frontend/src/pages/Home.tsx), including the hero section heading, subheadings, and any other brand name references so the name is prominently visible on the homepage.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/Home.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/Home.tsx"
+        ]
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the MobileNavDrawer component (frontend/src/components/MobileNavDrawer.tsx) and AdminLayout component (frontend/src/components/admin/AdminLayout.tsx), including any brand name references in the admin sidebar.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/MobileNavDrawer.tsx",
+          "frontend/src/components/admin/AdminLayout.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/MobileNavDrawer.tsx",
+          "frontend/src/components/admin/AdminLayout.tsx"
+        ]
+      },
+      {
+        "id": "REQ-6",
+        "summary": "Search all remaining frontend source files (pages, components, hooks, utils, CSS files) for any remaining string 'Veda Botanics' and replace with 'Nature Glow' to ensure a complete rebrand.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/admin/AdminLogin.tsx",
+          "frontend/src/pages/admin/AdminProducts.tsx",
+          "frontend/src/pages/admin/AdminOrders.tsx",
+          "frontend/src/pages/admin/AdminSettings.tsx",
+          "frontend/src/pages/Shop.tsx",
+          "frontend/src/pages/ProductDetail.tsx",
+          "frontend/src/pages/Checkout.tsx",
+          "frontend/src/pages/PaymentSuccess.tsx",
+          "frontend/src/pages/PaymentFailure.tsx",
+          "frontend/src/index.css",
+          "frontend/src/utils/seedProducts.ts",
+          "frontend/src/components/CartDrawer.tsx",
+          "frontend/src/components/ProductCard.tsx",
+          "frontend/src/components/admin/ProductFormModal.tsx",
+          "frontend/src/components/admin/OrderDetailModal.tsx",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/admin/AdminLogin.tsx"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "build-request.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/index.html",
+    "frontend/src/components/Footer.tsx",
+    "frontend/src/components/MobileNavDrawer.tsx",
+    "frontend/src/components/Navbar.tsx",
+    "frontend/src/components/admin/AdminLayout.tsx",
+    "frontend/src/pages/Home.tsx",
+    "frontend/src/pages/admin/AdminLogin.tsx",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}
