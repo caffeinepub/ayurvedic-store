@@ -1,54 +1,27 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Ayurvedic website project with a floating WhatsApp customer support button feature being built.",
-  "architectural_notes": [],
-  "known_issues": [],
-  "isFixRequest": false,
+  "summary": "Ayurvedic-styled website project with WhatsApp button and admin panel. Currently fixing a bug where updating the WhatsApp number from the admin panel does not reflect in the WhatsApp button on the frontend.",
+  "architectural_notes": [
+    "WhatsApp button must dynamically fetch phone number from backend canister, not use hardcoded or cached value"
+  ],
+  "known_issues": [
+    "WhatsApp button does not update when phone number is changed from admin panel — frontend not re-fetching updated value from backend after save"
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-create-a-floatingwhatsapp-component-as-a-fixed-circular-button-in-the-bottom-right-corner-of-the-page-the-button-must-use-whatsapp-green-25d366-background-with-a-white-whatsapp-svg-icon-inside-on-click-it-opens-a-new-tab-to-https-wa-me-919819187188-text-hello-2c-20i-20would-20like-20to-20know-20more-20about-20your-20ayurvedic-20face-20packs-the-button-should-be-56-56px-on-desktop-and-48-48px-on-mobile-positioned-at-bottom-right-with-enough-margin-to-avoid-overlapping-footer-or-important-content",
-      "title": "Create a FloatingWhatsApp component as a fixed circular button in the bottom-right corner of the page. The button must use WhatsApp green (#25D366) background with a white WhatsApp SVG icon inside. On click, it opens a new tab to 'https://wa.me/919819187188?text=Hello%2C%20I%20would%20like%20to%20know%20more%20about%20your%20Ayurvedic%20face%20packs.' The button should be 56×56px on desktop and 48×48px on mobile, positioned at bottom-right with enough margin to avoid overlapping footer or important content.",
+      "id": "feature-the-floatingwhatsapp-component-must-dynamically-fetch-the-whatsapp-phone-number-from-the-backend-canister-via-the-site-settings-query-instead-of-using-a-hardcoded-or-stale-cached-value-after-the-admin-saves-a-new-whatsapp-number-in-adminsettings-the-floatingwhatsapp-button-must-use-the-updated-number-immediately-ensure-the-react-query-cache-for-site-settings-is-invalidated-or-refetched-after-a-successful-save-in-adminsettings-so-the-customer-facing-button-always-reflects-the-current-backend-value",
+      "title": "The FloatingWhatsApp component must dynamically fetch the WhatsApp phone number from the backend canister (via the site settings query) instead of using a hardcoded or stale cached value. After the admin saves a new WhatsApp number in AdminSettings, the FloatingWhatsApp button must use the updated number immediately — ensure the React Query cache for site settings is invalidated or refetched after a successful save in AdminSettings so the customer-facing button always reflects the current backend value.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
-    },
-    {
-      "id": "feature-add-a-soft-box-shadow-to-the-floatingwhatsapp-button-and-a-smooth-hover-animation-on-hover-the-button-scales-up-slightly-e-g-scale-110-and-gains-a-subtle-green-glow-effect-a-tooltip-with-the-text-chat-with-us-on-whatsapp-should-appear-above-the-button-on-hover-styled-in-earthy-natural-tones-consistent-with-the-ayurvedic-palette",
-      "title": "Add a soft box-shadow to the FloatingWhatsApp button and a smooth hover animation: on hover, the button scales up slightly (e.g., scale-110) and gains a subtle green glow effect. A tooltip with the text 'Chat with us on WhatsApp' should appear above the button on hover, styled in earthy/natural tones consistent with the Ayurvedic palette.",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-an-entrance-animation-to-the-floatingwhatsapp-button-so-it-fades-in-and-slides-up-from-the-bottom-when-the-page-first-loads-use-a-css-keyframe-or-tailwind-animation-e-g-fade-in-translate-y-with-a-short-delay-300-500ms-so-it-does-not-distract-from-initial-page-content",
-      "title": "Add an entrance animation to the FloatingWhatsApp button so it fades in and slides up from the bottom when the page first loads. Use a CSS keyframe or Tailwind animation (e.g., fade-in + translate-y) with a short delay (300–500ms) so it does not distract from initial page content.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-mount-the-floatingwhatsapp-component-inside-the-customerlayout-wrapper-in-app-tsx-so-it-appears-on-all-customer-facing-pages-the-component-should-read-the-whatsapp-number-from-the-backend-site-settings-via-the-existing-usewhatsappnumber-or-site-settings-react-query-hook-and-only-render-when-a-valid-number-is-configured-use-the-hardcoded-number-919819187188-as-the-fallback-default-if-the-backend-returns-an-empty-string",
-      "title": "Mount the FloatingWhatsApp component inside the CustomerLayout wrapper in App.tsx so it appears on all customer-facing pages. The component should read the WhatsApp number from the backend site settings (via the existing useWhatsAppNumber or site settings React Query hook) and only render when a valid number is configured. Use the hardcoded number '919819187188' as the fallback default if the backend returns an empty string.",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "version": 1
     }
   ],
-  "new_feature_requests": [
-    {
-      "id": "AR-1",
-      "summary": "Floating WhatsApp customer support button with Ayurvedic theme, fixed bottom-right, green circular button, hover tooltip, entrance animation, opens wa.me/919819187188 with pre-filled message",
-      "reqIds": [],
-      "status": "pending"
-    }
-  ],
+  "new_feature_requests": [],
   "gameProjectType": "none",
-  "projectName": "Nature Glow Ayurvedic",
+  "projectName": "Nature Glow",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

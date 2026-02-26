@@ -1,82 +1,27 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Floating WhatsApp Customer Support Button",
+  "title": "Fix WhatsApp button to reflect updated phone number from admin panel",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Create a FloatingWhatsApp component with fixed positioning, WhatsApp green styling, and click-to-chat functionality",
+      "summary": "Make FloatingWhatsApp component dynamically fetch the WhatsApp phone number from the backend and ensure the admin panel invalidates the cache when saving a new number",
       "acceptanceCriteria": [
-        "Button is fixed to the bottom-right corner on both mobile and desktop viewports",
-        "Button background is #25D366 with a white WhatsApp icon",
-        "Clicking the button opens https://wa.me/919819187188 with the pre-filled message in a new tab",
-        "Button does not overlap footer or other critical content"
+        "FloatingWhatsApp component reads the phone number from the site settings query result, not a hardcoded string.",
+        "When an admin updates and saves a new WhatsApp number in AdminSettings, the React Query cache for site settings is invalidated.",
+        "After saving a new number in the admin panel, the FloatingWhatsApp button opens a WhatsApp chat with the newly saved number without requiring a page reload.",
+        "If no number is returned from the backend, the button falls back to a sensible default rather than throwing an error."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/FloatingWhatsApp.tsx",
           "operation": "modify",
-          "description": "Update the FloatingWhatsApp component to use a circular button (56px desktop, 48px mobile) with WhatsApp green (#25D366) background and white WhatsApp SVG icon. Position it fixed at bottom-right with appropriate margins (e.g., bottom-6 right-6 on desktop, bottom-4 right-4 on mobile). On click, open https://wa.me/919819187188?text=Hello%2C%20I%20would%20like%20to%20know%20more%20about%20your%20Ayurvedic%20face%20packs. in a new tab using target='_blank' and rel='noopener noreferrer'. Use z-index high enough to stay above most content but below modals."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Add shadow, hover animations, and tooltip to the FloatingWhatsApp button",
-      "acceptanceCriteria": [
-        "Button displays a soft box-shadow in its default state",
-        "Hovering the button triggers a scale-up and green glow transition",
-        "A tooltip reading 'Chat with us on WhatsApp' appears above the button on hover",
-        "Tooltip styling matches the site's natural/earthy color palette"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/FloatingWhatsApp.tsx",
-          "operation": "modify",
-          "description": "Add a soft box-shadow (e.g., shadow-lg) to the button. Implement hover effects using Tailwind classes: scale-110 transform and a green glow via shadow-[0_0_20px_rgba(37,211,102,0.5)]. Add a tooltip element that appears on hover, positioned above the button with text 'Chat with us on WhatsApp', styled with the Ayurvedic earthy palette (e.g., bg-forest-800 text-white or similar warm tone). Use CSS transitions for smooth animations."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Add entrance animation to FloatingWhatsApp on page load",
-      "acceptanceCriteria": [
-        "On page load, the button animates in with a fade-in and upward slide",
-        "The entrance animation plays once and completes within 600ms",
-        "The animation does not cause layout shift or overlap other elements during entry"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/FloatingWhatsApp.tsx",
-          "operation": "modify",
-          "description": "Add an entrance animation using Tailwind animate utilities or custom CSS keyframes. Implement a fade-in combined with translate-y slide-up effect that triggers once on mount. Use a 300-500ms delay before the animation starts, and complete the animation within 600ms total. Apply opacity-0 and translate-y-4 initially, then animate to opacity-100 and translate-y-0. Ensure the component uses fixed positioning throughout to prevent layout shift."
+          "description": "Replace the hardcoded phone number with a call to the useGetWhatsappNumber hook from useQueries.ts. Use the query result's data for the phone number, falling back to a default value (e.g., '+919876543210') when the query is loading or returns an empty string. Ensure the component handles loading and error states gracefully without breaking the UI."
         },
         {
-          "path": "frontend/tailwind.config.js",
+          "path": "frontend/src/pages/admin/AdminSettings.tsx",
           "operation": "modify",
-          "description": "If needed, extend the Tailwind config to add a custom animation for the slide-up-fade-in effect (e.g., 'slideUpFadeIn' keyframe with opacity and transform). Only modify if existing Tailwind utilities are insufficient."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Wire FloatingWhatsApp into CustomerLayout and connect to backend WhatsApp number settings",
-      "acceptanceCriteria": [
-        "FloatingWhatsApp renders on all customer-facing pages via CustomerLayout",
-        "If the backend returns a WhatsApp number, it is used in the wa.me link",
-        "If the backend returns an empty string, the fallback number 919819187188 is used",
-        "The button does not render if no number is available at all"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/FloatingWhatsApp.tsx",
-          "operation": "modify",
-          "description": "Update the component to use the useGetWhatsappNumber hook (from frontend/src/hooks/useQueries.ts) to fetch the WhatsApp number from the backend. If the backend returns a non-empty string, use it in the wa.me link. If the backend returns an empty string, fall back to the hardcoded number '919819187188'. Only render the button when a valid number is available (either from backend or fallback). Keep the pre-filled message 'Hello, I would like to know more about your Ayurvedic face packs.' URL-encoded in the link."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Verify that the FloatingWhatsApp component is already imported and rendered inside the CustomerLayout wrapper (which wraps all customer-facing routes). If not already present, add the FloatingWhatsApp component inside CustomerLayout so it appears on all public pages (Home, Shop, ProductDetail, Cart, PaymentSuccess, PaymentFailure). Ensure it is positioned after the main content outlet so it renders above page content."
+          "description": "After successfully saving the WhatsApp number via the setWhatsappNumber mutation, invalidate the React Query cache for the 'whatsappNumber' query key using queryClient.invalidateQueries. This ensures that any component using useGetWhatsappNumber (including FloatingWhatsApp) will refetch the updated value immediately. Add the invalidation call in the onSuccess callback of the mutation to ensure it triggers only after a successful save."
         }
       ]
     }

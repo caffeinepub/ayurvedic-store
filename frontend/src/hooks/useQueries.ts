@@ -326,10 +326,11 @@ export function useWhatsappNumber() {
   return useQuery<string>({
     queryKey: ['whatsappNumber'],
     queryFn: async () => {
-      if (!actor) return '';
+      if (!actor) throw new Error('Actor not available');
       return actor.getWhatsappNumber();
     },
     enabled: !!actor && !isFetching,
+    staleTime: 0,
   });
 }
 

@@ -6,7 +6,7 @@ const FALLBACK_NUMBER = '919819187188';
 const PREFILLED_MESSAGE = 'Hello, I would like to know more about your Ayurvedic face packs.';
 
 export default function FloatingWhatsApp() {
-  const { data: whatsappNumber } = useWhatsappNumber();
+  const { data: whatsappNumber, isLoading, isFetched } = useWhatsappNumber();
   const [visible, setVisible] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
 
@@ -16,20 +16,26 @@ export default function FloatingWhatsApp() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Determine the number to use
+  // Determine the number to use:
+  // - While loading, use fallback so the button is always available
+  // - Once fetched, prefer the backend value; fall back only if empty
   const resolvedNumber =
-    whatsappNumber && whatsappNumber.trim() !== ''
+    isFetched && whatsappNumber && whatsappNumber.trim() !== ''
       ? whatsappNumber.trim()
       : FALLBACK_NUMBER;
 
-  // Don't render if we have no number at all (still loading and no fallback needed)
-  // Since we always have a fallback, we render once the entrance delay fires
   const encodedMessage = encodeURIComponent(PREFILLED_MESSAGE);
   const waUrl = `https://wa.me/${resolvedNumber}?text=${encodedMessage}`;
 
   const handleClick = () => {
     window.open(waUrl, '_blank', 'noopener,noreferrer');
   };
+
+  // Hide the button if the backend explicitly returned an empty string (admin cleared it)
+  // but only after the query has settled — don't hide during loading
+  if (isFetched && !isLoading && whatsappNumber === '') {
+    return null;
+  }
 
   return (
     <div

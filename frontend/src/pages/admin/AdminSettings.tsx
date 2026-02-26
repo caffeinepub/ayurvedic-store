@@ -10,12 +10,14 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Settings, CreditCard, Store, Mail, Megaphone, Loader2, CheckCircle, AlertCircle, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function AdminSettings() {
   const { data: settings, isLoading } = useGetSiteSettings();
   const setSiteSettings = useSetSiteSettings();
   const { data: whatsappNumberData, isLoading: whatsappLoading } = useWhatsappNumber();
   const setWhatsappNumber = useSetWhatsappNumber();
+  const queryClient = useQueryClient();
 
   const [storeName, setStoreName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
@@ -60,6 +62,8 @@ export default function AdminSettings() {
   const handleSaveWhatsapp = async () => {
     try {
       await setWhatsappNumber.mutateAsync(whatsappNumber.trim());
+      // Explicitly invalidate and refetch so FloatingWhatsApp picks up the new number immediately
+      await queryClient.invalidateQueries({ queryKey: ['whatsappNumber'] });
       toast.success('WhatsApp number saved successfully');
     } catch (err: any) {
       toast.error(err?.message ?? 'Failed to save WhatsApp number');

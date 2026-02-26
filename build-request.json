@@ -1,102 +1,39 @@
 {
   "kind": "build_request",
-  "title": "Floating WhatsApp Customer Support Button",
-  "projectName": "Nature Glow Ayurvedic",
-  "priority": "normal",
+  "title": "Fix WhatsApp button not reflecting updated phone number from admin panel",
+  "projectName": "Nature Glow",
+  "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Create a FloatingWhatsApp component as a fixed circular button in the bottom-right corner of the page. The button must use WhatsApp green (#25D366) background with a white WhatsApp SVG icon inside. On click, it opens a new tab to 'https://wa.me/919819187188?text=Hello%2C%20I%20would%20like%20to%20know%20more%20about%20your%20Ayurvedic%20face%20packs.' The button should be 56×56px on desktop and 48×48px on mobile, positioned at bottom-right with enough margin to avoid overlapping footer or important content.",
+      "text": "The FloatingWhatsApp component must dynamically fetch the WhatsApp phone number from the backend canister (via the site settings query) instead of using a hardcoded or stale cached value. After the admin saves a new WhatsApp number in AdminSettings, the FloatingWhatsApp button must use the updated number immediately — ensure the React Query cache for site settings is invalidated or refetched after a successful save in AdminSettings so the customer-facing button always reflects the current backend value.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6",
-          "msg-8"
+          "msg-recent-5",
+          "msg-recent-7"
         ],
         "quotes": [
-          "Place the WhatsApp icon as a floating button on the bottom right corner of the website.",
-          "Use a circular button with WhatsApp green color (#25D366) and a white WhatsApp icon inside.",
-          "When clicked, it should open WhatsApp chat with this number: https://wa.me/91XXXXXXXXXX",
-          "9819187188"
+          "the WhatsApp button still dials the old number",
+          "the frontend button isn't reading the updated value from the backend after saving"
         ]
       },
       "acceptanceCriteria": [
-        "Button is fixed to the bottom-right corner on both mobile and desktop viewports",
-        "Button background is #25D366 with a white WhatsApp icon",
-        "Clicking the button opens https://wa.me/919819187188 with the pre-filled message in a new tab",
-        "Button does not overlap footer or other critical content"
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Add a soft box-shadow to the FloatingWhatsApp button and a smooth hover animation: on hover, the button scales up slightly (e.g., scale-110) and gains a subtle green glow effect. A tooltip with the text 'Chat with us on WhatsApp' should appear above the button on hover, styled in earthy/natural tones consistent with the Ayurvedic palette.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-6",
-          "msg-8"
-        ],
-        "quotes": [
-          "Add a soft shadow and smooth hover animation (slight zoom or glow effect).",
-          "Add a small tooltip text on hover: 'Chat with us on WhatsApp'"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Button displays a soft box-shadow in its default state",
-        "Hovering the button triggers a scale-up and green glow transition",
-        "A tooltip reading 'Chat with us on WhatsApp' appears above the button on hover",
-        "Tooltip styling matches the site's natural/earthy color palette"
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Add an entrance animation to the FloatingWhatsApp button so it fades in and slides up from the bottom when the page first loads. Use a CSS keyframe or Tailwind animation (e.g., fade-in + translate-y) with a short delay (300–500ms) so it does not distract from initial page content.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-6",
-          "msg-8"
-        ],
-        "quotes": [
-          "Add a subtle entrance animation (fade-in or slide-up when page loads)"
-        ]
-      },
-      "acceptanceCriteria": [
-        "On page load, the button animates in with a fade-in and upward slide",
-        "The entrance animation plays once and completes within 600ms",
-        "The animation does not cause layout shift or overlap other elements during entry"
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Mount the FloatingWhatsApp component inside the CustomerLayout wrapper in App.tsx so it appears on all customer-facing pages. The component should read the WhatsApp number from the backend site settings (via the existing useWhatsAppNumber or site settings React Query hook) and only render when a valid number is configured. Use the hardcoded number '919819187188' as the fallback default if the backend returns an empty string.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-6",
-          "msg-8"
-        ],
-        "quotes": [
-          "The button should be visible on both mobile and desktop devices."
-        ]
-      },
-      "acceptanceCriteria": [
-        "FloatingWhatsApp renders on all customer-facing pages via CustomerLayout",
-        "If the backend returns a WhatsApp number, it is used in the wa.me link",
-        "If the backend returns an empty string, the fallback number 919819187188 is used",
-        "The button does not render if no number is available at all"
+        "FloatingWhatsApp component reads the phone number from the site settings query result, not a hardcoded string.",
+        "When an admin updates and saves a new WhatsApp number in AdminSettings, the React Query cache for site settings is invalidated.",
+        "After saving a new number in the admin panel, the FloatingWhatsApp button opens a WhatsApp chat with the newly saved number without requiring a page reload.",
+        "If no number is returned from the backend, the button falls back to a sensible default rather than throwing an error."
       ]
     }
   ],
   "constraints": [
-    "Phone number for WhatsApp link must be 919819187188 (India country code + number)",
-    "Pre-filled message must be: 'Hello, I would like to know more about your Ayurvedic face packs.'",
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui"
+    "Do not modify files listed in frontend.immutablePaths.",
+    "Do not change the backend schema or data model — the WhatsApp number is already stored in site settings."
   ],
   "nonGoals": [
-    "Do not add any backend changes for this feature",
-    "Do not add a WhatsApp chat widget or embedded chat window — only a button linking to wa.me",
-    "Do not modify admin settings for WhatsApp number configuration (already exists)"
+    "Redesigning the WhatsApp button UI or animations.",
+    "Adding new admin settings fields.",
+    "Changing how the admin save action works beyond cache invalidation."
   ],
   "imageRequirements": {
     "required": [],
