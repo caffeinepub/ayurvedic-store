@@ -1,177 +1,82 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Rebrand website name from Veda Botanics to Nature Glow",
+  "title": "Floating WhatsApp Customer Support Button",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the HTML shell (frontend/index.html), including the page <title> tag and any meta tags.",
+      "summary": "Create a FloatingWhatsApp component with fixed positioning, WhatsApp green styling, and click-to-chat functionality",
       "acceptanceCriteria": [
-        "The browser tab title reads 'Nature Glow' instead of 'Veda Botanics'",
-        "No instance of 'Veda Botanics' remains in index.html"
+        "Button is fixed to the bottom-right corner on both mobile and desktop viewports",
+        "Button background is #25D366 with a white WhatsApp icon",
+        "Clicking the button opens https://wa.me/919819187188 with the pre-filled message in a new tab",
+        "Button does not overlap footer or other critical content"
       ],
       "file_operations": [
         {
-          "path": "frontend/index.html",
+          "path": "frontend/src/components/FloatingWhatsApp.tsx",
           "operation": "modify",
-          "description": "Replace 'Veda Botanics' with 'Nature Glow' in the <title> tag and any other occurrences in the HTML document head or body."
+          "description": "Update the FloatingWhatsApp component to use a circular button (56px desktop, 48px mobile) with WhatsApp green (#25D366) background and white WhatsApp SVG icon. Position it fixed at bottom-right with appropriate margins (e.g., bottom-6 right-6 on desktop, bottom-4 right-4 on mobile). On click, open https://wa.me/919819187188?text=Hello%2C%20I%20would%20like%20to%20know%20more%20about%20your%20Ayurvedic%20face%20packs. in a new tab using target='_blank' and rel='noopener noreferrer'. Use z-index high enough to stay above most content but below modals."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the Navbar component (frontend/src/components/Navbar.tsx), including the logo text and any aria-labels or alt text referencing the brand name.",
+      "summary": "Add shadow, hover animations, and tooltip to the FloatingWhatsApp button",
       "acceptanceCriteria": [
-        "The navbar logo/brand text displays 'Nature Glow'",
-        "No instance of 'Veda Botanics' remains in the Navbar component"
+        "Button displays a soft box-shadow in its default state",
+        "Hovering the button triggers a scale-up and green glow transition",
+        "A tooltip reading 'Chat with us on WhatsApp' appears above the button on hover",
+        "Tooltip styling matches the site's natural/earthy color palette"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/Navbar.tsx",
+          "path": "frontend/src/components/FloatingWhatsApp.tsx",
           "operation": "modify",
-          "description": "Replace all text strings 'Veda Botanics' with 'Nature Glow' in the logo text, aria-labels, and any other brand name references within the Navbar component."
+          "description": "Add a soft box-shadow (e.g., shadow-lg) to the button. Implement hover effects using Tailwind classes: scale-110 transform and a green glow via shadow-[0_0_20px_rgba(37,211,102,0.5)]. Add a tooltip element that appears on hover, positioned above the button with text 'Chat with us on WhatsApp', styled with the Ayurvedic earthy palette (e.g., bg-forest-800 text-white or similar warm tone). Use CSS transitions for smooth animations."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the Footer component (frontend/src/components/Footer.tsx), including the brand name, tagline, and any copyright text.",
+      "summary": "Add entrance animation to FloatingWhatsApp on page load",
       "acceptanceCriteria": [
-        "The footer displays 'Nature Glow' as the brand name",
-        "No instance of 'Veda Botanics' remains in the Footer component"
+        "On page load, the button animates in with a fade-in and upward slide",
+        "The entrance animation plays once and completes within 600ms",
+        "The animation does not cause layout shift or overlap other elements during entry"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/Footer.tsx",
+          "path": "frontend/src/components/FloatingWhatsApp.tsx",
           "operation": "modify",
-          "description": "Replace all text strings 'Veda Botanics' with 'Nature Glow' in the brand name display, tagline, copyright text, and any other brand references within the Footer component."
+          "description": "Add an entrance animation using Tailwind animate utilities or custom CSS keyframes. Implement a fade-in combined with translate-y slide-up effect that triggers once on mount. Use a 300-500ms delay before the animation starts, and complete the animation within 600ms total. Apply opacity-0 and translate-y-4 initially, then animate to opacity-100 and translate-y-0. Ensure the component uses fixed positioning throughout to prevent layout shift."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "If needed, extend the Tailwind config to add a custom animation for the slide-up-fade-in effect (e.g., 'slideUpFadeIn' keyframe with opacity and transform). Only modify if existing Tailwind utilities are insufficient."
         }
       ]
     },
     {
       "id": "REQ-4",
-      "summary": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' on the Home page (frontend/src/pages/Home.tsx), including the hero section heading, subheadings, and any other brand name references so the name is prominently visible on the homepage.",
+      "summary": "Wire FloatingWhatsApp into CustomerLayout and connect to backend WhatsApp number settings",
       "acceptanceCriteria": [
-        "The homepage hero section prominently displays 'Nature Glow'",
-        "No instance of 'Veda Botanics' remains on the Home page",
-        "The brand name 'Nature Glow' is visible without scrolling on the homepage"
+        "FloatingWhatsApp renders on all customer-facing pages via CustomerLayout",
+        "If the backend returns a WhatsApp number, it is used in the wa.me link",
+        "If the backend returns an empty string, the fallback number 919819187188 is used",
+        "The button does not render if no number is available at all"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/Home.tsx",
+          "path": "frontend/src/components/FloatingWhatsApp.tsx",
           "operation": "modify",
-          "description": "Replace all text strings 'Veda Botanics' with 'Nature Glow' in the hero section heading, subheadings, and any other brand name references throughout the Home page component."
-        }
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "summary": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the MobileNavDrawer component (frontend/src/components/MobileNavDrawer.tsx) and AdminLayout component (frontend/src/components/admin/AdminLayout.tsx), including any brand name references in the admin sidebar.",
-      "acceptanceCriteria": [
-        "The mobile nav drawer shows 'Nature Glow' wherever the brand name appears",
-        "The admin sidebar/layout shows 'Nature Glow' wherever the brand name appears",
-        "No instance of 'Veda Botanics' remains in these components"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/MobileNavDrawer.tsx",
-          "operation": "modify",
-          "description": "Replace all text strings 'Veda Botanics' with 'Nature Glow' in any brand name references within the mobile navigation drawer component."
-        },
-        {
-          "path": "frontend/src/components/admin/AdminLayout.tsx",
-          "operation": "modify",
-          "description": "Replace all text strings 'Veda Botanics' with 'Nature Glow' in the admin sidebar header, branding elements, and any other brand name references within the AdminLayout component."
-        }
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "summary": "Search all remaining frontend source files (pages, components, hooks, utils, CSS files) for any remaining string 'Veda Botanics' and replace with 'Nature Glow' to ensure a complete rebrand.",
-      "acceptanceCriteria": [
-        "No instance of 'Veda Botanics' exists anywhere in the frontend source code",
-        "All user-facing text that previously said 'Veda Botanics' now says 'Nature Glow'"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/admin/AdminLogin.tsx",
-          "operation": "modify",
-          "description": "Search for and replace any occurrences of 'Veda Botanics' with 'Nature Glow' in the admin login page, including page titles, headings, or any other brand references."
-        },
-        {
-          "path": "frontend/src/pages/admin/AdminProducts.tsx",
-          "operation": "modify",
-          "description": "Search for and replace any occurrences of 'Veda Botanics' with 'Nature Glow' in the admin products page, including page titles, headings, or any other brand references."
-        },
-        {
-          "path": "frontend/src/pages/admin/AdminOrders.tsx",
-          "operation": "modify",
-          "description": "Search for and replace any occurrences of 'Veda Botanics' with 'Nature Glow' in the admin orders page, including page titles, headings, or any other brand references."
-        },
-        {
-          "path": "frontend/src/pages/admin/AdminSettings.tsx",
-          "operation": "modify",
-          "description": "Search for and replace any occurrences of 'Veda Botanics' with 'Nature Glow' in the admin settings page, including page titles, headings, or any other brand references."
-        },
-        {
-          "path": "frontend/src/pages/Shop.tsx",
-          "operation": "modify",
-          "description": "Search for and replace any occurrences of 'Veda Botanics' with 'Nature Glow' in the shop page, including page titles, headings, or any other brand references."
-        },
-        {
-          "path": "frontend/src/pages/ProductDetail.tsx",
-          "operation": "modify",
-          "description": "Search for and replace any occurrences of 'Veda Botanics' with 'Nature Glow' in the product detail page, including page titles, headings, or any other brand references."
-        },
-        {
-          "path": "frontend/src/pages/Checkout.tsx",
-          "operation": "modify",
-          "description": "Search for and replace any occurrences of 'Veda Botanics' with 'Nature Glow' in the checkout page, including page titles, headings, or any other brand references."
-        },
-        {
-          "path": "frontend/src/pages/PaymentSuccess.tsx",
-          "operation": "modify",
-          "description": "Search for and replace any occurrences of 'Veda Botanics' with 'Nature Glow' in the payment success page, including page titles, headings, or any other brand references."
-        },
-        {
-          "path": "frontend/src/pages/PaymentFailure.tsx",
-          "operation": "modify",
-          "description": "Search for and replace any occurrences of 'Veda Botanics' with 'Nature Glow' in the payment failure page, including page titles, headings, or any other brand references."
-        },
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Search for and replace any occurrences of 'Veda Botanics' with 'Nature Glow' in CSS comments or custom property descriptions that may reference the brand name."
-        },
-        {
-          "path": "frontend/src/utils/seedProducts.ts",
-          "operation": "modify",
-          "description": "Search for and replace any occurrences of 'Veda Botanics' with 'Nature Glow' in product seed data descriptions, names, or any other text fields that reference the brand name."
-        },
-        {
-          "path": "frontend/src/components/CartDrawer.tsx",
-          "operation": "modify",
-          "description": "Search for and replace any occurrences of 'Veda Botanics' with 'Nature Glow' in the cart drawer component, including headings or any other brand references."
-        },
-        {
-          "path": "frontend/src/components/ProductCard.tsx",
-          "operation": "modify",
-          "description": "Search for and replace any occurrences of 'Veda Botanics' with 'Nature Glow' in the product card component, including any brand references in text or tooltips."
-        },
-        {
-          "path": "frontend/src/components/admin/ProductFormModal.tsx",
-          "operation": "modify",
-          "description": "Search for and replace any occurrences of 'Veda Botanics' with 'Nature Glow' in the product form modal, including modal titles, form labels, or placeholder text that may reference the brand."
-        },
-        {
-          "path": "frontend/src/components/admin/OrderDetailModal.tsx",
-          "operation": "modify",
-          "description": "Search for and replace any occurrences of 'Veda Botanics' with 'Nature Glow' in the order detail modal, including modal titles or any other brand references."
+          "description": "Update the component to use the useGetWhatsappNumber hook (from frontend/src/hooks/useQueries.ts) to fetch the WhatsApp number from the backend. If the backend returns a non-empty string, use it in the wa.me link. If the backend returns an empty string, fall back to the hardcoded number '919819187188'. Only render the button when a valid number is available (either from backend or fallback). Keep the pre-filled message 'Hello, I would like to know more about your Ayurvedic face packs.' URL-encoded in the link."
         },
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Search for and replace any occurrences of 'Veda Botanics' with 'Nature Glow' in the root App component, including any page titles, meta tags set via routing, or other brand references."
+          "description": "Verify that the FloatingWhatsApp component is already imported and rendered inside the CustomerLayout wrapper (which wraps all customer-facing routes). If not already present, add the FloatingWhatsApp component inside CustomerLayout so it appears on all public pages (Home, Shop, ProductDetail, Cart, PaymentSuccess, PaymentFailure). Ensure it is positioned after the main content outlet so it renders above page content."
         }
       ]
     }

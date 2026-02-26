@@ -100,7 +100,19 @@ export const UserProfile = IDL.Record({
   'name' : IDL.Text,
   'email' : IDL.Text,
 });
-export const SiteSettings = IDL.Record({ 'razorpayKeyId' : IDL.Text });
+export const UserSummary = IDL.Record({
+  'principal' : IDL.Principal,
+  'orderCount' : IDL.Nat,
+  'registeredAt' : IDL.Int,
+  'profile' : IDL.Opt(UserProfile),
+});
+export const SiteSettings = IDL.Record({
+  'razorpayKeyId' : IDL.Text,
+  'whatsappNumber' : IDL.Text,
+  'storeName' : IDL.Text,
+  'contactEmail' : IDL.Text,
+  'announcementBanner' : IDL.Text,
+});
 export const StripeSessionStatus = IDL.Variant({
   'completed' : IDL.Record({
     'userPrincipal' : IDL.Opt(IDL.Text),
@@ -170,6 +182,7 @@ export const idlService = IDL.Service({
   'createProduct' : IDL.Func([ProductInput], [Product], []),
   'deleteProduct' : IDL.Func([IDL.Nat], [], []),
   'getAllProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
+  'getAllUsers' : IDL.Func([], [IDL.Vec(UserSummary)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getFeaturedProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
@@ -192,13 +205,17 @@ export const idlService = IDL.Service({
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
+  'getWhatsappNumber' : IDL.Func([], [IDL.Text], ['query']),
+  'isAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'isProductInStock' : IDL.Func([IDL.Nat], [IDL.Bool], ['query']),
   'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'searchProducts' : IDL.Func([IDL.Text], [IDL.Vec(Product)], ['query']),
+  'setAdmin' : IDL.Func([IDL.Principal], [], []),
   'setSiteSettings' : IDL.Func([SiteSettings], [], []),
   'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
+  'setWhatsappNumber' : IDL.Func([IDL.Text], [], []),
   'transform' : IDL.Func(
       [TransformationInput],
       [TransformationOutput],
@@ -298,7 +315,19 @@ export const idlFactory = ({ IDL }) => {
     'priceInr' : IDL.Nat,
   });
   const UserProfile = IDL.Record({ 'name' : IDL.Text, 'email' : IDL.Text });
-  const SiteSettings = IDL.Record({ 'razorpayKeyId' : IDL.Text });
+  const UserSummary = IDL.Record({
+    'principal' : IDL.Principal,
+    'orderCount' : IDL.Nat,
+    'registeredAt' : IDL.Int,
+    'profile' : IDL.Opt(UserProfile),
+  });
+  const SiteSettings = IDL.Record({
+    'razorpayKeyId' : IDL.Text,
+    'whatsappNumber' : IDL.Text,
+    'storeName' : IDL.Text,
+    'contactEmail' : IDL.Text,
+    'announcementBanner' : IDL.Text,
+  });
   const StripeSessionStatus = IDL.Variant({
     'completed' : IDL.Record({
       'userPrincipal' : IDL.Opt(IDL.Text),
@@ -365,6 +394,7 @@ export const idlFactory = ({ IDL }) => {
     'createProduct' : IDL.Func([ProductInput], [Product], []),
     'deleteProduct' : IDL.Func([IDL.Nat], [], []),
     'getAllProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
+    'getAllUsers' : IDL.Func([], [IDL.Vec(UserSummary)], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getFeaturedProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
@@ -391,13 +421,17 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
+    'getWhatsappNumber' : IDL.Func([], [IDL.Text], ['query']),
+    'isAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'isProductInStock' : IDL.Func([IDL.Nat], [IDL.Bool], ['query']),
     'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'searchProducts' : IDL.Func([IDL.Text], [IDL.Vec(Product)], ['query']),
+    'setAdmin' : IDL.Func([IDL.Principal], [], []),
     'setSiteSettings' : IDL.Func([SiteSettings], [], []),
     'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
+    'setWhatsappNumber' : IDL.Func([IDL.Text], [], []),
     'transform' : IDL.Func(
         [TransformationInput],
         [TransformationOutput],

@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-replace-all-occurrences-of-veda-botanics-with-nature-glow-in-the-html-shell-frontend-index-html-including-the-page-title-tag-and-any-meta-tags",
-      "featureTitle": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the HTML shell (frontend/index.html), including the page <title> tag and any meta tags.",
+      "featureId": "feature-create-a-floatingwhatsapp-component-as-a-fixed-circular-button-in-the-bottom-right-corner-of-the-page-the-button-must-use-whatsapp-green-25d366-background-with-a-white-whatsapp-svg-icon-inside-on-click-it-opens-a-new-tab-to-https-wa-me-919819187188-text-hello-2c-20i-20would-20like-20to-20know-20more-20about-20your-20ayurvedic-20face-20packs-the-button-should-be-56-56px-on-desktop-and-48-48px-on-mobile-positioned-at-bottom-right-with-enough-margin-to-avoid-overlapping-footer-or-important-content",
+      "featureTitle": "Create a FloatingWhatsApp component as a fixed circular button in the bottom-right corner of the page. The button must use WhatsApp green (#25D366) background with a white WhatsApp SVG icon inside. On click, it opens a new tab to 'https://wa.me/919819187188?text=Hello%2C%20I%20would%20like%20to%20know%20more%20about%20your%20Ayurvedic%20face%20packs.' The button should be 56×56px on desktop and 48×48px on mobile, positioned at bottom-right with enough margin to avoid overlapping footer or important content.",
       "files": [
-        "frontend/index.html"
+        "frontend/src/components/FloatingWhatsApp.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -24,10 +24,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-replace-all-occurrences-of-veda-botanics-with-nature-glow-in-the-navbar-component-frontend-src-components-navbar-tsx-including-the-logo-text-and-any-aria-labels-or-alt-text-referencing-the-brand-name",
-      "featureTitle": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the Navbar component (frontend/src/components/Navbar.tsx), including the logo text and any aria-labels or alt text referencing the brand name.",
+      "featureId": "feature-add-a-soft-box-shadow-to-the-floatingwhatsapp-button-and-a-smooth-hover-animation-on-hover-the-button-scales-up-slightly-e-g-scale-110-and-gains-a-subtle-green-glow-effect-a-tooltip-with-the-text-chat-with-us-on-whatsapp-should-appear-above-the-button-on-hover-styled-in-earthy-natural-tones-consistent-with-the-ayurvedic-palette",
+      "featureTitle": "Add a soft box-shadow to the FloatingWhatsApp button and a smooth hover animation: on hover, the button scales up slightly (e.g., scale-110) and gains a subtle green glow effect. A tooltip with the text 'Chat with us on WhatsApp' should appear above the button on hover, styled in earthy/natural tones consistent with the Ayurvedic palette.",
       "files": [
-        "frontend/src/components/Navbar.tsx"
+        "frontend/src/components/FloatingWhatsApp.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -46,10 +46,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-replace-all-occurrences-of-veda-botanics-with-nature-glow-in-the-footer-component-frontend-src-components-footer-tsx-including-the-brand-name-tagline-and-any-copyright-text",
-      "featureTitle": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the Footer component (frontend/src/components/Footer.tsx), including the brand name, tagline, and any copyright text.",
+      "featureId": "feature-add-an-entrance-animation-to-the-floatingwhatsapp-button-so-it-fades-in-and-slides-up-from-the-bottom-when-the-page-first-loads-use-a-css-keyframe-or-tailwind-animation-e-g-fade-in-translate-y-with-a-short-delay-300-500ms-so-it-does-not-distract-from-initial-page-content",
+      "featureTitle": "Add an entrance animation to the FloatingWhatsApp button so it fades in and slides up from the bottom when the page first loads. Use a CSS keyframe or Tailwind animation (e.g., fade-in + translate-y) with a short delay (300–500ms) so it does not distract from initial page content.",
       "files": [
-        "frontend/src/components/Footer.tsx"
+        "frontend/src/components/FloatingWhatsApp.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -68,10 +68,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-replace-all-occurrences-of-veda-botanics-with-nature-glow-on-the-home-page-frontend-src-pages-home-tsx-including-the-hero-section-heading-subheadings-and-any-other-brand-name-references-so-the-name-is-prominently-visible-on-the-homepage",
-      "featureTitle": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' on the Home page (frontend/src/pages/Home.tsx), including the hero section heading, subheadings, and any other brand name references so the name is prominently visible on the homepage.",
+      "featureId": "feature-mount-the-floatingwhatsapp-component-inside-the-customerlayout-wrapper-in-app-tsx-so-it-appears-on-all-customer-facing-pages-the-component-should-read-the-whatsapp-number-from-the-backend-site-settings-via-the-existing-usewhatsappnumber-or-site-settings-react-query-hook-and-only-render-when-a-valid-number-is-configured-use-the-hardcoded-number-919819187188-as-the-fallback-default-if-the-backend-returns-an-empty-string",
+      "featureTitle": "Mount the FloatingWhatsApp component inside the CustomerLayout wrapper in App.tsx so it appears on all customer-facing pages. The component should read the WhatsApp number from the backend site settings (via the existing useWhatsAppNumber or site settings React Query hook) and only render when a valid number is configured. Use the hardcoded number '919819187188' as the fallback default if the backend returns an empty string.",
       "files": [
-        "frontend/src/pages/Home.tsx"
+        "frontend/src/components/FloatingWhatsApp.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -86,51 +86,6 @@
       ],
       "testIds": [
         "REQ-4"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-replace-all-occurrences-of-veda-botanics-with-nature-glow-in-the-mobilenavdrawer-component-frontend-src-components-mobilenavdrawer-tsx-and-adminlayout-component-frontend-src-components-admin-adminlayout-tsx-including-any-brand-name-references-in-the-admin-sidebar",
-      "featureTitle": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the MobileNavDrawer component (frontend/src/components/MobileNavDrawer.tsx) and AdminLayout component (frontend/src/components/admin/AdminLayout.tsx), including any brand name references in the admin sidebar.",
-      "files": [
-        "frontend/src/components/MobileNavDrawer.tsx",
-        "frontend/src/components/admin/AdminLayout.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-5"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-search-all-remaining-frontend-source-files-pages-components-hooks-utils-css-files-for-any-remaining-string-veda-botanics-and-replace-with-nature-glow-to-ensure-a-complete-rebrand",
-      "featureTitle": "Search all remaining frontend source files (pages, components, hooks, utils, CSS files) for any remaining string 'Veda Botanics' and replace with 'Nature Glow' to ensure a complete rebrand.",
-      "files": [
-        "frontend/src/pages/admin/AdminLogin.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-6"
       ],
       "confidence": "high"
     }

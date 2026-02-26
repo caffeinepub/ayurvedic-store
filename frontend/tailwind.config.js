@@ -41,21 +41,31 @@ export default {
         border: 'var(--border)',
         input: 'var(--input)',
         ring: 'var(--ring)',
+
+        // ── Ayurvedic brand palette ──
+        forest:    'oklch(0.35 0.09 145)',   // deep forest green
+        sage:      'oklch(0.58 0.07 145)',   // medium sage green
+        golden:    'oklch(0.72 0.12 75)',    // warm gold
+        terracotta:'oklch(0.58 0.14 40)',    // warm terracotta
+        bark:      'oklch(0.38 0.05 60)',    // warm brown
+        cream:     'oklch(0.97 0.012 90)',   // off-white cream
+        parchment: 'oklch(0.94 0.02 90)',    // slightly deeper cream
+
         // Admin-specific tokens
         admin: {
-          bg: 'var(--admin-bg)',
+          bg:      'var(--admin-bg)',
           sidebar: 'var(--admin-sidebar)',
-          card: 'var(--admin-card)',
-          fg: 'var(--admin-fg)',
-          muted: 'var(--admin-muted)',
-          border: 'var(--admin-border)',
-          hover: 'var(--admin-hover)',
-          accent: 'var(--admin-accent)',
+          card:    'var(--admin-card)',
+          fg:      'var(--admin-fg)',
+          muted:   'var(--admin-muted)',
+          border:  'var(--admin-border)',
+          hover:   'var(--admin-hover)',
+          accent:  'var(--admin-accent)',
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        serif: ['Playfair Display', 'Georgia', 'serif'],
+        sans:  ['Inter', 'system-ui', 'sans-serif'],
+        serif: ['Cormorant Garamond', 'Georgia', 'serif'],
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -63,8 +73,10 @@ export default {
         sm: 'calc(var(--radius) - 4px)',
       },
       boxShadow: {
-        'herb': '0 2px 12px oklch(0.42 0.09 145 / 0.12)',
-        'herb-lg': '0 8px 32px oklch(0.42 0.09 145 / 0.15)',
+        'botanical':    '0 2px 16px oklch(0.35 0.09 145 / 0.10), 0 1px 4px oklch(0.35 0.09 145 / 0.06)',
+        'botanical-lg': '0 8px 32px oklch(0.35 0.09 145 / 0.15), 0 2px 8px oklch(0.35 0.09 145 / 0.08)',
+        'herb':         '0 2px 12px oklch(0.42 0.09 145 / 0.12)',
+        'herb-lg':      '0 8px 32px oklch(0.42 0.09 145 / 0.15)',
       },
       keyframes: {
         'accordion-down': {

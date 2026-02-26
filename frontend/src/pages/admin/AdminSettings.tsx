@@ -1,172 +1,269 @@
-import React, { useState, useEffect } from 'react';
-import { useGetSiteSettings, useSetSiteSettings } from '../../hooks/useQueries';
-import { Settings, Key, Save, Loader2, CheckCircle2, AlertCircle, ExternalLink } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useGetSiteSettings, useSetSiteSettings, useWhatsappNumber, useSetWhatsappNumber } from '../../hooks/useQueries';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Settings, CreditCard, Store, Mail, Megaphone, Loader2, CheckCircle, AlertCircle, MessageCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AdminSettings() {
   const { data: settings, isLoading } = useGetSiteSettings();
   const setSiteSettings = useSetSiteSettings();
+  const { data: whatsappNumberData, isLoading: whatsappLoading } = useWhatsappNumber();
+  const setWhatsappNumber = useSetWhatsappNumber();
 
+  const [storeName, setStoreName] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [announcementBanner, setAnnouncementBanner] = useState('');
   const [razorpayKeyId, setRazorpayKeyId] = useState('');
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState('');
+  const [whatsappNumber, setWhatsappNumberState] = useState('');
 
   useEffect(() => {
     if (settings) {
-      setRazorpayKeyId(settings.razorpayKeyId);
+      setStoreName(settings.storeName ?? '');
+      setContactEmail(settings.contactEmail ?? '');
+      setAnnouncementBanner(settings.announcementBanner ?? '');
+      setRazorpayKeyId(settings.razorpayKeyId ?? '');
     }
   }, [settings]);
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSaved(false);
+  useEffect(() => {
+    if (whatsappNumberData !== undefined) {
+      setWhatsappNumberState(whatsappNumberData ?? '');
+    }
+  }, [whatsappNumberData]);
 
+  const isLiveKey = razorpayKeyId.startsWith('rzp_live_');
+  const isTestKey = razorpayKeyId.startsWith('rzp_test_');
+  const isValidKey = isLiveKey || isTestKey;
+
+  const handleSave = async () => {
     try {
-      await setSiteSettings.mutateAsync({ razorpayKeyId: razorpayKeyId.trim() });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save settings');
+      await setSiteSettings.mutateAsync({
+        storeName,
+        contactEmail,
+        announcementBanner,
+        razorpayKeyId,
+        whatsappNumber: settings?.whatsappNumber ?? '',
+      });
+      toast.success('Settings saved successfully');
+    } catch (err: any) {
+      toast.error(err?.message ?? 'Failed to save settings');
     }
   };
 
+  const handleSaveWhatsapp = async () => {
+    try {
+      await setWhatsappNumber.mutateAsync(whatsappNumber.trim());
+      toast.success('WhatsApp number saved successfully');
+    } catch (err: any) {
+      toast.error(err?.message ?? 'Failed to save WhatsApp number');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-64 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6 max-w-2xl">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-admin-fg">Site Settings</h1>
-        <p className="text-sm text-admin-muted mt-0.5">Configure your store settings and integrations</p>
+    <div className="p-6 space-y-6 max-w-3xl">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="p-2 rounded-lg bg-primary/10">
+          <Settings className="w-6 h-6 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+          <p className="text-sm text-muted-foreground">Manage your store configuration</p>
+        </div>
       </div>
 
-      {/* Razorpay Settings */}
-      <Card className="bg-admin-card border-admin-border">
+      {/* Store Info */}
+      <Card>
         <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-admin-accent/10 flex items-center justify-center">
-              <Key className="w-5 h-5 text-admin-accent" />
-            </div>
-            <div>
-              <CardTitle className="text-base font-bold text-admin-fg">Razorpay Integration</CardTitle>
-              <CardDescription className="text-admin-muted text-sm">
-                Configure your Razorpay payment gateway credentials
-              </CardDescription>
-            </div>
+          <div className="flex items-center gap-2">
+            <Store className="w-5 h-5 text-primary" />
+            <CardTitle className="text-lg">Store Information</CardTitle>
           </div>
+          <CardDescription>Basic details about your store</CardDescription>
         </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex items-center gap-2 py-4">
-              <Loader2 className="w-4 h-4 animate-spin text-admin-accent" />
-              <span className="text-sm text-admin-muted">Loading settings…</span>
-            </div>
-          ) : (
-            <form onSubmit={handleSave} className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="razorpayKeyId" className="text-admin-fg font-medium">
-                  Razorpay Key ID
-                </Label>
-                <Input
-                  id="razorpayKeyId"
-                  value={razorpayKeyId}
-                  onChange={e => setRazorpayKeyId(e.target.value)}
-                  placeholder="rzp_live_xxxxxxxxxxxx or rzp_test_xxxxxxxxxxxx"
-                  className="bg-admin-bg border-admin-border text-admin-fg placeholder:text-admin-muted font-mono"
-                />
-                <p className="text-xs text-admin-muted">
-                  This is your public Razorpay Key ID (starts with <code className="bg-admin-bg px-1 py-0.5 rounded text-admin-fg">rzp_</code>).
-                  Find it in your{' '}
-                  <a
-                    href="https://dashboard.razorpay.com/app/keys"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-admin-accent hover:underline inline-flex items-center gap-0.5"
-                  >
-                    Razorpay Dashboard
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                </p>
-              </div>
-
-              {/* Key type indicator */}
-              {razorpayKeyId && (
-                <div className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg border ${
-                  razorpayKeyId.startsWith('rzp_live_')
-                    ? 'bg-green-50 border-green-200 text-green-700'
-                    : razorpayKeyId.startsWith('rzp_test_')
-                    ? 'bg-amber-50 border-amber-200 text-amber-700'
-                    : 'bg-admin-bg border-admin-border text-admin-muted'
-                }`}>
-                  {razorpayKeyId.startsWith('rzp_live_') ? (
-                    <><CheckCircle2 className="w-3.5 h-3.5" /> Live mode key detected</>
-                  ) : razorpayKeyId.startsWith('rzp_test_') ? (
-                    <><AlertCircle className="w-3.5 h-3.5" /> Test mode key — switch to live key for production</>
-                  ) : (
-                    <><AlertCircle className="w-3.5 h-3.5" /> Key format not recognized</>
-                  )}
-                </div>
-              )}
-
-              {error && (
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  {error}
-                </div>
-              )}
-
-              {saved && (
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm">
-                  <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-                  Settings saved successfully!
-                </div>
-              )}
-
-              <Button
-                type="submit"
-                disabled={setSiteSettings.isPending}
-                className="bg-admin-accent hover:bg-admin-accent/90 text-white"
-              >
-                {setSiteSettings.isPending ? (
-                  <><Loader2 className="w-4 h-4 animate-spin mr-2" />Saving…</>
-                ) : (
-                  <><Save className="w-4 h-4 mr-2" />Save Settings</>
-                )}
-              </Button>
-            </form>
-          )}
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="storeName">Store Name</Label>
+            <Input
+              id="storeName"
+              value={storeName}
+              onChange={(e) => setStoreName(e.target.value)}
+              placeholder="Nature Glow"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="contactEmail">
+              <span className="flex items-center gap-1">
+                <Mail className="w-4 h-4" /> Contact Email
+              </span>
+            </Label>
+            <Input
+              id="contactEmail"
+              type="email"
+              value={contactEmail}
+              onChange={(e) => setContactEmail(e.target.value)}
+              placeholder="hello@natureglow.com"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="announcementBanner">
+              <span className="flex items-center gap-1">
+                <Megaphone className="w-4 h-4" /> Announcement Banner
+              </span>
+            </Label>
+            <Textarea
+              id="announcementBanner"
+              value={announcementBanner}
+              onChange={(e) => setAnnouncementBanner(e.target.value)}
+              placeholder="Free shipping on orders above ₹499!"
+              rows={2}
+            />
+            <p className="text-xs text-muted-foreground">Leave empty to hide the banner.</p>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Info Card */}
-      <Card className="bg-admin-card border-admin-border">
+      {/* Razorpay */}
+      <Card>
         <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-admin-accent/10 flex items-center justify-center">
-              <Settings className="w-5 h-5 text-admin-accent" />
-            </div>
-            <div>
-              <CardTitle className="text-base font-bold text-admin-fg">About Settings</CardTitle>
-            </div>
+          <div className="flex items-center gap-2">
+            <CreditCard className="w-5 h-5 text-primary" />
+            <CardTitle className="text-lg">Razorpay Integration</CardTitle>
           </div>
+          <CardDescription>Configure your Razorpay payment gateway</CardDescription>
         </CardHeader>
-        <CardContent>
-          <ul className="space-y-2 text-sm text-admin-muted">
-            <li className="flex items-start gap-2">
-              <span className="text-admin-accent mt-0.5">•</span>
-              The Razorpay Key ID is stored securely on the blockchain and used by the checkout page.
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-admin-accent mt-0.5">•</span>
-              Use a <strong className="text-admin-fg">test key</strong> (<code className="bg-admin-bg px-1 rounded">rzp_test_</code>) during development and a <strong className="text-admin-fg">live key</strong> (<code className="bg-admin-bg px-1 rounded">rzp_live_</code>) for production.
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-admin-accent mt-0.5">•</span>
-              Changes take effect immediately for all new checkout sessions.
-            </li>
-          </ul>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="razorpayKeyId">Razorpay Key ID</Label>
+            <div className="flex gap-2 items-center">
+              <Input
+                id="razorpayKeyId"
+                value={razorpayKeyId}
+                onChange={(e) => setRazorpayKeyId(e.target.value)}
+                placeholder="rzp_live_... or rzp_test_..."
+                className="font-mono text-sm"
+              />
+              {razorpayKeyId && (
+                isValidKey ? (
+                  <Badge variant="default" className="shrink-0 flex items-center gap-1">
+                    <CheckCircle className="w-3 h-3" />
+                    {isLiveKey ? 'Live' : 'Test'}
+                  </Badge>
+                ) : (
+                  <Badge variant="destructive" className="shrink-0 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    Invalid
+                  </Badge>
+                )
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Your Razorpay Key ID starts with <code className="bg-muted px-1 rounded">rzp_live_</code> (production) or{' '}
+              <code className="bg-muted px-1 rounded">rzp_test_</code> (testing).
+            </p>
+          </div>
+
+          <Separator />
+
+          <div className="rounded-lg bg-muted/50 p-4 space-y-2 text-sm text-muted-foreground">
+            <p className="font-medium text-foreground">How to get your Razorpay Key ID:</p>
+            <ol className="list-decimal list-inside space-y-1">
+              <li>Log in to your <a href="https://dashboard.razorpay.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">Razorpay Dashboard</a></li>
+              <li>Go to <strong>Settings → API Keys</strong></li>
+              <li>Generate or copy your Key ID</li>
+              <li>Paste it above and save</li>
+            </ol>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Save Store + Razorpay Settings */}
+      <div className="flex justify-end">
+        <Button
+          onClick={handleSave}
+          disabled={setSiteSettings.isPending}
+          className="min-w-[140px]"
+        >
+          {setSiteSettings.isPending ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Saving…
+            </>
+          ) : (
+            'Save Settings'
+          )}
+        </Button>
+      </div>
+
+      {/* WhatsApp */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <MessageCircle className="w-5 h-5 text-green-600" />
+            <CardTitle className="text-lg">WhatsApp Contact</CardTitle>
+          </div>
+          <CardDescription>
+            Add your WhatsApp number to show a floating chat button on all customer-facing pages.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {whatsappLoading ? (
+            <Skeleton className="h-10 w-full" />
+          ) : (
+            <div className="space-y-2">
+              <Label htmlFor="whatsappNumber">WhatsApp Number (with country code)</Label>
+              <Input
+                id="whatsappNumber"
+                value={whatsappNumber}
+                onChange={(e) => setWhatsappNumberState(e.target.value)}
+                placeholder="e.g. 919876543210"
+                className="font-mono text-sm"
+              />
+              <p className="text-xs text-muted-foreground">
+                Enter the number in international format without <code className="bg-muted px-1 rounded">+</code> or spaces.
+                Example: <code className="bg-muted px-1 rounded">919876543210</code> for an Indian number.
+                Leave empty to hide the WhatsApp button.
+              </p>
+            </div>
+          )}
+
+          <div className="flex justify-end">
+            <Button
+              onClick={handleSaveWhatsapp}
+              disabled={setWhatsappNumber.isPending || whatsappLoading}
+              variant="outline"
+              className="min-w-[160px] border-green-600 text-green-700 hover:bg-green-50"
+            >
+              {setWhatsappNumber.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving…
+                </>
+              ) : (
+                <>
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Save WhatsApp Number
+                </>
+              )}
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

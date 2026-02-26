@@ -2,38 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root {
-    /* ── Customer storefront palette (warm botanical greens) ── */
-    --background: oklch(0.98 0.008 100);
-    --foreground: oklch(0.22 0.02 100);
+    /* ── Customer storefront palette (Ayurvedic: deep greens, golds, creams, warm browns) ── */
+    --background: oklch(0.97 0.012 90);       /* warm cream */
+    --foreground: oklch(0.22 0.03 60);         /* warm dark brown */
 
     --card: oklch(1 0 0);
-    --card-foreground: oklch(0.22 0.02 100);
+    --card-foreground: oklch(0.22 0.03 60);
 
     --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.22 0.02 100);
+    --popover-foreground: oklch(0.22 0.03 60);
 
-    --primary: oklch(0.42 0.09 145);
-    --primary-foreground: oklch(0.98 0.005 145);
+    --primary: oklch(0.35 0.09 145);           /* deep forest green */
+    --primary-foreground: oklch(0.97 0.008 90);
 
-    --secondary: oklch(0.93 0.025 100);
-    --secondary-foreground: oklch(0.35 0.04 100);
+    --secondary: oklch(0.92 0.03 90);          /* parchment */
+    --secondary-foreground: oklch(0.35 0.05 60);
 
-    --muted: oklch(0.94 0.015 100);
-    --muted-foreground: oklch(0.55 0.025 100);
+    --muted: oklch(0.93 0.02 90);
+    --muted-foreground: oklch(0.52 0.03 60);
 
-    --accent: oklch(0.88 0.06 85);
-    --accent-foreground: oklch(0.28 0.05 85);
+    --accent: oklch(0.72 0.12 75);             /* warm gold */
+    --accent-foreground: oklch(0.15 0.03 60);
 
     --destructive: oklch(0.55 0.22 25);
     --destructive-foreground: oklch(0.98 0.005 25);
 
-    --border: oklch(0.88 0.015 100);
-    --input: oklch(0.88 0.015 100);
-    --ring: oklch(0.42 0.09 145);
+    --border: oklch(0.87 0.02 90);
+    --input: oklch(0.87 0.02 90);
+    --ring: oklch(0.35 0.09 145);
 
     --radius: 0.75rem;
 
@@ -58,7 +58,7 @@
     --popover: oklch(0.18 0.015 240);
     --popover-foreground: oklch(0.94 0.008 240);
 
-    --primary: oklch(0.58 0.1 145);
+    --primary: oklch(0.55 0.1 145);
     --primary-foreground: oklch(0.12 0.02 145);
 
     --secondary: oklch(0.24 0.02 240);
@@ -67,15 +67,15 @@
     --muted: oklch(0.24 0.02 240);
     --muted-foreground: oklch(0.62 0.02 240);
 
-    --accent: oklch(0.32 0.04 85);
-    --accent-foreground: oklch(0.92 0.03 85);
+    --accent: oklch(0.65 0.12 75);
+    --accent-foreground: oklch(0.12 0.02 60);
 
     --destructive: oklch(0.55 0.22 25);
     --destructive-foreground: oklch(0.98 0.005 25);
 
     --border: oklch(0.28 0.02 240);
     --input: oklch(0.28 0.02 240);
-    --ring: oklch(0.58 0.1 145);
+    --ring: oklch(0.55 0.1 145);
 
     /* Admin dark */
     --admin-bg: oklch(0.12 0.012 240);
@@ -100,11 +100,17 @@
     -moz-osx-font-smoothing: grayscale;
   }
   .font-serif {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Cormorant Garamond', Georgia, serif;
   }
 }
 
 @layer utilities {
+  .shadow-botanical {
+    box-shadow: 0 2px 16px oklch(0.35 0.09 145 / 0.10), 0 1px 4px oklch(0.35 0.09 145 / 0.06);
+  }
+  .shadow-botanical-lg {
+    box-shadow: 0 8px 32px oklch(0.35 0.09 145 / 0.15), 0 2px 8px oklch(0.35 0.09 145 / 0.08);
+  }
   .shadow-herb {
     box-shadow: 0 2px 12px oklch(0.42 0.09 145 / 0.12);
   }

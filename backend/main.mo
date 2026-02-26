@@ -7,6 +7,7 @@ import Nat "mo:core/Nat";
 import Principal "mo:core/Principal";
 import Iter "mo:core/Iter";
 
+
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
 import MixinStorage "blob-storage/Mixin";
@@ -14,15 +15,23 @@ import Storage "blob-storage/Storage";
 import Stripe "stripe/stripe";
 import OutCall "http-outcalls/outcall";
 
+// Ensure seamless upgrade
+
 actor {
   include MixinStorage();
+
+  var adminPrincipal : ?Principal = null;
 
   public type Specification = {
     key : Text;
     value : Text;
   };
 
-  public type ProductStatus = { #active; #outOfStock; #launchingSoon };
+  public type ProductStatus = {
+    #active;
+    #outOfStock;
+    #launchingSoon;
+  };
 
   public type ProductInput = {
     name : Text;
@@ -91,8 +100,19 @@ actor {
     email : Text;
   };
 
+  public type UserSummary = {
+    principal : Principal;
+    profile : ?UserProfile;
+    registeredAt : Int;
+    orderCount : Nat;
+  };
+
   public type SiteSettings = {
     razorpayKeyId : Text;
+    storeName : Text;
+    contactEmail : Text;
+    announcementBanner : Text;
+    whatsappNumber : Text;
   };
 
   let accessControlState = AccessControl.initState();
@@ -104,41 +124,127 @@ actor {
   let products = Map.empty<Nat, Product>();
   let orders = Map.empty<Nat, Order>();
   let userProfiles = Map.empty<Principal, UserProfile>();
+  let userRegistrationTimes = Map.empty<Principal, Int>();
 
   var siteSettings : SiteSettings = {
     razorpayKeyId = "";
+    storeName = "";
+    contactEmail = "";
+    announcementBanner = "";
+    whatsappNumber = "";
   };
 
   var stripeConfig : ?Stripe.StripeConfiguration = null;
 
+  // ── Helper: check if a principal is anonymous ────────────────────────────────
+
+  func isAnonymous(p : Principal) : Bool {
+    p.toText() == "2vxsx-fae";
+  };
+
+  // ── Admin functions ─────────────────────────────────────────────────────────
+
+  /// Bootstrap or admin-only: set the admin principal.
+  /// When no admin has been set yet, any authenticated caller may claim admin.
+  /// Once an admin is set, only the current admin can change it.
+  public shared ({ caller }) func setAdmin(principal : Principal) : async () {
+    if (isAnonymous(caller)) {
+      Runtime.trap("Not authorized: Anonymous callers cannot set admin");
+    };
+    switch (adminPrincipal) {
+      case (null) {
+        // Bootstrap: first authenticated caller claims admin
+        adminPrincipal := ?principal;
+      };
+      case (?_existing) {
+        // Already bootstrapped: only current admin may reassign
+        if (not isAdminOrAuthorized(caller)) {
+          Runtime.trap("Not authorized: Only admin can assign admin role");
+        };
+        adminPrincipal := ?principal;
+      };
+    };
+  };
+
+  public query ({ caller }) func isAdmin() : async Bool {
+    if (isAnonymous(caller)) { return false };
+    switch (adminPrincipal) {
+      case (?admin) { caller == admin };
+      case (null) { false };
+    };
+  };
+
+  // Check if the caller is the designated admin or has the correct role via AccessControl.
+  // Anonymous callers are always rejected.
+  func isAdminOrAuthorized(caller : Principal) : Bool {
+    if (isAnonymous(caller)) { return false };
+    switch (adminPrincipal) {
+      case (?admin) { caller == admin or AccessControl.hasPermission(accessControlState, caller, #admin) };
+      case (null) { AccessControl.hasPermission(accessControlState, caller, #admin) };
+    };
+  };
+
+  // Check if the caller is authenticated (non-anonymous).
+  func isAuthenticated(caller : Principal) : Bool {
+    not isAnonymous(caller);
+  };
+
   // ── User profile functions ──────────────────────────────────────────────────
 
+  /// Authenticated users only: get the caller's own profile.
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Not authenticated: Only authenticated users can access their profile");
+    if (not isAuthenticated(caller)) {
+      Runtime.trap("Not authorized: Anonymous callers cannot access profiles");
     };
     userProfiles.get(caller);
   };
 
+  /// Authenticated users only: save the caller's own profile.
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Not authenticated: Only authenticated users can edit their profile");
+    if (not isAuthenticated(caller)) {
+      Runtime.trap("Not authorized: Anonymous callers cannot save a profile");
+    };
+    // Record registration time on first save
+    switch (userRegistrationTimes.get(caller)) {
+      case (null) { userRegistrationTimes.add(caller, Time.now()) };
+      case (?_) {};
     };
     userProfiles.add(caller, profile);
   };
 
+  /// Owner or admin: get a specific user's profile.
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
-    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
+    if (caller != user and not isAdminOrAuthorized(caller)) {
       Runtime.trap("Not authorized: Only admin or the owner can access profile");
     };
     userProfiles.get(user);
+  };
+
+  /// Admin-only: list all registered users with profile and order summary.
+  public query ({ caller }) func getAllUsers() : async [UserSummary] {
+    if (not isAdminOrAuthorized(caller)) {
+      Runtime.trap("Not authorized: Only admin can view all users");
+    };
+    let allOrders = orders.values().toArray();
+    userRegistrationTimes.entries().toArray().map(
+      func((principal, registeredAt)) : UserSummary {
+        let profile = userProfiles.get(principal);
+        let orderCount = allOrders.filter(func(o : Order) : Bool { o.customerId == principal }).size();
+        {
+          principal = principal;
+          profile = profile;
+          registeredAt = registeredAt;
+          orderCount = orderCount;
+        };
+      }
+    );
   };
 
   // ── Product functions ───────────────────────────────────────────────────────
 
   /// Admin-only: create a new product.
   public shared ({ caller }) func createProduct(productInput : ProductInput) : async Product {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not isAdminOrAuthorized(caller)) {
       Runtime.trap("Not authorized: Only admin can create product");
     };
 
@@ -172,7 +278,7 @@ actor {
 
   /// Admin-only: get all products including hidden/draft ones.
   public query ({ caller }) func getAllProducts() : async [Product] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not isAdminOrAuthorized(caller)) {
       Runtime.trap("Not authorized: Only admin can view all products");
     };
     products.values().toArray();
@@ -180,7 +286,7 @@ actor {
 
   /// Admin-only: update an existing product.
   public shared ({ caller }) func updateProduct(id : Nat, productInput : ProductInput) : async Product {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not isAdminOrAuthorized(caller)) {
       Runtime.trap("Not authorized: Only admin can update product");
     };
 
@@ -207,7 +313,7 @@ actor {
 
   /// Admin-only: delete a product.
   public shared ({ caller }) func deleteProduct(id : Nat) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not isAdminOrAuthorized(caller)) {
       Runtime.trap("Not authorized: Only admin can delete products");
     };
 
@@ -219,7 +325,7 @@ actor {
 
   /// Admin-only: update stock quantity for a product.
   public shared ({ caller }) func updateStock(id : Nat, quantity : Nat) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not isAdminOrAuthorized(caller)) {
       Runtime.trap("Not authorized: Only admin can update stock");
     };
 
@@ -291,7 +397,7 @@ actor {
 
   /// Authenticated users only: place a new order.
   public shared ({ caller }) func createOrder(orderInput : OrderInput) : async Order {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    if (not isAuthenticated(caller)) {
       Runtime.trap("Not authenticated: Only authenticated users can place orders");
     };
 
@@ -315,9 +421,12 @@ actor {
 
   /// Order owner or admin: confirm payment for an order.
   public shared ({ caller }) func confirmPayment(orderId : Nat, razorpayPaymentId : Text) : async () {
+    if (not isAuthenticated(caller)) {
+      Runtime.trap("Not authenticated: Only authenticated users can confirm payment");
+    };
     switch (orders.get(orderId)) {
       case (?order) {
-        if (caller != order.customerId and not AccessControl.isAdmin(accessControlState, caller)) {
+        if (caller != order.customerId and not isAdminOrAuthorized(caller)) {
           Runtime.trap("Not authorized: Only order owner or admin can confirm payment");
         };
         let updatedOrder = {
@@ -340,7 +449,7 @@ actor {
 
   /// Admin-only: list all orders.
   public query ({ caller }) func getOrders() : async [Order] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not isAdminOrAuthorized(caller)) {
       Runtime.trap("Not authorized: Only admin can view all orders");
     };
     orders.values().toArray();
@@ -348,9 +457,12 @@ actor {
 
   /// Order owner or admin: get a single order by id.
   public query ({ caller }) func getOrderById(orderId : Nat) : async ?Order {
+    if (not isAuthenticated(caller)) {
+      Runtime.trap("Not authenticated: Only authenticated users can view orders");
+    };
     switch (orders.get(orderId)) {
       case (?order) {
-        if (caller != order.customerId and not AccessControl.isAdmin(accessControlState, caller)) {
+        if (caller != order.customerId and not isAdminOrAuthorized(caller)) {
           Runtime.trap("Not authorized: Only order owner or admin can view order");
         };
         ?order;
@@ -361,7 +473,7 @@ actor {
 
   /// Authenticated users only: list the caller's own orders.
   public query ({ caller }) func getMyOrders() : async [Order] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    if (not isAuthenticated(caller)) {
       Runtime.trap("Not authenticated: Only authenticated users can view their orders");
     };
     orders.values().toArray().filter(func(o) { o.customerId == caller });
@@ -369,7 +481,7 @@ actor {
 
   /// Admin-only: update the fulfillment status of an order.
   public shared ({ caller }) func updateFulfillmentStatus(orderId : Nat, status : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not isAdminOrAuthorized(caller)) {
       Runtime.trap("Not authorized: Only admin can update fulfillment status");
     };
 
@@ -404,7 +516,7 @@ actor {
 
   /// Admin-only: read the full site settings (includes sensitive config).
   public query ({ caller }) func getSiteSettings() : async SiteSettings {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not isAdminOrAuthorized(caller)) {
       Runtime.trap("Not authorized: Only admin can view site settings");
     };
     siteSettings;
@@ -412,8 +524,24 @@ actor {
 
   /// Admin-only: persist updated site settings.
   public shared ({ caller }) func setSiteSettings(newSettings : SiteSettings) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not isAdminOrAuthorized(caller)) {
       Runtime.trap("Not authorized: Only admin can update site settings");
+    };
+    siteSettings := newSettings;
+  };
+
+  // WhatsApp Number Management (public query and admin-only setter)
+  public query func getWhatsappNumber() : async Text {
+    siteSettings.whatsappNumber;
+  };
+
+  public shared ({ caller }) func setWhatsappNumber(number : Text) : async () {
+    if (not isAdminOrAuthorized(caller)) {
+      Runtime.trap("Not authorized: Only admin can set WhatsApp number");
+    };
+    // Create new settings record
+    let newSettings : SiteSettings = {
+      siteSettings with whatsappNumber = number;
     };
     siteSettings := newSettings;
   };
@@ -425,7 +553,7 @@ actor {
   };
 
   public shared ({ caller }) func setStripeConfiguration(config : Stripe.StripeConfiguration) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not isAdminOrAuthorized(caller)) {
       Runtime.trap("Not authorized: Only admin can perform this action");
     };
     stripeConfig := ?config;
@@ -442,7 +570,11 @@ actor {
     await Stripe.getSessionStatus(getStripeConfiguration(), sessionId, transform);
   };
 
+  /// Authenticated users only: create a Stripe checkout session.
   public shared ({ caller }) func createCheckoutSession(items : [Stripe.ShoppingItem], successUrl : Text, cancelUrl : Text) : async Text {
+    if (not isAuthenticated(caller)) {
+      Runtime.trap("Not authenticated: Only authenticated users can create checkout sessions");
+    };
     await Stripe.createCheckoutSession(getStripeConfiguration(), caller, items, successUrl, cancelUrl, transform);
   };
 
@@ -450,3 +582,4 @@ actor {
     OutCall.transform(input);
   };
 };
+

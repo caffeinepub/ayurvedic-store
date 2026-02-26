@@ -1,58 +1,40 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "E-commerce storefront and admin dashboard project. The website is being rebranded from 'Veda Botanics' to 'Nature Glow', with the name update reflected across the site title, branding, and homepage.",
-  "architectural_notes": [
-    "Deployed on Internet Computer (ICP) platform; user storefront at root path, admin dashboard at /admin route"
-  ],
+  "summary": "Ayurvedic website project with a floating WhatsApp customer support button feature being built.",
+  "architectural_notes": [],
   "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-replace-all-occurrences-of-veda-botanics-with-nature-glow-in-the-html-shell-frontend-index-html-including-the-page-title-tag-and-any-meta-tags",
-      "title": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the HTML shell (frontend/index.html), including the page <title> tag and any meta tags.",
+      "id": "feature-create-a-floatingwhatsapp-component-as-a-fixed-circular-button-in-the-bottom-right-corner-of-the-page-the-button-must-use-whatsapp-green-25d366-background-with-a-white-whatsapp-svg-icon-inside-on-click-it-opens-a-new-tab-to-https-wa-me-919819187188-text-hello-2c-20i-20would-20like-20to-20know-20more-20about-20your-20ayurvedic-20face-20packs-the-button-should-be-56-56px-on-desktop-and-48-48px-on-mobile-positioned-at-bottom-right-with-enough-margin-to-avoid-overlapping-footer-or-important-content",
+      "title": "Create a FloatingWhatsApp component as a fixed circular button in the bottom-right corner of the page. The button must use WhatsApp green (#25D366) background with a white WhatsApp SVG icon inside. On click, it opens a new tab to 'https://wa.me/919819187188?text=Hello%2C%20I%20would%20like%20to%20know%20more%20about%20your%20Ayurvedic%20face%20packs.' The button should be 56×56px on desktop and 48×48px on mobile, positioned at bottom-right with enough margin to avoid overlapping footer or important content.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-replace-all-occurrences-of-veda-botanics-with-nature-glow-in-the-navbar-component-frontend-src-components-navbar-tsx-including-the-logo-text-and-any-aria-labels-or-alt-text-referencing-the-brand-name",
-      "title": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the Navbar component (frontend/src/components/Navbar.tsx), including the logo text and any aria-labels or alt text referencing the brand name.",
+      "id": "feature-add-a-soft-box-shadow-to-the-floatingwhatsapp-button-and-a-smooth-hover-animation-on-hover-the-button-scales-up-slightly-e-g-scale-110-and-gains-a-subtle-green-glow-effect-a-tooltip-with-the-text-chat-with-us-on-whatsapp-should-appear-above-the-button-on-hover-styled-in-earthy-natural-tones-consistent-with-the-ayurvedic-palette",
+      "title": "Add a soft box-shadow to the FloatingWhatsApp button and a smooth hover animation: on hover, the button scales up slightly (e.g., scale-110) and gains a subtle green glow effect. A tooltip with the text 'Chat with us on WhatsApp' should appear above the button on hover, styled in earthy/natural tones consistent with the Ayurvedic palette.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-replace-all-occurrences-of-veda-botanics-with-nature-glow-in-the-footer-component-frontend-src-components-footer-tsx-including-the-brand-name-tagline-and-any-copyright-text",
-      "title": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the Footer component (frontend/src/components/Footer.tsx), including the brand name, tagline, and any copyright text.",
+      "id": "feature-add-an-entrance-animation-to-the-floatingwhatsapp-button-so-it-fades-in-and-slides-up-from-the-bottom-when-the-page-first-loads-use-a-css-keyframe-or-tailwind-animation-e-g-fade-in-translate-y-with-a-short-delay-300-500ms-so-it-does-not-distract-from-initial-page-content",
+      "title": "Add an entrance animation to the FloatingWhatsApp button so it fades in and slides up from the bottom when the page first loads. Use a CSS keyframe or Tailwind animation (e.g., fade-in + translate-y) with a short delay (300–500ms) so it does not distract from initial page content.",
       "reqIds": [
         "REQ-3"
       ],
       "version": 1
     },
     {
-      "id": "feature-replace-all-occurrences-of-veda-botanics-with-nature-glow-on-the-home-page-frontend-src-pages-home-tsx-including-the-hero-section-heading-subheadings-and-any-other-brand-name-references-so-the-name-is-prominently-visible-on-the-homepage",
-      "title": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' on the Home page (frontend/src/pages/Home.tsx), including the hero section heading, subheadings, and any other brand name references so the name is prominently visible on the homepage.",
+      "id": "feature-mount-the-floatingwhatsapp-component-inside-the-customerlayout-wrapper-in-app-tsx-so-it-appears-on-all-customer-facing-pages-the-component-should-read-the-whatsapp-number-from-the-backend-site-settings-via-the-existing-usewhatsappnumber-or-site-settings-react-query-hook-and-only-render-when-a-valid-number-is-configured-use-the-hardcoded-number-919819187188-as-the-fallback-default-if-the-backend-returns-an-empty-string",
+      "title": "Mount the FloatingWhatsApp component inside the CustomerLayout wrapper in App.tsx so it appears on all customer-facing pages. The component should read the WhatsApp number from the backend site settings (via the existing useWhatsAppNumber or site settings React Query hook) and only render when a valid number is configured. Use the hardcoded number '919819187188' as the fallback default if the backend returns an empty string.",
       "reqIds": [
         "REQ-4"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-replace-all-occurrences-of-veda-botanics-with-nature-glow-in-the-mobilenavdrawer-component-frontend-src-components-mobilenavdrawer-tsx-and-adminlayout-component-frontend-src-components-admin-adminlayout-tsx-including-any-brand-name-references-in-the-admin-sidebar",
-      "title": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the MobileNavDrawer component (frontend/src/components/MobileNavDrawer.tsx) and AdminLayout component (frontend/src/components/admin/AdminLayout.tsx), including any brand name references in the admin sidebar.",
-      "reqIds": [
-        "REQ-5"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-search-all-remaining-frontend-source-files-pages-components-hooks-utils-css-files-for-any-remaining-string-veda-botanics-and-replace-with-nature-glow-to-ensure-a-complete-rebrand",
-      "title": "Search all remaining frontend source files (pages, components, hooks, utils, CSS files) for any remaining string 'Veda Botanics' and replace with 'Nature Glow' to ensure a complete rebrand.",
-      "reqIds": [
-        "REQ-6"
       ],
       "version": 1
     }
@@ -60,13 +42,13 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Rename website from 'Veda Botanics' to 'Nature Glow' across site title, branding, and homepage",
+      "summary": "Floating WhatsApp customer support button with Ayurvedic theme, fixed bottom-right, green circular button, hover tooltip, entrance animation, opens wa.me/919819187188 with pre-filled message",
       "reqIds": [],
       "status": "pending"
     }
   ],
   "gameProjectType": "none",
-  "projectName": "Nature Glow",
+  "projectName": "Nature Glow Ayurvedic",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

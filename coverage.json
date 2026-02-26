@@ -1,96 +1,59 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T15:45:23.332Z",
+  "generatedAt": "2026-02-26T19:57:21.305Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 6,
-    "implemented": 6,
+    "total": 4,
+    "implemented": 4,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the HTML shell (frontend/index.html), including the page <title> tag and any meta tags.",
+        "summary": "Create a FloatingWhatsApp component as a fixed circular button in the bottom-right corner of the page. The button must use WhatsApp green (#25D366) background with a white WhatsApp SVG icon inside. On click, it opens a new tab to 'https://wa.me/919819187188?text=Hello%2C%20I%20would%20like%20to%20know%20more%20about%20your%20Ayurvedic%20face%20packs.' The button should be 56×56px on desktop and 48×48px on mobile, positioned at bottom-right with enough margin to avoid overlapping footer or important content.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/index.html"
+          "frontend/src/components/FloatingWhatsApp.tsx"
         ],
         "matchedFiles": [
-          "frontend/index.html"
+          "frontend/src/components/FloatingWhatsApp.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the Navbar component (frontend/src/components/Navbar.tsx), including the logo text and any aria-labels or alt text referencing the brand name.",
+        "summary": "Add a soft box-shadow to the FloatingWhatsApp button and a smooth hover animation: on hover, the button scales up slightly (e.g., scale-110) and gains a subtle green glow effect. A tooltip with the text 'Chat with us on WhatsApp' should appear above the button on hover, styled in earthy/natural tones consistent with the Ayurvedic palette.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/Navbar.tsx"
+          "frontend/src/components/FloatingWhatsApp.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/Navbar.tsx"
+          "frontend/src/components/FloatingWhatsApp.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the Footer component (frontend/src/components/Footer.tsx), including the brand name, tagline, and any copyright text.",
+        "summary": "Add an entrance animation to the FloatingWhatsApp button so it fades in and slides up from the bottom when the page first loads. Use a CSS keyframe or Tailwind animation (e.g., fade-in + translate-y) with a short delay (300–500ms) so it does not distract from initial page content.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/Footer.tsx"
+          "frontend/src/components/FloatingWhatsApp.tsx",
+          "frontend/tailwind.config.js"
         ],
         "matchedFiles": [
-          "frontend/src/components/Footer.tsx"
+          "frontend/src/components/FloatingWhatsApp.tsx"
         ]
       },
       {
         "id": "REQ-4",
-        "summary": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' on the Home page (frontend/src/pages/Home.tsx), including the hero section heading, subheadings, and any other brand name references so the name is prominently visible on the homepage.",
+        "summary": "Mount the FloatingWhatsApp component inside the CustomerLayout wrapper in App.tsx so it appears on all customer-facing pages. The component should read the WhatsApp number from the backend site settings (via the existing useWhatsAppNumber or site settings React Query hook) and only render when a valid number is configured. Use the hardcoded number '919819187188' as the fallback default if the backend returns an empty string.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/Home.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/Home.tsx"
-        ]
-      },
-      {
-        "id": "REQ-5",
-        "summary": "Replace all occurrences of 'Veda Botanics' with 'Nature Glow' in the MobileNavDrawer component (frontend/src/components/MobileNavDrawer.tsx) and AdminLayout component (frontend/src/components/admin/AdminLayout.tsx), including any brand name references in the admin sidebar.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/MobileNavDrawer.tsx",
-          "frontend/src/components/admin/AdminLayout.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/MobileNavDrawer.tsx",
-          "frontend/src/components/admin/AdminLayout.tsx"
-        ]
-      },
-      {
-        "id": "REQ-6",
-        "summary": "Search all remaining frontend source files (pages, components, hooks, utils, CSS files) for any remaining string 'Veda Botanics' and replace with 'Nature Glow' to ensure a complete rebrand.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/admin/AdminLogin.tsx",
-          "frontend/src/pages/admin/AdminProducts.tsx",
-          "frontend/src/pages/admin/AdminOrders.tsx",
-          "frontend/src/pages/admin/AdminSettings.tsx",
-          "frontend/src/pages/Shop.tsx",
-          "frontend/src/pages/ProductDetail.tsx",
-          "frontend/src/pages/Checkout.tsx",
-          "frontend/src/pages/PaymentSuccess.tsx",
-          "frontend/src/pages/PaymentFailure.tsx",
-          "frontend/src/index.css",
-          "frontend/src/utils/seedProducts.ts",
-          "frontend/src/components/CartDrawer.tsx",
-          "frontend/src/components/ProductCard.tsx",
-          "frontend/src/components/admin/ProductFormModal.tsx",
-          "frontend/src/components/admin/OrderDetailModal.tsx",
+          "frontend/src/components/FloatingWhatsApp.tsx",
           "frontend/src/App.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/admin/AdminLogin.tsx"
+          "frontend/src/components/FloatingWhatsApp.tsx"
         ]
       }
     ]
@@ -100,13 +63,7 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/index.html",
-    "frontend/src/components/Footer.tsx",
-    "frontend/src/components/MobileNavDrawer.tsx",
-    "frontend/src/components/Navbar.tsx",
-    "frontend/src/components/admin/AdminLayout.tsx",
-    "frontend/src/pages/Home.tsx",
-    "frontend/src/pages/admin/AdminLogin.tsx",
+    "frontend/src/components/FloatingWhatsApp.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

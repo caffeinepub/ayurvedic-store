@@ -79,6 +79,10 @@ export interface http_request_result {
 }
 export interface SiteSettings {
     razorpayKeyId: string;
+    whatsappNumber: string;
+    storeName: string;
+    contactEmail: string;
+    announcementBanner: string;
 }
 export interface ShoppingItem {
     productName: string;
@@ -86,6 +90,12 @@ export interface ShoppingItem {
     quantity: bigint;
     priceInCents: bigint;
     productDescription: string;
+}
+export interface UserSummary {
+    principal: Principal;
+    orderCount: bigint;
+    registeredAt: bigint;
+    profile?: UserProfile;
 }
 export interface TransformationInput {
     context: Uint8Array;
@@ -131,6 +141,9 @@ export interface backendInterface {
      * / Order owner or admin: confirm payment for an order.
      */
     confirmPayment(orderId: bigint, razorpayPaymentId: string): Promise<void>;
+    /**
+     * / Authenticated users only: create a Stripe checkout session.
+     */
     createCheckoutSession(items: Array<ShoppingItem>, successUrl: string, cancelUrl: string): Promise<string>;
     /**
      * / Authenticated users only: place a new order.
@@ -148,6 +161,13 @@ export interface backendInterface {
      * / Admin-only: get all products including hidden/draft ones.
      */
     getAllProducts(): Promise<Array<Product>>;
+    /**
+     * / Admin-only: list all registered users with profile and order summary.
+     */
+    getAllUsers(): Promise<Array<UserSummary>>;
+    /**
+     * / Authenticated users only: get the caller's own profile.
+     */
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     /**
@@ -193,23 +213,38 @@ export interface backendInterface {
      */
     getSiteSettings(): Promise<SiteSettings>;
     getStripeSessionStatus(sessionId: string): Promise<StripeSessionStatus>;
+    /**
+     * / Owner or admin: get a specific user's profile.
+     */
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    getWhatsappNumber(): Promise<string>;
+    isAdmin(): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
     /**
      * / Public: check whether a product is in stock.
      */
     isProductInStock(productId: bigint): Promise<boolean>;
     isStripeConfigured(): Promise<boolean>;
+    /**
+     * / Authenticated users only: save the caller's own profile.
+     */
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     /**
      * / Public: full-text search over product name and description.
      */
     searchProducts(searchTerm: string): Promise<Array<Product>>;
     /**
+     * / Bootstrap or admin-only: set the admin principal.
+     * / When no admin has been set yet, any authenticated caller may claim admin.
+     * / Once an admin is set, only the current admin can change it.
+     */
+    setAdmin(principal: Principal): Promise<void>;
+    /**
      * / Admin-only: persist updated site settings.
      */
     setSiteSettings(newSettings: SiteSettings): Promise<void>;
     setStripeConfiguration(config: StripeConfiguration): Promise<void>;
+    setWhatsappNumber(number: string): Promise<void>;
     transform(input: TransformationInput): Promise<TransformationOutput>;
     /**
      * / Admin-only: update the fulfillment status of an order.

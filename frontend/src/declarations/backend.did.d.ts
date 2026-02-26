@@ -76,7 +76,13 @@ export interface ShoppingItem {
   'priceInCents' : bigint,
   'productDescription' : string,
 }
-export interface SiteSettings { 'razorpayKeyId' : string }
+export interface SiteSettings {
+  'razorpayKeyId' : string,
+  'whatsappNumber' : string,
+  'storeName' : string,
+  'contactEmail' : string,
+  'announcementBanner' : string,
+}
 export interface Specification { 'key' : string, 'value' : string }
 export interface StripeConfiguration {
   'allowedCountries' : Array<string>,
@@ -99,6 +105,12 @@ export interface UserProfile { 'name' : string, 'email' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
+export interface UserSummary {
+  'principal' : Principal,
+  'orderCount' : bigint,
+  'registeredAt' : bigint,
+  'profile' : [] | [UserProfile],
+}
 export interface _CaffeineStorageCreateCertificateResult {
   'method' : string,
   'blob_hash' : string,
@@ -138,6 +150,9 @@ export interface _SERVICE {
    * / Order owner or admin: confirm payment for an order.
    */
   'confirmPayment' : ActorMethod<[bigint, string], undefined>,
+  /**
+   * / Authenticated users only: create a Stripe checkout session.
+   */
   'createCheckoutSession' : ActorMethod<
     [Array<ShoppingItem>, string, string],
     string
@@ -158,6 +173,13 @@ export interface _SERVICE {
    * / Admin-only: get all products including hidden/draft ones.
    */
   'getAllProducts' : ActorMethod<[], Array<Product>>,
+  /**
+   * / Admin-only: list all registered users with profile and order summary.
+   */
+  'getAllUsers' : ActorMethod<[], Array<UserSummary>>,
+  /**
+   * / Authenticated users only: get the caller's own profile.
+   */
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   /**
@@ -203,23 +225,38 @@ export interface _SERVICE {
    */
   'getSiteSettings' : ActorMethod<[], SiteSettings>,
   'getStripeSessionStatus' : ActorMethod<[string], StripeSessionStatus>,
+  /**
+   * / Owner or admin: get a specific user's profile.
+   */
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'getWhatsappNumber' : ActorMethod<[], string>,
+  'isAdmin' : ActorMethod<[], boolean>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   /**
    * / Public: check whether a product is in stock.
    */
   'isProductInStock' : ActorMethod<[bigint], boolean>,
   'isStripeConfigured' : ActorMethod<[], boolean>,
+  /**
+   * / Authenticated users only: save the caller's own profile.
+   */
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   /**
    * / Public: full-text search over product name and description.
    */
   'searchProducts' : ActorMethod<[string], Array<Product>>,
   /**
+   * / Bootstrap or admin-only: set the admin principal.
+   * / When no admin has been set yet, any authenticated caller may claim admin.
+   * / Once an admin is set, only the current admin can change it.
+   */
+  'setAdmin' : ActorMethod<[Principal], undefined>,
+  /**
    * / Admin-only: persist updated site settings.
    */
   'setSiteSettings' : ActorMethod<[SiteSettings], undefined>,
   'setStripeConfiguration' : ActorMethod<[StripeConfiguration], undefined>,
+  'setWhatsappNumber' : ActorMethod<[string], undefined>,
   'transform' : ActorMethod<[TransformationInput], TransformationOutput>,
   /**
    * / Admin-only: update the fulfillment status of an order.
