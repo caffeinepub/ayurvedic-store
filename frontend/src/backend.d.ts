@@ -72,6 +72,16 @@ export interface http_header {
     value: string;
     name: string;
 }
+export interface WhatsAppButtonSettings {
+    ringEffect: boolean;
+    icon: string;
+    animation: string;
+    tooltip: string;
+    pulseRingColor: string;
+    enabled: boolean;
+    buttonColor: string;
+    number: string;
+}
 export interface http_request_result {
     status: bigint;
     body: Uint8Array;
@@ -217,6 +227,7 @@ export interface backendInterface {
      * / Owner or admin: get a specific user's profile.
      */
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    getWhatsappButtonSettings(): Promise<WhatsAppButtonSettings>;
     getWhatsappNumber(): Promise<string>;
     isAdmin(): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
@@ -258,4 +269,5 @@ export interface backendInterface {
      * / Admin-only: update stock quantity for a product.
      */
     updateStock(id: bigint, quantity: bigint): Promise<void>;
+    updateWhatsappButtonSettings(settings: WhatsAppButtonSettings): Promise<void>;
 }

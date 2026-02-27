@@ -1,27 +1,230 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix WhatsApp button to reflect updated phone number from admin panel",
+  "title": "Rebuild Premium Ayurvedic Skincare Website - Frontend",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Make FloatingWhatsApp component dynamically fetch the WhatsApp phone number from the backend and ensure the admin panel invalidates the cache when saving a new number",
+      "summary": "Implement full-page Hero section with premium Ayurvedic branding, botanical background, and animated entrance",
       "acceptanceCriteria": [
-        "FloatingWhatsApp component reads the phone number from the site settings query result, not a hardcoded string.",
-        "When an admin updates and saves a new WhatsApp number in AdminSettings, the React Query cache for site settings is invalidated.",
-        "After saving a new number in the admin panel, the FloatingWhatsApp button opens a WhatsApp chat with the newly saved number without requiring a page reload.",
-        "If no number is returned from the backend, the button falls back to a sensible default rather than throwing an error."
+        "Hero section renders with brand headline using Playfair Display or Cinzel serif font",
+        "Background features a botanical/herb imagery",
+        "CTA button uses soft gold accent color",
+        "Fade-in and slide-up animations play on page load"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Hero.tsx",
+          "operation": "create",
+          "description": "Create Hero component with full-page layout featuring brand headline, subheadline, and primary CTA. Use deep forest green (#0B3D2E) text, warm beige (#F5E6D3) overlays, soft gold (#C9A96E) CTA button. Set background image to frontend/public/assets/generated/hero-botanical.dim_1920x1080.png. Implement fade-in and slide-up CSS animations triggered on mount using Tailwind animate utilities or custom keyframes."
+        },
+        {
+          "path": "frontend/src/pages/Home.tsx",
+          "operation": "modify",
+          "description": "Replace or wrap existing hero banner with the new Hero component as the first section. Ensure Hero renders before Featured Products and other sections. Maintain existing product fetching logic."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Build Featured Products section with glassmorphism cards, smooth hover animations, and React Query integration",
+      "acceptanceCriteria": [
+        "Product cards use glassmorphism styling with soft shadows and rounded corners",
+        "Hover state triggers scale and shadow animation",
+        "Products are fetched from backend via existing React Query hook",
+        "Add to Cart button is visible and functional on each card"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/FeaturedProducts.tsx",
+          "operation": "create",
+          "description": "Create FeaturedProducts component that uses the existing useGetFeaturedProducts hook from frontend/src/hooks/useQueries.ts. Map products to glassmorphism-styled cards with soft backdrop blur, rounded-xl corners, and subtle shadows. Each card displays product image, name, price (formatted via frontend/src/utils/formatters.ts), and an Add to Cart button. Apply hover:scale-105 and hover:shadow-xl transitions. Wire Add to Cart to the CartContext from frontend/src/context/CartContext.tsx."
+        },
+        {
+          "path": "frontend/src/pages/Home.tsx",
+          "operation": "modify",
+          "description": "Replace or enhance the existing featured products section with the new FeaturedProducts component. Position it after the Hero section. Remove any duplicate product fetching logic if present."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Add Benefits section highlighting three core Ayurvedic values with icon cards and scroll-triggered animation",
+      "acceptanceCriteria": [
+        "Three benefit cards are displayed: 100% Natural, Chemical-Free, Handmade",
+        "Section background uses light sage green (#A8B5A2)",
+        "Each card contains an icon and short descriptive text",
+        "Slide-up animation triggers on scroll"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Benefits.tsx",
+          "operation": "create",
+          "description": "Create Benefits component with a section background of light sage green (#A8B5A2). Display three benefit cards in a responsive grid (flex or grid layout). Each card includes an icon (use lucide-react icons: Leaf for Natural, ShieldCheck for Chemical-Free, HandMetal for Handmade) and short descriptive text. Implement slide-up animation on scroll using Intersection Observer API or a lightweight scroll animation library. Apply Tailwind transition and transform utilities."
+        },
+        {
+          "path": "frontend/src/pages/Home.tsx",
+          "operation": "modify",
+          "description": "Insert the Benefits component after the FeaturedProducts section. Ensure proper spacing and section flow."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Create Testimonials section with customer quotes in minimal cards using warm beige and earthy brown palette",
+      "acceptanceCriteria": [
+        "At least three testimonials are displayed",
+        "Each testimonial card shows customer name, star rating, and quote",
+        "Section uses warm beige background and earthy brown typography",
+        "Layout is clean and well-spaced"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Testimonials.tsx",
+          "operation": "create",
+          "description": "Create Testimonials component with warm beige (#F5E6D3) section background and earthy brown (#6B4F3A) text. Define an inline array of at least three testimonial objects (name, rating, quote). Map to clean, minimal cards with rounded corners and subtle shadows. Display star ratings using lucide-react Star icons (filled for active stars, outlined for inactive). Use proper spacing and responsive grid layout."
+        },
+        {
+          "path": "frontend/src/pages/Home.tsx",
+          "operation": "modify",
+          "description": "Insert the Testimonials component after the Benefits section. Maintain section order: Hero, FeaturedProducts, Benefits, Testimonials."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Build About Ayurveda storytelling section with rich narrative, botanical image, and golden accent divider",
+      "acceptanceCriteria": [
+        "Section contains storytelling copy about Ayurvedic heritage",
+        "A golden (#C9A96E) accent divider line is present",
+        "Two-column layout on desktop, stacked on mobile",
+        "Serif font used for headings, sans-serif for body"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/AboutAyurveda.tsx",
+          "operation": "create",
+          "description": "Create AboutAyurveda component with two-column layout on desktop (lg:grid-cols-2) and single-column on mobile. Left column displays storytelling copy about Ayurvedic heritage with serif headings (Playfair Display or Cinzel) and sans-serif body (Lato or Poppins). Right column shows the botanical texture image using frontend/public/assets/generated/about-ayurveda.dim_800x600.png. Include a golden (#C9A96E) horizontal divider line (border-t-2) at the top of the section. Use warm beige or white section background."
+        },
+        {
+          "path": "frontend/src/pages/Home.tsx",
+          "operation": "modify",
+          "description": "Insert the AboutAyurveda component after the Testimonials section. Ensure all sections are properly ordered and spaced."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Fix FloatingWhatsApp button to fetch latest number from backend, invalidate cache on admin updates, and ensure visibility on all customer pages",
+      "acceptanceCriteria": [
+        "Floating WhatsApp button appears on all customer pages",
+        "Button fetches the current number from backend; fallback number is used if fetch fails",
+        "Clicking opens a WhatsApp chat with a pre-filled message",
+        "Entrance animation, tooltip, and pulse ring are rendered",
+        "After admin saves a new WhatsApp number, the button reflects it without a page reload (React Query cache invalidated)"
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/FloatingWhatsApp.tsx",
           "operation": "modify",
-          "description": "Replace the hardcoded phone number with a call to the useGetWhatsappNumber hook from useQueries.ts. Use the query result's data for the phone number, falling back to a default value (e.g., '+919876543210') when the query is loading or returns an empty string. Ensure the component handles loading and error states gracefully without breaking the UI."
+          "description": "Review the existing FloatingWhatsApp component. Ensure it uses the useGetWhatsappNumber hook from frontend/src/hooks/useQueries.ts (or create one if missing) to fetch the WhatsApp number from backend via actor.getWhatsappNumber(). Implement a fallback number if the fetch fails. Verify entrance animation, tooltip, and pulse ring styles are present. Ensure the component is rendered in frontend/src/App.tsx for all customer-facing routes."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add or verify the useGetWhatsappNumber query hook that calls actor.getWhatsappNumber(). Set queryKey to ['whatsappNumber']. Ensure the hook is exported and available for use in FloatingWhatsApp. Add or verify a useUpdateWhatsappNumber mutation hook that calls actor.setWhatsappNumber(number) and invalidates the ['whatsappNumber'] queryKey on success to refresh the FloatingWhatsApp display."
         },
         {
           "path": "frontend/src/pages/admin/AdminSettings.tsx",
           "operation": "modify",
-          "description": "After successfully saving the WhatsApp number via the setWhatsappNumber mutation, invalidate the React Query cache for the 'whatsappNumber' query key using queryClient.invalidateQueries. This ensures that any component using useGetWhatsappNumber (including FloatingWhatsApp) will refetch the updated value immediately. Add the invalidation call in the onSuccess callback of the mutation to ensure it triggers only after a successful save."
+          "description": "Review the WhatsApp number update logic in AdminSettings. Ensure it uses the useUpdateWhatsappNumber mutation from useQueries.ts and invalidates the ['whatsappNumber'] cache on success so the FloatingWhatsApp button reflects the new number immediately."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Design premium Footer with brand info, navigation, contact details, golden divider, and dark forest green theme",
+      "acceptanceCriteria": [
+        "Footer uses deep forest green (#0B3D2E) background with light/beige text",
+        "Brand name, nav links, contact info, and copyright are present",
+        "Golden accent divider separates footer from main content",
+        "Layout is responsive and looks premium on mobile"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Footer.tsx",
+          "operation": "modify",
+          "description": "Refactor the existing Footer component to use deep forest green (#0B3D2E) background with warm beige (#F5E6D3) or white text. Add a golden (#C9A96E) border-t-2 divider at the top of the footer. Include brand name/logo, quick nav links (Home, Shop, About), contact details, social media placeholders, and copyright line. Ensure responsive layout with proper spacing. Maintain the 'Built with caffeine.ai' attribution if present."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Apply full Ayurvedic design system globally with five-color palette, serif/sans-serif typography, and consistent styling",
+      "acceptanceCriteria": [
+        "All five brand colors are applied consistently across sections",
+        "Playfair Display or Cinzel is used for all headings site-wide",
+        "Lato or Poppins is used for all body text",
+        "Soft shadows, rounded corners, and whitespace are consistent throughout",
+        "No overly bright or off-brand colors appear on any page"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Extend the Tailwind theme with the five Ayurvedic brand colors: primary (deep forest green #0B3D2E), background (warm beige #F5E6D3), accent (soft gold #C9A96E), depth (earthy brown #6B4F3A), and subtle (light sage green #A8B5A2). Ensure Playfair Display or Cinzel is set as the heading font family and Lato or Poppins as the body font family. Add utilities for consistent soft shadows (shadow-md, shadow-lg) and rounded corners (rounded-lg, rounded-xl)."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Define CSS custom properties for the five Ayurvedic brand colors under :root for light mode. Apply Playfair Display or Cinzel to all h1-h6 elements and Lato or Poppins to body text. Set default soft shadows and rounded corner styles. Ensure whitespace and minimal layout principles are enforced globally. Import Google Fonts for Playfair Display/Cinzel and Lato/Poppins if not already present."
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Ensure full mobile responsiveness across all sections with large tappable buttons and premium aesthetic",
+      "acceptanceCriteria": [
+        "All sections reflow correctly on screens 375px and wider",
+        "Buttons have a minimum touch target of 44px height",
+        "Font sizes scale down gracefully on small screens",
+        "No horizontal overflow or layout breakage on mobile"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Hero.tsx",
+          "operation": "modify",
+          "description": "Add responsive styles to Hero: use text-4xl md:text-5xl lg:text-6xl for headline, ensure CTA button has min-h-[44px] and sufficient padding. Test layout on 375px width."
+        },
+        {
+          "path": "frontend/src/components/FeaturedProducts.tsx",
+          "operation": "modify",
+          "description": "Ensure product cards use responsive grid (grid-cols-1 sm:grid-cols-2 lg:grid-cols-3). Add to Cart buttons must have min-h-[44px]. Test card layout on small screens."
+        },
+        {
+          "path": "frontend/src/components/Benefits.tsx",
+          "operation": "modify",
+          "description": "Use responsive grid for benefit cards (grid-cols-1 md:grid-cols-3). Ensure proper spacing and text scaling on mobile. Test scroll animation trigger on small viewports."
+        },
+        {
+          "path": "frontend/src/components/Testimonials.tsx",
+          "operation": "modify",
+          "description": "Use responsive grid for testimonial cards (grid-cols-1 md:grid-cols-2 lg:grid-cols-3). Ensure text wraps correctly and cards stack cleanly on mobile. Test on 375px width."
+        },
+        {
+          "path": "frontend/src/components/AboutAyurveda.tsx",
+          "operation": "modify",
+          "description": "Ensure two-column layout switches to single-column on mobile (grid-cols-1 lg:grid-cols-2). Test image scaling and text readability on small screens."
+        },
+        {
+          "path": "frontend/src/components/Footer.tsx",
+          "operation": "modify",
+          "description": "Ensure Footer stacks vertically on mobile. Test link tappability (min-h-[44px] for interactive elements). Verify no horizontal overflow on 375px width."
+        },
+        {
+          "path": "frontend/src/components/Navbar.tsx",
+          "operation": "modify",
+          "description": "Verify mobile menu toggle and cart icon are tappable (min 44px touch target). Ensure no layout breakage on small screens."
         }
       ]
     }

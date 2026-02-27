@@ -161,6 +161,16 @@ export interface http_header {
     value: string;
     name: string;
 }
+export interface WhatsAppButtonSettings {
+    ringEffect: boolean;
+    icon: string;
+    animation: string;
+    tooltip: string;
+    pulseRingColor: string;
+    enabled: boolean;
+    buttonColor: string;
+    number: string;
+}
 export interface http_request_result {
     status: bigint;
     body: Uint8Array;
@@ -317,6 +327,7 @@ export interface backendInterface {
      * / Owner or admin: get a specific user's profile.
      */
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    getWhatsappButtonSettings(): Promise<WhatsAppButtonSettings>;
     getWhatsappNumber(): Promise<string>;
     isAdmin(): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
@@ -358,6 +369,7 @@ export interface backendInterface {
      * / Admin-only: update stock quantity for a product.
      */
     updateStock(id: bigint, quantity: bigint): Promise<void>;
+    updateWhatsappButtonSettings(settings: WhatsAppButtonSettings): Promise<void>;
 }
 import type { Order as _Order, OrderItem as _OrderItem, Product as _Product, ProductInput as _ProductInput, ProductStatus as _ProductStatus, ShippingDetails as _ShippingDetails, Specification as _Specification, StripeSessionStatus as _StripeSessionStatus, UserProfile as _UserProfile, UserRole as _UserRole, UserSummary as _UserSummary, _CaffeineStorageRefillInformation as __CaffeineStorageRefillInformation, _CaffeineStorageRefillResult as __CaffeineStorageRefillResult } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
@@ -768,6 +780,20 @@ export class Backend implements backendInterface {
             return from_candid_opt_n25(this._uploadFile, this._downloadFile, result);
         }
     }
+    async getWhatsappButtonSettings(): Promise<WhatsAppButtonSettings> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getWhatsappButtonSettings();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getWhatsappButtonSettings();
+            return result;
+        }
+    }
     async getWhatsappNumber(): Promise<string> {
         if (this.processError) {
             try {
@@ -975,6 +1001,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.updateStock(arg0, arg1);
+            return result;
+        }
+    }
+    async updateWhatsappButtonSettings(arg0: WhatsAppButtonSettings): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateWhatsappButtonSettings(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateWhatsappButtonSettings(arg0);
             return result;
         }
     }

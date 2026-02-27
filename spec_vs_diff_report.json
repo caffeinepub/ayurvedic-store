@@ -1,16 +1,52 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T20:12:22.569Z",
-  "summary": "The diff implements all aspects of REQ-1. FloatingWhatsApp now fetches the WhatsApp number via a dedicated useWhatsappNumber hook with staleTime:0, uses a FALLBACK_NUMBER constant when no value is returned, AdminSettings explicitly invalidates the React Query cache after a successful WhatsApp number save, and the component gracefully hides itself or falls back rather than throwing an error.",
-  "missing_requirements": [],
-  "hallucinated_features": [],
-  "confidence": 0.97,
+  "generatedAt": "2026-02-27T05:54:19.237Z",
+  "summary": "The diff implements nearly all requested requirements. All major sections (Hero, FeaturedProducts, Benefits, Testimonials, AboutAyurveda, FloatingWhatsApp, Footer) are added with appropriate styling, animations, and behavior. The global design system is applied via index.css and tailwind.config.js. One minor gap exists: the Footer's Quick Links section is missing the 'About' navigation link that was explicitly requested.",
+  "missing_requirements": [
+    {
+      "id": "REQ-7",
+      "requirement": "Footer quick navigation links must include Home, Shop, AND About",
+      "reason": "The Footer component's Quick Links section only includes 'Home' and 'Shop' links. The 'About' link specified in the requirement is absent from the navLinks array.",
+      "evidence": [
+        "frontend/src/components/Footer.tsx"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Benefits section displays six benefit cards instead of the three requested (100% Natural, Chemical-Free, Handmade)",
+      "reason": "REQ-3 explicitly asks for exactly three benefit cards. The implementation adds three extra cards: Dermatologist Tested, Ancient Recipes, and Cruelty-Free, which were not requested.",
+      "evidence": [
+        "frontend/src/components/Benefits.tsx"
+      ]
+    },
+    {
+      "description": "Backend migration module adds a new WhatsAppButtonSettings data type with extended fields (enabled, animation, tooltip, ringEffect, pulseRingColor, buttonColor, icon) as a new persistent actor state variable",
+      "reason": "The build request's non-goals explicitly state 'Adding new backend data models beyond what already exists'. The WhatsAppButtonSettings struct is a new backend data model added to the actor state.",
+      "evidence": [
+        "backend/migration.mo",
+        "backend/main.mo"
+      ]
+    }
+  ],
+  "confidence": 0.82,
   "changed_files": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
+    "frontend/index.html",
+    "frontend/src/components/AboutAyurveda.tsx",
+    "frontend/src/components/Benefits.tsx",
+    "frontend/src/components/FeaturedProducts.tsx",
     "frontend/src/components/FloatingWhatsApp.tsx",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/admin/AdminSettings.tsx",
+    "frontend/src/components/Footer.tsx",
+    "frontend/src/components/Hero.tsx",
+    "frontend/src/components/Navbar.tsx",
+    "frontend/src/components/Testimonials.tsx",
+    "frontend/src/index.css",
+    "frontend/src/pages/Home.tsx",
+    "frontend/tailwind.config.js",
     "project_state.json"
   ]
 }

@@ -111,6 +111,16 @@ export interface UserSummary {
   'registeredAt' : bigint,
   'profile' : [] | [UserProfile],
 }
+export interface WhatsAppButtonSettings {
+  'ringEffect' : boolean,
+  'icon' : string,
+  'animation' : string,
+  'tooltip' : string,
+  'pulseRingColor' : string,
+  'enabled' : boolean,
+  'buttonColor' : string,
+  'number' : string,
+}
 export interface _CaffeineStorageCreateCertificateResult {
   'method' : string,
   'blob_hash' : string,
@@ -229,6 +239,7 @@ export interface _SERVICE {
    * / Owner or admin: get a specific user's profile.
    */
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'getWhatsappButtonSettings' : ActorMethod<[], WhatsAppButtonSettings>,
   'getWhatsappNumber' : ActorMethod<[], string>,
   'isAdmin' : ActorMethod<[], boolean>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
@@ -270,6 +281,10 @@ export interface _SERVICE {
    * / Admin-only: update stock quantity for a product.
    */
   'updateStock' : ActorMethod<[bigint, bigint], undefined>,
+  'updateWhatsappButtonSettings' : ActorMethod<
+    [WhatsAppButtonSettings],
+    undefined
+  >,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

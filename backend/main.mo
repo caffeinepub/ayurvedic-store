@@ -7,16 +7,16 @@ import Nat "mo:core/Nat";
 import Principal "mo:core/Principal";
 import Iter "mo:core/Iter";
 
-
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
 import MixinStorage "blob-storage/Mixin";
 import Storage "blob-storage/Storage";
 import Stripe "stripe/stripe";
 import OutCall "http-outcalls/outcall";
+import Migration "migration";
 
 // Ensure seamless upgrade
-
+(with migration = Migration.run)
 actor {
   include MixinStorage();
 
@@ -115,6 +115,18 @@ actor {
     whatsappNumber : Text;
   };
 
+  // WhatsApp Button Settings
+  public type WhatsAppButtonSettings = {
+    number : Text;
+    enabled : Bool;
+    animation : Text;
+    tooltip : Text;
+    ringEffect : Bool;
+    pulseRingColor : Text;
+    buttonColor : Text;
+    icon : Text;
+  };
+
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
@@ -135,6 +147,16 @@ actor {
   };
 
   var stripeConfig : ?Stripe.StripeConfiguration = null;
+  var whatsappButtonSettings : WhatsAppButtonSettings = {
+    number = "";
+    enabled = true;
+    animation = "slide-in";
+    tooltip = "";
+    ringEffect = true;
+    pulseRingColor = "#25D366";
+    buttonColor = "#25D366";
+    icon = "whatsapp";
+  };
 
   // ── Helper: check if a principal is anonymous ────────────────────────────────
 
@@ -544,6 +566,10 @@ actor {
       siteSettings with whatsappNumber = number;
     };
     siteSettings := newSettings;
+    // Update WhatsApp button settings with the new number.
+    whatsappButtonSettings := {
+      whatsappButtonSettings with number = number;
+    };
   };
 
   // ---- Stripe integration methods --------------------------------------------
@@ -581,5 +607,16 @@ actor {
   public query func transform(input : OutCall.TransformationInput) : async OutCall.TransformationOutput {
     OutCall.transform(input);
   };
-};
 
+  // WhatsApp Button Settings Queries and Updates
+  public query func getWhatsappButtonSettings() : async WhatsAppButtonSettings {
+    whatsappButtonSettings;
+  };
+
+  public shared ({ caller }) func updateWhatsappButtonSettings(settings : WhatsAppButtonSettings) : async () {
+    if (not isAdminOrAuthorized(caller)) {
+      Runtime.trap("Not authorized: Only admin can update WhatsApp button settings");
+    };
+    whatsappButtonSettings := settings;
+  };
+};

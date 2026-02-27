@@ -1,42 +1,208 @@
 {
   "kind": "build_request",
-  "title": "Fix WhatsApp button not reflecting updated phone number from admin panel",
+  "title": "Rebuild Premium Ayurvedic Skincare Website",
   "projectName": "Nature Glow",
-  "priority": "high",
+  "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "The FloatingWhatsApp component must dynamically fetch the WhatsApp phone number from the backend canister (via the site settings query) instead of using a hardcoded or stale cached value. After the admin saves a new WhatsApp number in AdminSettings, the FloatingWhatsApp button must use the updated number immediately — ensure the React Query cache for site settings is invalidated or refetched after a successful save in AdminSettings so the customer-facing button always reflects the current backend value.",
+      "text": "Implement a full-page Hero section with a premium Ayurvedic brand headline, subheadline, and a primary CTA button. Use deep forest green (#0B3D2E) as primary, warm beige (#F5E6D3) as background, and soft gold (#C9A96E) accents. Include a high-quality background image of herbs/botanicals. Apply fade-in and slide-up entrance animations.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-recent-5",
-          "msg-recent-7"
+          "msg-8"
         ],
         "quotes": [
-          "the WhatsApp button still dials the old number",
-          "the frontend button isn't reading the updated value from the backend after saving"
+          "Hero section with premium Ayurvedic branding"
         ]
       },
       "acceptanceCriteria": [
-        "FloatingWhatsApp component reads the phone number from the site settings query result, not a hardcoded string.",
-        "When an admin updates and saves a new WhatsApp number in AdminSettings, the React Query cache for site settings is invalidated.",
-        "After saving a new number in the admin panel, the FloatingWhatsApp button opens a WhatsApp chat with the newly saved number without requiring a page reload.",
-        "If no number is returned from the backend, the button falls back to a sensible default rather than throwing an error."
+        "Hero section renders with brand headline using Playfair Display or Cinzel serif font",
+        "Background features a botanical/herb imagery",
+        "CTA button uses soft gold accent color",
+        "Fade-in and slide-up animations play on page load"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Build a Featured Products section displaying product cards with glassmorphism-style soft card UI. Each card shows product image, name, price, and an Add to Cart button. Cards should have smooth hover animations (scale + shadow lift). Use the existing React Query product fetch hook to populate products.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-8"
+        ],
+        "quotes": [
+          "Featured products with elegant cards",
+          "Use glassmorphism or soft card UI for product sections"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Product cards use glassmorphism styling with soft shadows and rounded corners",
+        "Hover state triggers scale and shadow animation",
+        "Products are fetched from backend via existing React Query hook",
+        "Add to Cart button is visible and functional on each card"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Add a Benefits section highlighting three core values: '100% Natural', 'Chemical-Free', and 'Handmade'. Each benefit should be displayed as an icon card with a short description. Use light sage green (#A8B5A2) as the section background. Apply slide-up animation on scroll entry.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-8"
+        ],
+        "quotes": [
+          "Benefits section (100% natural, chemical-free, handmade)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Three benefit cards are displayed: 100% Natural, Chemical-Free, Handmade",
+        "Section background uses light sage green (#A8B5A2)",
+        "Each card contains an icon and short descriptive text",
+        "Slide-up animation triggers on scroll"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Create a Testimonials section with at least three customer quotes displayed in clean, minimal cards. Include customer name, a star rating, and the quote text. Use warm beige (#F5E6D3) background and earthy brown (#6B4F3A) text for depth.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-8"
+        ],
+        "quotes": [
+          "Testimonials with clean layout"
+        ]
+      },
+      "acceptanceCriteria": [
+        "At least three testimonials are displayed",
+        "Each testimonial card shows customer name, star rating, and quote",
+        "Section uses warm beige background and earthy brown typography",
+        "Layout is clean and well-spaced"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Build an 'About Ayurveda' storytelling section with a rich narrative about Ayurvedic heritage, a botanical texture image, and a golden accent divider line. Use elegant serif headings and body text in clean sans-serif (Lato or Poppins). Layout should be two-column on desktop, single-column on mobile.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-8"
+        ],
+        "quotes": [
+          "About Ayurveda section with storytelling",
+          "Add golden accent lines or dividers"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Section contains storytelling copy about Ayurvedic heritage",
+        "A golden (#C9A96E) accent divider line is present",
+        "Two-column layout on desktop, stacked on mobile",
+        "Serif font used for headings, sans-serif for body"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Ensure the floating WhatsApp contact button is visible on all customer-facing pages. It must fetch the WhatsApp number from the backend (with fallback), open a pre-filled WhatsApp chat on click, and include an entrance animation, tooltip, and pulse ring effect. Fix any stale cache issue so the button always reflects the latest number saved via admin settings.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-8"
+        ],
+        "quotes": [
+          "WhatsApp contact button (floating)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Floating WhatsApp button appears on all customer pages",
+        "Button fetches the current number from backend; fallback number is used if fetch fails",
+        "Clicking opens a WhatsApp chat with a pre-filled message",
+        "Entrance animation, tooltip, and pulse ring are rendered",
+        "After admin saves a new WhatsApp number, the button reflects it without a page reload (React Query cache invalidated)"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Design a premium Footer section with the brand name/logo, quick navigation links (Home, Shop, About), contact details, social media placeholders, a golden accent divider, and a copyright line. Keep it minimal, dark (deep forest green background), and elegant.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-8"
+        ],
+        "quotes": [
+          "Footer with minimal premium design"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Footer uses deep forest green (#0B3D2E) background with light/beige text",
+        "Brand name, nav links, contact info, and copyright are present",
+        "Golden accent divider separates footer from main content",
+        "Layout is responsive and looks premium on mobile"
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "Apply the full Ayurvedic design system globally: deep forest green (#0B3D2E) primary, warm beige (#F5E6D3) background, soft gold (#C9A96E) accents, earthy brown (#6B4F3A) depth, light sage green (#A8B5A2) subtle sections. Use Playfair Display or Cinzel for all headings and Lato or Poppins for body text. Ensure consistent use of whitespace, soft shadows, smooth rounded corners, and subtle nature-inspired background patterns throughout the site.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-8"
+        ],
+        "quotes": [
+          "Use a rich and elegant Ayurvedic-inspired palette",
+          "Headings: Use an elegant serif font",
+          "Body text: Use a clean sans-serif font",
+          "Minimal, clean layout with lots of whitespace"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All five brand colors are applied consistently across sections",
+        "Playfair Display or Cinzel is used for all headings site-wide",
+        "Lato or Poppins is used for all body text",
+        "Soft shadows, rounded corners, and whitespace are consistent throughout",
+        "No overly bright or off-brand colors appear on any page"
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Ensure full mobile responsiveness across all sections: hero, products, benefits, testimonials, about, and footer. Buttons must be large and tappable. Typography must scale appropriately. The premium look must be maintained at all mobile breakpoints.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-8"
+        ],
+        "quotes": [
+          "Ensure smooth responsive design",
+          "Keep buttons large and clean",
+          "Maintain premium look on mobile"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All sections reflow correctly on screens 375px and wider",
+        "Buttons have a minimum touch target of 44px height",
+        "Font sizes scale down gracefully on small screens",
+        "No horizontal overflow or layout breakage on mobile"
       ]
     }
   ],
   "constraints": [
-    "Do not modify files listed in frontend.immutablePaths.",
-    "Do not change the backend schema or data model — the WhatsApp number is already stored in site settings."
+    "Do not modify files in frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
+    "All backend logic must remain in the single Motoko actor at backend/main.mo",
+    "Preserve all existing admin panel functionality (products, orders, users, settings)"
   ],
   "nonGoals": [
-    "Redesigning the WhatsApp button UI or animations.",
-    "Adding new admin settings fields.",
-    "Changing how the admin save action works beyond cache invalidation."
+    "Adding new backend data models beyond what already exists",
+    "Implementing a new payment gateway",
+    "Building new admin panel pages or features",
+    "Adding real-time features or WebSocket communication"
   ],
   "imageRequirements": {
-    "required": [],
+    "required": [
+      "Lush botanical flat lay with Ayurvedic herbs, turmeric powder, neem leaves, sandalwood, and rose petals on warm beige linen — hero background (hero-botanical.dim_1920x1080.png)",
+      "Close-up of green neem leaves and herbal powders with natural wooden texture — about section image (about-ayurveda.dim_800x600.png)",
+      "Collection of three golden amber glass skincare bottles with botanical sprigs on beige background — featured products banner (products-banner.dim_1200x600.png)",
+      "Soft overhead shot of Ayurvedic ingredients: saffron, rose water, ashwagandha, and clay powder on earthy cloth — benefits section texture background (benefits-texture.dim_1200x400.png)"
+    ],
     "edits": []
   }
 }

@@ -120,6 +120,16 @@ export const StripeSessionStatus = IDL.Variant({
   }),
   'failed' : IDL.Record({ 'error' : IDL.Text }),
 });
+export const WhatsAppButtonSettings = IDL.Record({
+  'ringEffect' : IDL.Bool,
+  'icon' : IDL.Text,
+  'animation' : IDL.Text,
+  'tooltip' : IDL.Text,
+  'pulseRingColor' : IDL.Text,
+  'enabled' : IDL.Bool,
+  'buttonColor' : IDL.Text,
+  'number' : IDL.Text,
+});
 export const StripeConfiguration = IDL.Record({
   'allowedCountries' : IDL.Vec(IDL.Text),
   'secretKey' : IDL.Text,
@@ -205,6 +215,11 @@ export const idlService = IDL.Service({
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
+  'getWhatsappButtonSettings' : IDL.Func(
+      [],
+      [WhatsAppButtonSettings],
+      ['query'],
+    ),
   'getWhatsappNumber' : IDL.Func([], [IDL.Text], ['query']),
   'isAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
@@ -224,6 +239,7 @@ export const idlService = IDL.Service({
   'updateFulfillmentStatus' : IDL.Func([IDL.Nat, IDL.Text], [], []),
   'updateProduct' : IDL.Func([IDL.Nat, ProductInput], [Product], []),
   'updateStock' : IDL.Func([IDL.Nat, IDL.Nat], [], []),
+  'updateWhatsappButtonSettings' : IDL.Func([WhatsAppButtonSettings], [], []),
 });
 
 export const idlInitArgs = [];
@@ -335,6 +351,16 @@ export const idlFactory = ({ IDL }) => {
     }),
     'failed' : IDL.Record({ 'error' : IDL.Text }),
   });
+  const WhatsAppButtonSettings = IDL.Record({
+    'ringEffect' : IDL.Bool,
+    'icon' : IDL.Text,
+    'animation' : IDL.Text,
+    'tooltip' : IDL.Text,
+    'pulseRingColor' : IDL.Text,
+    'enabled' : IDL.Bool,
+    'buttonColor' : IDL.Text,
+    'number' : IDL.Text,
+  });
   const StripeConfiguration = IDL.Record({
     'allowedCountries' : IDL.Vec(IDL.Text),
     'secretKey' : IDL.Text,
@@ -421,6 +447,11 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
+    'getWhatsappButtonSettings' : IDL.Func(
+        [],
+        [WhatsAppButtonSettings],
+        ['query'],
+      ),
     'getWhatsappNumber' : IDL.Func([], [IDL.Text], ['query']),
     'isAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
@@ -440,6 +471,7 @@ export const idlFactory = ({ IDL }) => {
     'updateFulfillmentStatus' : IDL.Func([IDL.Nat, IDL.Text], [], []),
     'updateProduct' : IDL.Func([IDL.Nat, ProductInput], [Product], []),
     'updateStock' : IDL.Func([IDL.Nat, IDL.Nat], [], []),
+    'updateWhatsappButtonSettings' : IDL.Func([WhatsAppButtonSettings], [], []),
   });
 };
 

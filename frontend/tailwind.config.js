@@ -43,13 +43,13 @@ export default {
         ring: 'var(--ring)',
 
         // ── Ayurvedic brand palette ──
-        forest:    'oklch(0.35 0.09 145)',   // deep forest green
-        sage:      'oklch(0.58 0.07 145)',   // medium sage green
-        golden:    'oklch(0.72 0.12 75)',    // warm gold
-        terracotta:'oklch(0.58 0.14 40)',    // warm terracotta
-        bark:      'oklch(0.38 0.05 60)',    // warm brown
-        cream:     'oklch(0.97 0.012 90)',   // off-white cream
-        parchment: 'oklch(0.94 0.02 90)',    // slightly deeper cream
+        forest:     'oklch(0.28 0.08 148)',   // deep forest green #0B3D2E
+        sage:       'oklch(0.62 0.07 148)',   // light sage green #A8B5A2
+        golden:     'oklch(0.70 0.13 72)',    // soft gold #C9A96E
+        bark:       'oklch(0.40 0.06 55)',    // earthy brown #6B4F3A
+        cream:      'oklch(0.97 0.012 85)',   // warm beige/cream #F5E6D3
+        parchment:  'oklch(0.93 0.025 85)',   // slightly deeper cream
+        terracotta: 'oklch(0.56 0.14 38)',    // warm terracotta accent
 
         // Admin-specific tokens
         admin: {
@@ -64,8 +64,8 @@ export default {
         },
       },
       fontFamily: {
-        sans:  ['Inter', 'system-ui', 'sans-serif'],
-        serif: ['Cormorant Garamond', 'Georgia', 'serif'],
+        sans:  ['Lato', 'system-ui', 'sans-serif'],
+        serif: ['Playfair Display', 'Georgia', 'serif'],
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -73,10 +73,11 @@ export default {
         sm: 'calc(var(--radius) - 4px)',
       },
       boxShadow: {
-        'botanical':    '0 2px 16px oklch(0.35 0.09 145 / 0.10), 0 1px 4px oklch(0.35 0.09 145 / 0.06)',
-        'botanical-lg': '0 8px 32px oklch(0.35 0.09 145 / 0.15), 0 2px 8px oklch(0.35 0.09 145 / 0.08)',
+        'botanical':    '0 2px 16px oklch(0.28 0.08 148 / 0.10), 0 1px 4px oklch(0.28 0.08 148 / 0.06)',
+        'botanical-lg': '0 8px 32px oklch(0.28 0.08 148 / 0.15), 0 2px 8px oklch(0.28 0.08 148 / 0.08)',
         'herb':         '0 2px 12px oklch(0.42 0.09 145 / 0.12)',
         'herb-lg':      '0 8px 32px oklch(0.42 0.09 145 / 0.15)',
+        'golden':       '0 4px 24px oklch(0.70 0.13 72 / 0.25), 0 1px 6px oklch(0.70 0.13 72 / 0.12)',
       },
       keyframes: {
         'accordion-down': {
@@ -87,10 +88,25 @@ export default {
           from: { height: 'var(--radix-accordion-content-height)' },
           to: { height: '0' },
         },
+        'fade-in-up': {
+          from: { opacity: '0', transform: 'translateY(32px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        'fade-in': {
+          from: { opacity: '0' },
+          to: { opacity: '1' },
+        },
+        'pulse-ring': {
+          '0%': { transform: 'scale(1)', opacity: '0.4' },
+          '100%': { transform: 'scale(1.6)', opacity: '0' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'fade-in-up': 'fade-in-up 0.7s ease-out forwards',
+        'fade-in': 'fade-in 0.8s ease-out forwards',
+        'pulse-ring': 'pulse-ring 1.8s ease-out infinite',
       },
     },
   },
