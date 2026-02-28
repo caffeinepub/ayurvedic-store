@@ -43,11 +43,11 @@ export default {
         ring: 'var(--ring)',
 
         // ── Ayurvedic brand palette ──
-        forest:     'oklch(0.28 0.08 148)',   // deep forest green #0B3D2E
-        sage:       'oklch(0.62 0.07 148)',   // light sage green #A8B5A2
-        golden:     'oklch(0.70 0.13 72)',    // soft gold #C9A96E
-        bark:       'oklch(0.40 0.06 55)',    // earthy brown #6B4F3A
-        cream:      'oklch(0.97 0.012 85)',   // warm beige/cream #F5E6D3
+        forest:     'oklch(0.28 0.08 148)',   // deep forest green
+        sage:       'oklch(0.62 0.07 148)',   // light sage green
+        golden:     'oklch(0.70 0.13 72)',    // soft gold
+        bark:       'oklch(0.40 0.06 55)',    // earthy brown
+        cream:      'oklch(0.97 0.012 85)',   // warm beige/cream
         parchment:  'oklch(0.93 0.025 85)',   // slightly deeper cream
         terracotta: 'oklch(0.56 0.14 38)',    // warm terracotta accent
 
@@ -100,6 +100,15 @@ export default {
           '0%': { transform: 'scale(1)', opacity: '0.4' },
           '100%': { transform: 'scale(1.6)', opacity: '0' },
         },
+        // Ken Burns: slow cinematic pan from left + gentle zoom
+        'kenBurnsEffect': {
+          '0%': {
+            transform: 'translateX(-5%) scale(1.0)',
+          },
+          '100%': {
+            transform: 'translateX(0%) scale(1.12)',
+          },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -107,6 +116,7 @@ export default {
         'fade-in-up': 'fade-in-up 0.7s ease-out forwards',
         'fade-in': 'fade-in 0.8s ease-out forwards',
         'pulse-ring': 'pulse-ring 1.8s ease-out infinite',
+        'kenburns': 'kenBurnsEffect 20s ease-in-out infinite alternate',
       },
     },
   },

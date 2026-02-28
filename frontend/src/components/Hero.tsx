@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { ArrowRight, Leaf, Sparkles } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
 
 export default function Hero() {
   const [mounted, setMounted] = useState(false);
@@ -12,69 +12,101 @@ export default function Hero() {
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
-      {/* Background image */}
+      {/* Ken Burns animated background image — uploaded herbs & spices photo */}
       <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('/assets/generated/hero-botanical.dim_1920x1080.png')" }}
-      />
-      {/* Layered overlays for depth */}
-      <div className="absolute inset-0 bg-gradient-to-r from-forest/85 via-forest/60 to-forest/20" />
-      <div className="absolute inset-0 bg-gradient-to-t from-forest/50 via-transparent to-transparent" />
-
-      {/* Decorative botanical pattern overlay */}
-      <div
-        className="absolute inset-0 opacity-5"
+        className="absolute inset-0 animate-kenburns"
         style={{
-          backgroundImage: `radial-gradient(circle at 20% 50%, oklch(0.70 0.13 72) 0%, transparent 50%),
-                            radial-gradient(circle at 80% 20%, oklch(0.62 0.07 148) 0%, transparent 40%)`,
+          backgroundImage: "url('/assets/3312bc175a87a2f9f067b6b442cc28e4.jpg')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          willChange: 'transform',
         }}
       />
+
+      {/* Dark gradient overlay for text readability */}
+      <div className="absolute inset-0 bg-gradient-to-r from-forest/85 via-forest/60 to-forest/30" />
+      <div className="absolute inset-0 bg-gradient-to-t from-forest/65 via-transparent to-forest/35" />
 
       {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
         <div className="max-w-2xl">
+
+          {/* Site name — "Nature Glow" — prominent brand overlay */}
+          <div
+            className={`mb-4 transition-all duration-700 ${
+              mounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
+            }`}
+          >
+            <h1
+              className="font-serif font-bold leading-none tracking-wide"
+              style={{
+                fontSize: 'clamp(3.5rem, 8vw, 7rem)',
+                color: 'oklch(0.70 0.13 72)',
+                textShadow:
+                  '0 2px 24px oklch(0.28 0.08 148 / 0.7), 0 1px 4px oklch(0.10 0.04 148 / 0.9)',
+                letterSpacing: '0.04em',
+              }}
+            >
+              Nature Glow
+            </h1>
+            {/* Decorative golden underline beneath the brand name */}
+            <div
+              className={`mt-2 h-[3px] rounded-full transition-all duration-700 delay-150 ${
+                mounted ? 'opacity-100 w-48' : 'opacity-0 w-0'
+              }`}
+              style={{
+                background:
+                  'linear-gradient(90deg, oklch(0.70 0.13 72), oklch(0.70 0.13 72 / 0))',
+                transition: 'width 0.8s ease 0.15s, opacity 0.7s ease 0.15s',
+              }}
+            />
+          </div>
+
           {/* Badge */}
           <div
-            className={`inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full border border-golden/40 bg-golden/10 backdrop-blur-sm transition-all duration-700 ${
+            className={`inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full border border-golden/40 bg-golden/10 backdrop-blur-sm transition-all duration-700 delay-200 ${
               mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
           >
-            <Leaf className="w-4 h-4 text-golden" />
             <span className="text-golden text-xs font-sans font-semibold uppercase tracking-[0.2em]">
-              Pure Ayurvedic Skincare
+              🌿 Pure Ayurvedic Skincare
             </span>
           </div>
 
-          {/* Main headline */}
-          <h1
-            className={`font-serif text-5xl sm:text-6xl lg:text-7xl font-bold text-cream leading-[1.1] mb-4 transition-all duration-700 delay-100 ${
-              mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-            }`}
-          >
-            Nature Glow
-          </h1>
-
           {/* Sub-headline */}
           <h2
-            className={`font-serif text-2xl sm:text-3xl lg:text-4xl font-medium text-cream/90 leading-snug mb-6 transition-all duration-700 delay-200 ${
+            className={`font-serif text-2xl sm:text-3xl font-medium text-cream leading-snug mb-4 transition-all duration-700 delay-300 ${
               mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
             }`}
           >
-            Radiance Rooted in{' '}
-            <span className="text-gradient-gold italic">Ancient Wisdom</span>
+            Ancient Wisdom for Modern Living
           </h2>
 
           {/* Golden divider */}
           <div
-            className={`w-24 h-0.5 bg-golden mb-6 transition-all duration-700 delay-300 ${
+            className={`w-32 h-px mb-5 transition-all duration-700 delay-350 ${
               mounted ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'
             }`}
-            style={{ transformOrigin: 'left' }}
+            style={{
+              background: 'oklch(0.97 0.012 85)',
+              transformOrigin: 'left',
+            }}
           />
+
+          {/* Tagline */}
+          <p
+            className={`font-serif text-xl sm:text-2xl font-medium mb-6 transition-all duration-700 delay-400 ${
+              mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+            }`}
+            style={{ color: 'oklch(0.97 0.012 85)' }}
+          >
+            Unlock Your Natural Radiance
+          </p>
 
           {/* Description */}
           <p
-            className={`font-sans text-cream/80 text-lg leading-relaxed mb-10 max-w-lg transition-all duration-700 delay-300 ${
+            className={`font-sans text-cream/80 text-lg leading-relaxed mb-10 max-w-lg transition-all duration-700 delay-450 ${
               mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
           >
@@ -84,7 +116,7 @@ export default function Hero() {
 
           {/* CTAs */}
           <div
-            className={`flex flex-wrap gap-4 transition-all duration-700 delay-400 ${
+            className={`flex flex-wrap gap-4 transition-all duration-700 delay-500 ${
               mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
           >
@@ -104,7 +136,7 @@ export default function Hero() {
 
           {/* Trust indicators */}
           <div
-            className={`flex flex-wrap gap-6 mt-12 transition-all duration-700 delay-500 ${
+            className={`flex flex-wrap gap-8 mt-12 transition-all duration-700 delay-600 ${
               mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
           >
@@ -124,7 +156,7 @@ export default function Hero() {
 
       {/* Scroll indicator */}
       <div
-        className={`absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 transition-all duration-700 delay-600 ${
+        className={`absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 transition-all duration-700 delay-700 ${
           mounted ? 'opacity-100' : 'opacity-0'
         }`}
       >

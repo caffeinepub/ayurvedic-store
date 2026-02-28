@@ -1,208 +1,84 @@
 {
   "kind": "build_request",
-  "title": "Rebuild Premium Ayurvedic Skincare Website",
+  "title": "Replace hero image with uploaded herbs & spices photo and Ken Burns animation with Nature Glow name overlay",
   "projectName": "Nature Glow",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Implement a full-page Hero section with a premium Ayurvedic brand headline, subheadline, and a primary CTA button. Use deep forest green (#0B3D2E) as primary, warm beige (#F5E6D3) as background, and soft gold (#C9A96E) accents. Include a high-quality background image of herbs/botanicals. Apply fade-in and slide-up entrance animations.",
+      "text": "Save the uploaded herbs and spices image (mortar & pestle with turmeric, ginger, rosemary, garlic, cinnamon on a wooden table) as the hero background image at frontend/public/assets/generated/hero-herbs-spices.dim_1920x1080.jpg and use it as the Ken Burns animated background in the Hero component, replacing any previously used hero image.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-8"
+          "msg-latest"
         ],
         "quotes": [
-          "Hero section with premium Ayurvedic branding"
+          "Use this image into image and use this image",
+          "Same website ayurvedic store",
+          "ken burn effect of this image same project"
         ]
       },
       "acceptanceCriteria": [
-        "Hero section renders with brand headline using Playfair Display or Cinzel serif font",
-        "Background features a botanical/herb imagery",
-        "CTA button uses soft gold accent color",
-        "Fade-in and slide-up animations play on page load"
+        "The uploaded herbs and spices photo is rendered as the full-screen hero background in Hero.tsx",
+        "The previous hero background image is replaced by this new image",
+        "The image is stored at frontend/public/assets/generated/hero-herbs-spices.dim_1920x1080.jpg"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Build a Featured Products section displaying product cards with glassmorphism-style soft card UI. Each card shows product image, name, price, and an Add to Cart button. Cards should have smooth hover animations (scale + shadow lift). Use the existing React Query product fetch hook to populate products.",
+      "text": "Apply a Ken Burns CSS animation (smooth continuous slow pan and zoom) to the hero background image in the Hero component, so the herbs and spices image gently moves across the viewport in a cinematic loop.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-8"
+          "msg-latest"
         ],
         "quotes": [
-          "Featured products with elegant cards",
-          "Use glassmorphism or soft card UI for product sections"
+          "Like a ken burn effect of this image",
+          "make sure nature glow which name of the website is visible on hero moving image"
         ]
       },
       "acceptanceCriteria": [
-        "Product cards use glassmorphism styling with soft shadows and rounded corners",
-        "Hover state triggers scale and shadow animation",
-        "Products are fetched from backend via existing React Query hook",
-        "Add to Cart button is visible and functional on each card"
+        "The hero background image continuously pans and zooms in a slow, smooth loop (Ken Burns effect)",
+        "The animation loops seamlessly without jarring cuts",
+        "The Ken Burns keyframe animation in tailwind.config.js is used or updated to power this effect"
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Add a Benefits section highlighting three core values: '100% Natural', 'Chemical-Free', and 'Handmade'. Each benefit should be displayed as an icon card with a short description. Use light sage green (#A8B5A2) as the section background. Apply slide-up animation on scroll entry.",
+      "text": "Display the 'Nature Glow' website name prominently as an overlay text on the hero section, positioned so it is clearly visible over the Ken Burns animated herbs and spices background. Style it with a large, elegant serif font (Playfair Display), white or cream color with a subtle text shadow, so it remains legible as the image moves beneath it.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-8"
+          "msg-latest"
         ],
         "quotes": [
-          "Benefits section (100% natural, chemical-free, handmade)"
+          "make sure nature glow which name of the website is visible on hero moving image",
+          "Nature Glow is the name of the website"
         ]
       },
       "acceptanceCriteria": [
-        "Three benefit cards are displayed: 100% Natural, Chemical-Free, Handmade",
-        "Section background uses light sage green (#A8B5A2)",
-        "Each card contains an icon and short descriptive text",
-        "Slide-up animation triggers on scroll"
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Create a Testimonials section with at least three customer quotes displayed in clean, minimal cards. Include customer name, a star rating, and the quote text. Use warm beige (#F5E6D3) background and earthy brown (#6B4F3A) text for depth.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-8"
-        ],
-        "quotes": [
-          "Testimonials with clean layout"
-        ]
-      },
-      "acceptanceCriteria": [
-        "At least three testimonials are displayed",
-        "Each testimonial card shows customer name, star rating, and quote",
-        "Section uses warm beige background and earthy brown typography",
-        "Layout is clean and well-spaced"
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "Build an 'About Ayurveda' storytelling section with a rich narrative about Ayurvedic heritage, a botanical texture image, and a golden accent divider line. Use elegant serif headings and body text in clean sans-serif (Lato or Poppins). Layout should be two-column on desktop, single-column on mobile.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-8"
-        ],
-        "quotes": [
-          "About Ayurveda section with storytelling",
-          "Add golden accent lines or dividers"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Section contains storytelling copy about Ayurvedic heritage",
-        "A golden (#C9A96E) accent divider line is present",
-        "Two-column layout on desktop, stacked on mobile",
-        "Serif font used for headings, sans-serif for body"
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "text": "Ensure the floating WhatsApp contact button is visible on all customer-facing pages. It must fetch the WhatsApp number from the backend (with fallback), open a pre-filled WhatsApp chat on click, and include an entrance animation, tooltip, and pulse ring effect. Fix any stale cache issue so the button always reflects the latest number saved via admin settings.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-8"
-        ],
-        "quotes": [
-          "WhatsApp contact button (floating)"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Floating WhatsApp button appears on all customer pages",
-        "Button fetches the current number from backend; fallback number is used if fetch fails",
-        "Clicking opens a WhatsApp chat with a pre-filled message",
-        "Entrance animation, tooltip, and pulse ring are rendered",
-        "After admin saves a new WhatsApp number, the button reflects it without a page reload (React Query cache invalidated)"
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "text": "Design a premium Footer section with the brand name/logo, quick navigation links (Home, Shop, About), contact details, social media placeholders, a golden accent divider, and a copyright line. Keep it minimal, dark (deep forest green background), and elegant.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-8"
-        ],
-        "quotes": [
-          "Footer with minimal premium design"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Footer uses deep forest green (#0B3D2E) background with light/beige text",
-        "Brand name, nav links, contact info, and copyright are present",
-        "Golden accent divider separates footer from main content",
-        "Layout is responsive and looks premium on mobile"
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "text": "Apply the full Ayurvedic design system globally: deep forest green (#0B3D2E) primary, warm beige (#F5E6D3) background, soft gold (#C9A96E) accents, earthy brown (#6B4F3A) depth, light sage green (#A8B5A2) subtle sections. Use Playfair Display or Cinzel for all headings and Lato or Poppins for body text. Ensure consistent use of whitespace, soft shadows, smooth rounded corners, and subtle nature-inspired background patterns throughout the site.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-8"
-        ],
-        "quotes": [
-          "Use a rich and elegant Ayurvedic-inspired palette",
-          "Headings: Use an elegant serif font",
-          "Body text: Use a clean sans-serif font",
-          "Minimal, clean layout with lots of whitespace"
-        ]
-      },
-      "acceptanceCriteria": [
-        "All five brand colors are applied consistently across sections",
-        "Playfair Display or Cinzel is used for all headings site-wide",
-        "Lato or Poppins is used for all body text",
-        "Soft shadows, rounded corners, and whitespace are consistent throughout",
-        "No overly bright or off-brand colors appear on any page"
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "text": "Ensure full mobile responsiveness across all sections: hero, products, benefits, testimonials, about, and footer. Buttons must be large and tappable. Typography must scale appropriately. The premium look must be maintained at all mobile breakpoints.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-8"
-        ],
-        "quotes": [
-          "Ensure smooth responsive design",
-          "Keep buttons large and clean",
-          "Maintain premium look on mobile"
-        ]
-      },
-      "acceptanceCriteria": [
-        "All sections reflow correctly on screens 375px and wider",
-        "Buttons have a minimum touch target of 44px height",
-        "Font sizes scale down gracefully on small screens",
-        "No horizontal overflow or layout breakage on mobile"
+        "The text 'Nature Glow' is visible and prominent on the hero section over the animated background",
+        "The text does not scroll with the background image — it remains fixed in position within the hero overlay",
+        "The text uses Playfair Display font and is styled to match the natural/Ayurvedic aesthetic",
+        "The text remains legible regardless of which part of the image is currently panned into view"
       ]
     }
   ],
   "constraints": [
     "Do not modify files in frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
-    "All backend logic must remain in the single Motoko actor at backend/main.mo",
-    "Preserve all existing admin panel functionality (products, orders, users, settings)"
+    "Keep all other existing sections of the site (Navbar, FeaturedProducts, Benefits, Testimonials, AboutAyurveda, Footer) unchanged",
+    "Only the Hero component and its associated image asset should change"
   ],
   "nonGoals": [
-    "Adding new backend data models beyond what already exists",
-    "Implementing a new payment gateway",
-    "Building new admin panel pages or features",
-    "Adding real-time features or WebSocket communication"
+    "Converting the image to an actual animated GIF file",
+    "Adding new pages or product catalog changes",
+    "Modifying backend logic or data models",
+    "Changing any admin panel functionality"
   ],
   "imageRequirements": {
-    "required": [
-      "Lush botanical flat lay with Ayurvedic herbs, turmeric powder, neem leaves, sandalwood, and rose petals on warm beige linen — hero background (hero-botanical.dim_1920x1080.png)",
-      "Close-up of green neem leaves and herbal powders with natural wooden texture — about section image (about-ayurveda.dim_800x600.png)",
-      "Collection of three golden amber glass skincare bottles with botanical sprigs on beige background — featured products banner (products-banner.dim_1200x600.png)",
-      "Soft overhead shot of Ayurvedic ingredients: saffron, rose water, ashwagandha, and clay powder on earthy cloth — benefits section texture background (benefits-texture.dim_1200x400.png)"
-    ],
-    "edits": []
+    "required": [],
+    "edits": [
+      "Crop and optimize the uploaded herbs and spices flat-lay photo showing a mortar and pestle with turmeric, ginger, rosemary, garlic, cinnamon, and lemon on a wooden table, suitable for a full-screen hero background (hero-herbs-spices.dim_1920x1080.jpg)"
+    ]
   }
 }

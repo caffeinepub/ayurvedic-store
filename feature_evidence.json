@@ -2,11 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-implement-a-full-page-hero-section-with-a-premium-ayurvedic-brand-headline-subheadline-and-a-primary-cta-button-use-deep-forest-green-0b3d2e-as-primary-warm-beige-f5e6d3-as-background-and-soft-gold-c9a96e-accents-include-a-high-quality-background-image-of-herbs-botanicals-apply-fade-in-and-slide-up-entrance-animations",
-      "featureTitle": "Implement a full-page Hero section with a premium Ayurvedic brand headline, subheadline, and a primary CTA button. Use deep forest green (#0B3D2E) as primary, warm beige (#F5E6D3) as background, and soft gold (#C9A96E) accents. Include a high-quality background image of herbs/botanicals. Apply fade-in and slide-up entrance animations.",
+      "featureId": "feature-save-the-uploaded-herbs-and-spices-image-mortar-pestle-with-turmeric-ginger-rosemary-garlic-cinnamon-on-a-wooden-table-as-the-hero-background-image-at-frontend-public-assets-generated-hero-herbs-spices-dim-1920x1080-jpg-and-use-it-as-the-ken-burns-animated-background-in-the-hero-component-replacing-any-previously-used-hero-image",
+      "featureTitle": "Save the uploaded herbs and spices image (mortar & pestle with turmeric, ginger, rosemary, garlic, cinnamon on a wooden table) as the hero background image at frontend/public/assets/generated/hero-herbs-spices.dim_1920x1080.jpg and use it as the Ken Burns animated background in the Hero component, replacing any previously used hero image.",
       "files": [
-        "frontend/src/components/Hero.tsx",
-        "frontend/src/pages/Home.tsx"
+        "frontend/src/components/Hero.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -25,11 +24,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-build-a-featured-products-section-displaying-product-cards-with-glassmorphism-style-soft-card-ui-each-card-shows-product-image-name-price-and-an-add-to-cart-button-cards-should-have-smooth-hover-animations-scale-shadow-lift-use-the-existing-react-query-product-fetch-hook-to-populate-products",
-      "featureTitle": "Build a Featured Products section displaying product cards with glassmorphism-style soft card UI. Each card shows product image, name, price, and an Add to Cart button. Cards should have smooth hover animations (scale + shadow lift). Use the existing React Query product fetch hook to populate products.",
+      "featureId": "feature-apply-a-ken-burns-css-animation-smooth-continuous-slow-pan-and-zoom-to-the-hero-background-image-in-the-hero-component-so-the-herbs-and-spices-image-gently-moves-across-the-viewport-in-a-cinematic-loop",
+      "featureTitle": "Apply a Ken Burns CSS animation (smooth continuous slow pan and zoom) to the hero background image in the Hero component, so the herbs and spices image gently moves across the viewport in a cinematic loop.",
       "files": [
-        "frontend/src/components/FeaturedProducts.tsx",
-        "frontend/src/pages/Home.tsx"
+        "frontend/src/components/Hero.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -48,11 +46,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-a-benefits-section-highlighting-three-core-values-100-natural-chemical-free-and-handmade-each-benefit-should-be-displayed-as-an-icon-card-with-a-short-description-use-light-sage-green-a8b5a2-as-the-section-background-apply-slide-up-animation-on-scroll-entry",
-      "featureTitle": "Add a Benefits section highlighting three core values: '100% Natural', 'Chemical-Free', and 'Handmade'. Each benefit should be displayed as an icon card with a short description. Use light sage green (#A8B5A2) as the section background. Apply slide-up animation on scroll entry.",
+      "featureId": "feature-display-the-nature-glow-website-name-prominently-as-an-overlay-text-on-the-hero-section-positioned-so-it-is-clearly-visible-over-the-ken-burns-animated-herbs-and-spices-background-style-it-with-a-large-elegant-serif-font-playfair-display-white-or-cream-color-with-a-subtle-text-shadow-so-it-remains-legible-as-the-image-moves-beneath-it",
+      "featureTitle": "Display the 'Nature Glow' website name prominently as an overlay text on the hero section, positioned so it is clearly visible over the Ken Burns animated herbs and spices background. Style it with a large, elegant serif font (Playfair Display), white or cream color with a subtle text shadow, so it remains legible as the image moves beneath it.",
       "files": [
-        "frontend/src/components/Benefits.tsx",
-        "frontend/src/pages/Home.tsx"
+        "frontend/src/components/Hero.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -67,147 +64,6 @@
       ],
       "testIds": [
         "REQ-3"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-create-a-testimonials-section-with-at-least-three-customer-quotes-displayed-in-clean-minimal-cards-include-customer-name-a-star-rating-and-the-quote-text-use-warm-beige-f5e6d3-background-and-earthy-brown-6b4f3a-text-for-depth",
-      "featureTitle": "Create a Testimonials section with at least three customer quotes displayed in clean, minimal cards. Include customer name, a star rating, and the quote text. Use warm beige (#F5E6D3) background and earthy brown (#6B4F3A) text for depth.",
-      "files": [
-        "frontend/src/components/Testimonials.tsx",
-        "frontend/src/pages/Home.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-4"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-build-an-about-ayurveda-storytelling-section-with-a-rich-narrative-about-ayurvedic-heritage-a-botanical-texture-image-and-a-golden-accent-divider-line-use-elegant-serif-headings-and-body-text-in-clean-sans-serif-lato-or-poppins-layout-should-be-two-column-on-desktop-single-column-on-mobile",
-      "featureTitle": "Build an 'About Ayurveda' storytelling section with a rich narrative about Ayurvedic heritage, a botanical texture image, and a golden accent divider line. Use elegant serif headings and body text in clean sans-serif (Lato or Poppins). Layout should be two-column on desktop, single-column on mobile.",
-      "files": [
-        "frontend/src/components/AboutAyurveda.tsx",
-        "frontend/src/pages/Home.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-5"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-ensure-the-floating-whatsapp-contact-button-is-visible-on-all-customer-facing-pages-it-must-fetch-the-whatsapp-number-from-the-backend-with-fallback-open-a-pre-filled-whatsapp-chat-on-click-and-include-an-entrance-animation-tooltip-and-pulse-ring-effect-fix-any-stale-cache-issue-so-the-button-always-reflects-the-latest-number-saved-via-admin-settings",
-      "featureTitle": "Ensure the floating WhatsApp contact button is visible on all customer-facing pages. It must fetch the WhatsApp number from the backend (with fallback), open a pre-filled WhatsApp chat on click, and include an entrance animation, tooltip, and pulse ring effect. Fix any stale cache issue so the button always reflects the latest number saved via admin settings.",
-      "files": [
-        "frontend/src/components/FloatingWhatsApp.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-6"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-design-a-premium-footer-section-with-the-brand-name-logo-quick-navigation-links-home-shop-about-contact-details-social-media-placeholders-a-golden-accent-divider-and-a-copyright-line-keep-it-minimal-dark-deep-forest-green-background-and-elegant",
-      "featureTitle": "Design a premium Footer section with the brand name/logo, quick navigation links (Home, Shop, About), contact details, social media placeholders, a golden accent divider, and a copyright line. Keep it minimal, dark (deep forest green background), and elegant.",
-      "files": [
-        "frontend/src/components/Footer.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-7"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-apply-the-full-ayurvedic-design-system-globally-deep-forest-green-0b3d2e-primary-warm-beige-f5e6d3-background-soft-gold-c9a96e-accents-earthy-brown-6b4f3a-depth-light-sage-green-a8b5a2-subtle-sections-use-playfair-display-or-cinzel-for-all-headings-and-lato-or-poppins-for-body-text-ensure-consistent-use-of-whitespace-soft-shadows-smooth-rounded-corners-and-subtle-nature-inspired-background-patterns-throughout-the-site",
-      "featureTitle": "Apply the full Ayurvedic design system globally: deep forest green (#0B3D2E) primary, warm beige (#F5E6D3) background, soft gold (#C9A96E) accents, earthy brown (#6B4F3A) depth, light sage green (#A8B5A2) subtle sections. Use Playfair Display or Cinzel for all headings and Lato or Poppins for body text. Ensure consistent use of whitespace, soft shadows, smooth rounded corners, and subtle nature-inspired background patterns throughout the site.",
-      "files": [
-        "frontend/src/index.css",
-        "frontend/tailwind.config.js"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-8"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-ensure-full-mobile-responsiveness-across-all-sections-hero-products-benefits-testimonials-about-and-footer-buttons-must-be-large-and-tappable-typography-must-scale-appropriately-the-premium-look-must-be-maintained-at-all-mobile-breakpoints",
-      "featureTitle": "Ensure full mobile responsiveness across all sections: hero, products, benefits, testimonials, about, and footer. Buttons must be large and tappable. Typography must scale appropriately. The premium look must be maintained at all mobile breakpoints.",
-      "files": [
-        "frontend/src/components/AboutAyurveda.tsx",
-        "frontend/src/components/Benefits.tsx",
-        "frontend/src/components/FeaturedProducts.tsx",
-        "frontend/src/components/Footer.tsx",
-        "frontend/src/components/Hero.tsx",
-        "frontend/src/components/Navbar.tsx",
-        "frontend/src/components/Testimonials.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-9"
       ],
       "confidence": "high"
     }

@@ -1,52 +1,38 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-27T05:54:19.237Z",
-  "summary": "The diff implements nearly all requested requirements. All major sections (Hero, FeaturedProducts, Benefits, Testimonials, AboutAyurveda, FloatingWhatsApp, Footer) are added with appropriate styling, animations, and behavior. The global design system is applied via index.css and tailwind.config.js. One minor gap exists: the Footer's Quick Links section is missing the 'About' navigation link that was explicitly requested.",
+  "generatedAt": "2026-02-28T15:56:34.488Z",
+  "summary": "The diff implements REQ-2 (Ken Burns animation via animate-kenburns class) and REQ-3 (Nature Glow overlay text with Playfair Display serif font and text shadow). However, REQ-1 is only partially implemented: the Hero.tsx references a hashed image path ('/assets/3312bc175a87a2f9f067b6b442cc28e4.jpg') instead of the required path '/assets/generated/hero-herbs-spices.dim_1920x1080.jpg', and no new image file is added at the specified location.",
   "missing_requirements": [
     {
-      "id": "REQ-7",
-      "requirement": "Footer quick navigation links must include Home, Shop, AND About",
-      "reason": "The Footer component's Quick Links section only includes 'Home' and 'Shop' links. The 'About' link specified in the requirement is absent from the navLinks array.",
+      "id": "REQ-1",
+      "requirement": "Save the uploaded herbs and spices image as the hero background image at frontend/public/assets/generated/hero-herbs-spices.dim_1920x1080.jpg and reference it by that path in the Hero component.",
+      "reason": "Hero.tsx references '/assets/3312bc175a87a2f9f067b6b442cc28e4.jpg' (a hashed path) instead of '/assets/generated/hero-herbs-spices.dim_1920x1080.jpg' as required. Additionally, no image file is listed as added in the diff — the required file at frontend/public/assets/generated/hero-herbs-spices.dim_1920x1080.jpg is absent.",
       "evidence": [
-        "frontend/src/components/Footer.tsx"
+        "frontend/src/components/Hero.tsx"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Benefits section displays six benefit cards instead of the three requested (100% Natural, Chemical-Free, Handmade)",
-      "reason": "REQ-3 explicitly asks for exactly three benefit cards. The implementation adds three extra cards: Dermatologist Tested, Ancient Recipes, and Cruelty-Free, which were not requested.",
+      "description": "A decorative animated golden underline beneath the 'Nature Glow' brand name that expands from width 0 to w-48 on mount.",
+      "reason": "The build request only asked for the 'Nature Glow' text with Playfair Display font, white/cream color, and subtle text shadow. The animated underline decoration was not requested.",
       "evidence": [
-        "frontend/src/components/Benefits.tsx"
+        "frontend/src/components/Hero.tsx"
       ]
     },
     {
-      "description": "Backend migration module adds a new WhatsAppButtonSettings data type with extended fields (enabled, animation, tooltip, ringEffect, pulseRingColor, buttonColor, icon) as a new persistent actor state variable",
-      "reason": "The build request's non-goals explicitly state 'Adding new backend data models beyond what already exists'. The WhatsAppButtonSettings struct is a new backend data model added to the actor state.",
+      "description": "A mount-based fade/slide-in entrance animation applied to the 'Nature Glow' heading and other hero content elements using a useState/useEffect delayed mount pattern.",
+      "reason": "The build request did not request any entrance animation or fade-in effect for the overlay text or other hero content elements.",
       "evidence": [
-        "backend/migration.mo",
-        "backend/main.mo"
+        "frontend/src/components/Hero.tsx"
       ]
     }
   ],
   "confidence": 0.82,
   "changed_files": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/index.html",
-    "frontend/src/components/AboutAyurveda.tsx",
-    "frontend/src/components/Benefits.tsx",
-    "frontend/src/components/FeaturedProducts.tsx",
-    "frontend/src/components/FloatingWhatsApp.tsx",
-    "frontend/src/components/Footer.tsx",
     "frontend/src/components/Hero.tsx",
-    "frontend/src/components/Navbar.tsx",
-    "frontend/src/components/Testimonials.tsx",
-    "frontend/src/index.css",
-    "frontend/src/pages/Home.tsx",
-    "frontend/tailwind.config.js",
     "project_state.json"
   ]
 }
