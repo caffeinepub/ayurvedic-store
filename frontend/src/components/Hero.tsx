@@ -12,11 +12,11 @@ export default function Hero() {
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
-      {/* Ken Burns animated background image — uploaded herbs & spices photo */}
+      {/* Ken Burns animated background image — spices & herbs flatlay */}
       <div
         className="absolute inset-0 animate-kenburns"
         style={{
-          backgroundImage: "url('/assets/3312bc175a87a2f9f067b6b442cc28e4.jpg')",
+          backgroundImage: "url('/assets/generated/hero-spices.dim_1920x1080.jpg')",
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -24,9 +24,17 @@ export default function Hero() {
         }}
       />
 
-      {/* Dark gradient overlay for text readability */}
-      <div className="absolute inset-0 bg-gradient-to-r from-forest/85 via-forest/60 to-forest/30" />
-      <div className="absolute inset-0 bg-gradient-to-t from-forest/65 via-transparent to-forest/35" />
+      {/* Warm dark gradient overlay for text readability */}
+      <div className="absolute inset-0 bg-gradient-to-r from-forest/80 via-forest/55 to-forest/25" />
+      <div className="absolute inset-0 bg-gradient-to-t from-forest/60 via-transparent to-forest/30" />
+      {/* Extra warm amber tint to complement the herbs & spices palette */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(135deg, rgba(101,67,33,0.30) 0%, rgba(0,0,0,0.10) 60%, transparent 100%)',
+        }}
+      />
 
       {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">

@@ -1,64 +1,22 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Replace hero image with uploaded herbs & spices photo and Ken Burns animation with Nature Glow name overlay",
+  "title": "Replace hero image with uploaded spices/herbs flat-lay photo",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Save the uploaded herbs and spices image as the hero background and replace the previous hero image in the Hero component",
+      "summary": "Replace the current hero background image with the newly generated spices/herbs flat-lay photo while preserving all existing text overlays, gradient overlays, Ken Burns animation, and CTA buttons",
       "acceptanceCriteria": [
-        "The uploaded herbs and spices photo is rendered as the full-screen hero background in Hero.tsx",
-        "The previous hero background image is replaced by this new image",
-        "The image is stored at frontend/public/assets/generated/hero-herbs-spices.dim_1920x1080.jpg"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/public/assets/generated/hero-herbs-spices.dim_1920x1080.jpg",
-          "operation": "create",
-          "description": "Save the uploaded herbs and spices flat-lay photo (mortar & pestle with turmeric, ginger, rosemary, garlic, cinnamon on a wooden table) as the hero background image at this exact path with the dimensions 1920x1080."
-        },
-        {
-          "path": "frontend/src/components/Hero.tsx",
-          "operation": "modify",
-          "description": "Update the background image reference in the Hero component to use the new hero-herbs-spices.dim_1920x1080.jpg image file from frontend/public/assets/generated/. Replace any existing hero background image path with this new asset path. Ensure the image is applied as the background for the Ken Burns animated container."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Apply a Ken Burns CSS animation (smooth continuous slow pan and zoom) to the hero background image",
-      "acceptanceCriteria": [
-        "The hero background image continuously pans and zooms in a slow, smooth loop (Ken Burns effect)",
-        "The animation loops seamlessly without jarring cuts",
-        "The Ken Burns keyframe animation in tailwind.config.js is used or updated to power this effect"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/tailwind.config.js",
-          "operation": "modify",
-          "description": "Verify that the kenBurns keyframe animation is defined in the theme.extend.keyframes section. If not present, add a kenBurns animation with smooth pan and zoom keyframes (e.g., from scale(1) translate(0,0) to scale(1.1) translate(-5%, -5%) and back). Ensure the animation duration is long (e.g., 30s or more) for a slow cinematic effect and set to loop infinitely."
-        },
-        {
-          "path": "frontend/src/components/Hero.tsx",
-          "operation": "modify",
-          "description": "Apply the kenBurns animation class (e.g., animate-kenBurns) to the background container div that holds the hero-herbs-spices image. Ensure the animation runs continuously and smoothly, creating a slow pan and zoom effect across the herbs and spices photo. Verify the animation is applied to the background layer, not the overlay content."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Display the 'Nature Glow' website name prominently as an overlay text on the hero section, clearly visible over the Ken Burns animated background",
-      "acceptanceCriteria": [
-        "The text 'Nature Glow' is visible and prominent on the hero section over the animated background",
-        "The text does not scroll with the background image — it remains fixed in position within the hero overlay",
-        "The text uses Playfair Display font and is styled to match the natural/Ayurvedic aesthetic",
-        "The text remains legible regardless of which part of the image is currently panned into view"
+        "The hero section displays the spices and herbs flat-lay photo (mortar and pestle, turmeric, ginger, garlic, rosemary, lemon) as its background image",
+        "All existing hero text, gradient overlays, Ken Burns zoom animation, and CTA buttons remain intact and functional",
+        "No other sections or components are altered",
+        "The image renders correctly on both desktop and mobile viewports"
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/Hero.tsx",
           "operation": "modify",
-          "description": "Add or update the 'Nature Glow' text overlay in the Hero component. Position the text prominently (e.g., centered or top-center) over the animated background. Style it with the Playfair Display font (font-playfair), large size (text-6xl or larger), white or cream color (text-white or text-cream-100), and a subtle text shadow for legibility (e.g., shadow-lg or drop-shadow-lg). Ensure the text is in a fixed position relative to the hero container, not affected by the Ken Burns animation of the background. The text should remain readable as the herbs and spices image pans and zooms beneath it."
+          "description": "Update the background image source to reference the newly generated static asset at frontend/public/assets/generated/hero-spices.dim_1920x1080.jpg. Replace the existing backgroundImage URL in the component's styling/props while keeping all other hero functionality (text overlays, gradient overlays, Ken Burns animation, CTA buttons) completely unchanged. Ensure the image path is correct and the file is treated as a static asset accessible via /assets/generated/hero-spices.dim_1920x1080.jpg at runtime."
         }
       ]
     }

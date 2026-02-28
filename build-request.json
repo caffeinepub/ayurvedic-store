@@ -1,84 +1,44 @@
 {
   "kind": "build_request",
-  "title": "Replace hero image with uploaded herbs & spices photo and Ken Burns animation with Nature Glow name overlay",
+  "title": "Replace hero image with uploaded spices/herbs flat-lay photo",
   "projectName": "Nature Glow",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Save the uploaded herbs and spices image (mortar & pestle with turmeric, ginger, rosemary, garlic, cinnamon on a wooden table) as the hero background image at frontend/public/assets/generated/hero-herbs-spices.dim_1920x1080.jpg and use it as the Ken Burns animated background in the Hero component, replacing any previously used hero image.",
+      "text": "Replace the current hero background image in the Hero component with the newly generated static asset (frontend/public/assets/generated/hero-spices.dim_1920x1080.jpg). The image should be used as the full-screen background of the hero section, preserving all existing text overlays, gradient overlays, Ken Burns animation, and CTA buttons without any other changes.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-1",
+          "msg-2"
         ],
         "quotes": [
-          "Use this image into image and use this image",
-          "Same website ayurvedic store",
-          "ken burn effect of this image same project"
+          "Use this image as hero image simple. Replace the image",
+          "I'll replace the current hero image with your uploaded spices/herbs photo"
         ]
       },
       "acceptanceCriteria": [
-        "The uploaded herbs and spices photo is rendered as the full-screen hero background in Hero.tsx",
-        "The previous hero background image is replaced by this new image",
-        "The image is stored at frontend/public/assets/generated/hero-herbs-spices.dim_1920x1080.jpg"
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Apply a Ken Burns CSS animation (smooth continuous slow pan and zoom) to the hero background image in the Hero component, so the herbs and spices image gently moves across the viewport in a cinematic loop.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-latest"
-        ],
-        "quotes": [
-          "Like a ken burn effect of this image",
-          "make sure nature glow which name of the website is visible on hero moving image"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The hero background image continuously pans and zooms in a slow, smooth loop (Ken Burns effect)",
-        "The animation loops seamlessly without jarring cuts",
-        "The Ken Burns keyframe animation in tailwind.config.js is used or updated to power this effect"
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Display the 'Nature Glow' website name prominently as an overlay text on the hero section, positioned so it is clearly visible over the Ken Burns animated herbs and spices background. Style it with a large, elegant serif font (Playfair Display), white or cream color with a subtle text shadow, so it remains legible as the image moves beneath it.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-latest"
-        ],
-        "quotes": [
-          "make sure nature glow which name of the website is visible on hero moving image",
-          "Nature Glow is the name of the website"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The text 'Nature Glow' is visible and prominent on the hero section over the animated background",
-        "The text does not scroll with the background image — it remains fixed in position within the hero overlay",
-        "The text uses Playfair Display font and is styled to match the natural/Ayurvedic aesthetic",
-        "The text remains legible regardless of which part of the image is currently panned into view"
+        "The hero section displays the spices and herbs flat-lay photo (mortar and pestle, turmeric, ginger, garlic, rosemary, lemon) as its background image",
+        "All existing hero text, gradient overlays, Ken Burns zoom animation, and CTA buttons remain intact and functional",
+        "No other sections or components are altered",
+        "The image renders correctly on both desktop and mobile viewports"
       ]
     }
   ],
   "constraints": [
-    "Do not modify files in frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
-    "Keep all other existing sections of the site (Navbar, FeaturedProducts, Benefits, Testimonials, AboutAyurveda, Footer) unchanged",
-    "Only the Hero component and its associated image asset should change"
+    "Do not modify any hero text, overlays, animations, or CTA buttons — only swap the background image source",
+    "Do not change any backend code or other frontend components"
   ],
   "nonGoals": [
-    "Converting the image to an actual animated GIF file",
-    "Adding new pages or product catalog changes",
-    "Modifying backend logic or data models",
-    "Changing any admin panel functionality"
+    "Changing hero layout, typography, or color scheme",
+    "Modifying any page other than the Hero component",
+    "Adding new features or sections"
   ],
   "imageRequirements": {
-    "required": [],
-    "edits": [
-      "Crop and optimize the uploaded herbs and spices flat-lay photo showing a mortar and pestle with turmeric, ginger, rosemary, garlic, cinnamon, and lemon on a wooden table, suitable for a full-screen hero background (hero-herbs-spices.dim_1920x1080.jpg)"
-    ]
+    "required": [
+      "Flat-lay photograph of Ayurvedic spices and herbs on a rustic wooden surface: stone mortar and pestle filled with turmeric powder, fresh ginger root and slices, whole garlic bulbs and cloves, rosemary sprigs, cinnamon sticks, lemon halves, scattered turmeric and red spice powders, fresh basil leaves, a small bowl of golden turmeric, and a bottle of golden oil in the background (hero-spices.dim_1920x1080.jpg)"
+    ],
+    "edits": []
   }
 }

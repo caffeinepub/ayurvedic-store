@@ -1,42 +1,18 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-28T15:56:34.491Z",
+  "generatedAt": "2026-02-28T16:52:48.787Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 1,
+    "implemented": 1,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Save the uploaded herbs and spices image (mortar & pestle with turmeric, ginger, rosemary, garlic, cinnamon on a wooden table) as the hero background image at frontend/public/assets/generated/hero-herbs-spices.dim_1920x1080.jpg and use it as the Ken Burns animated background in the Hero component, replacing any previously used hero image.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/public/assets/generated/hero-herbs-spices.dim_1920x1080.jpg",
-          "frontend/src/components/Hero.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/Hero.tsx"
-        ]
-      },
-      {
-        "id": "REQ-2",
-        "summary": "Apply a Ken Burns CSS animation (smooth continuous slow pan and zoom) to the hero background image in the Hero component, so the herbs and spices image gently moves across the viewport in a cinematic loop.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/tailwind.config.js",
-          "frontend/src/components/Hero.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/Hero.tsx"
-        ]
-      },
-      {
-        "id": "REQ-3",
-        "summary": "Display the 'Nature Glow' website name prominently as an overlay text on the hero section, positioned so it is clearly visible over the Ken Burns animated herbs and spices background. Style it with a large, elegant serif font (Playfair Display), white or cream color with a subtle text shadow, so it remains legible as the image moves beneath it.",
+        "summary": "Replace the current hero background image in the Hero component with the newly generated static asset (frontend/public/assets/generated/hero-spices.dim_1920x1080.jpg). The image should be used as the full-screen background of the hero section, preserving all existing text overlays, gradient overlays, Ken Burns animation, and CTA buttons without any other changes.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/components/Hero.tsx"
@@ -52,6 +28,7 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/public/assets/generated/hero-spices.dim_1920x1080.jpg",
     "frontend/src/components/Hero.tsx",
     "project_state.json",
     "scratch/component-selection.json",

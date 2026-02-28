@@ -2,8 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-save-the-uploaded-herbs-and-spices-image-mortar-pestle-with-turmeric-ginger-rosemary-garlic-cinnamon-on-a-wooden-table-as-the-hero-background-image-at-frontend-public-assets-generated-hero-herbs-spices-dim-1920x1080-jpg-and-use-it-as-the-ken-burns-animated-background-in-the-hero-component-replacing-any-previously-used-hero-image",
-      "featureTitle": "Save the uploaded herbs and spices image (mortar & pestle with turmeric, ginger, rosemary, garlic, cinnamon on a wooden table) as the hero background image at frontend/public/assets/generated/hero-herbs-spices.dim_1920x1080.jpg and use it as the Ken Burns animated background in the Hero component, replacing any previously used hero image.",
+      "featureId": "feature-replace-the-current-hero-background-image-in-the-hero-component-with-the-newly-generated-static-asset-frontend-public-assets-generated-hero-spices-dim-1920x1080-jpg-the-image-should-be-used-as-the-full-screen-background-of-the-hero-section-preserving-all-existing-text-overlays-gradient-overlays-ken-burns-animation-and-cta-buttons-without-any-other-changes",
+      "featureTitle": "Replace the current hero background image in the Hero component with the newly generated static asset (frontend/public/assets/generated/hero-spices.dim_1920x1080.jpg). The image should be used as the full-screen background of the hero section, preserving all existing text overlays, gradient overlays, Ken Burns animation, and CTA buttons without any other changes.",
       "files": [
         "frontend/src/components/Hero.tsx"
       ],
@@ -20,50 +20,6 @@
       ],
       "testIds": [
         "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-apply-a-ken-burns-css-animation-smooth-continuous-slow-pan-and-zoom-to-the-hero-background-image-in-the-hero-component-so-the-herbs-and-spices-image-gently-moves-across-the-viewport-in-a-cinematic-loop",
-      "featureTitle": "Apply a Ken Burns CSS animation (smooth continuous slow pan and zoom) to the hero background image in the Hero component, so the herbs and spices image gently moves across the viewport in a cinematic loop.",
-      "files": [
-        "frontend/src/components/Hero.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-display-the-nature-glow-website-name-prominently-as-an-overlay-text-on-the-hero-section-positioned-so-it-is-clearly-visible-over-the-ken-burns-animated-herbs-and-spices-background-style-it-with-a-large-elegant-serif-font-playfair-display-white-or-cream-color-with-a-subtle-text-shadow-so-it-remains-legible-as-the-image-moves-beneath-it",
-      "featureTitle": "Display the 'Nature Glow' website name prominently as an overlay text on the hero section, positioned so it is clearly visible over the Ken Burns animated herbs and spices background. Style it with a large, elegant serif font (Playfair Display), white or cream color with a subtle text shadow, so it remains legible as the image moves beneath it.",
-      "files": [
-        "frontend/src/components/Hero.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-3"
       ],
       "confidence": "high"
     }

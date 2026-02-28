@@ -1,12 +1,10 @@
 # Specification
 
 ## Summary
-**Goal:** Replace the hero background image with an uploaded herbs & spices photo and apply a Ken Burns animation with a prominent "Nature Glow" name overlay.
+**Goal:** Replace the hero section's background image with a spices and herbs flat-lay photo.
 
 **Planned changes:**
-- Save the uploaded herbs and spices flat-lay photo (mortar & pestle with turmeric, ginger, rosemary, garlic, cinnamon, lemon on a wooden table) as the new hero background image asset
-- Update the Hero component to use this new image as the full-screen background, replacing any previously used hero image
-- Apply a smooth, continuous Ken Burns CSS animation (slow pan and zoom loop) to the hero background image
-- Display "Nature Glow" as a prominent overlay text on the hero section using Playfair Display font in white/cream with a subtle text shadow, fixed in position over the animated background
+- Swap the current hero background image source with the new spices/herbs flat-lay asset (`hero-spices.dim_1920x1080.jpg`)
+- Preserve all existing hero text overlays, gradient overlays, Ken Burns zoom animation, and CTA buttons unchanged
 
-**User-visible outcome:** The hero section now shows the herbs and spices photo with a cinematic Ken Burns pan-and-zoom animation, and the "Nature Glow" website name is clearly visible as an elegant overlay on top of the moving image.
+**User-visible outcome:** The hero section displays the new Ayurvedic spices and herbs flat-lay photo (featuring mortar and pestle, turmeric, ginger, garlic, rosemary, lemon, etc.) as its full-screen background on both desktop and mobile.

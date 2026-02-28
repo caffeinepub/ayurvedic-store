@@ -1,49 +1,22 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Nature Glow Ayurvedic store website with a Ken Burns hero animation using a herbs & spices image, prominently displaying the 'Nature Glow' website name over the animated hero image.",
-  "architectural_notes": [
-    "Project name is 'Nature Glow' — an Ayurvedic store website",
-    "Hero section uses a user-uploaded herbs & spices image with Ken Burns (pan/zoom) animation"
-  ],
+  "summary": "New project",
+  "architectural_notes": [],
   "known_issues": [],
   "isFixRequest": false,
-  "imageRequirements": "## Edit Images\n- Crop and optimize the uploaded herbs and spices flat-lay photo showing a mortar and pestle with turmeric, ginger, rosemary, garlic, cinnamon, and lemon on a wooden table, suitable for a full-screen hero background (hero-herbs-spices.dim_1920x1080.jpg)",
+  "imageRequirements": "## Required Images\n- Flat-lay photograph of Ayurvedic spices and herbs on a rustic wooden surface: stone mortar and pestle filled with turmeric powder, fresh ginger root and slices, whole garlic bulbs and cloves, rosemary sprigs, cinnamon sticks, lemon halves, scattered turmeric and red spice powders, fresh basil leaves, a small bowl of golden turmeric, and a bottle of golden oil in the background (hero-spices.dim_1920x1080.jpg)",
   "existing_features": [
     {
-      "id": "feature-save-the-uploaded-herbs-and-spices-image-mortar-pestle-with-turmeric-ginger-rosemary-garlic-cinnamon-on-a-wooden-table-as-the-hero-background-image-at-frontend-public-assets-generated-hero-herbs-spices-dim-1920x1080-jpg-and-use-it-as-the-ken-burns-animated-background-in-the-hero-component-replacing-any-previously-used-hero-image",
-      "title": "Save the uploaded herbs and spices image (mortar & pestle with turmeric, ginger, rosemary, garlic, cinnamon on a wooden table) as the hero background image at frontend/public/assets/generated/hero-herbs-spices.dim_1920x1080.jpg and use it as the Ken Burns animated background in the Hero component, replacing any previously used hero image.",
+      "id": "feature-replace-the-current-hero-background-image-in-the-hero-component-with-the-newly-generated-static-asset-frontend-public-assets-generated-hero-spices-dim-1920x1080-jpg-the-image-should-be-used-as-the-full-screen-background-of-the-hero-section-preserving-all-existing-text-overlays-gradient-overlays-ken-burns-animation-and-cta-buttons-without-any-other-changes",
+      "title": "Replace the current hero background image in the Hero component with the newly generated static asset (frontend/public/assets/generated/hero-spices.dim_1920x1080.jpg). The image should be used as the full-screen background of the hero section, preserving all existing text overlays, gradient overlays, Ken Burns animation, and CTA buttons without any other changes.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
-    },
-    {
-      "id": "feature-apply-a-ken-burns-css-animation-smooth-continuous-slow-pan-and-zoom-to-the-hero-background-image-in-the-hero-component-so-the-herbs-and-spices-image-gently-moves-across-the-viewport-in-a-cinematic-loop",
-      "title": "Apply a Ken Burns CSS animation (smooth continuous slow pan and zoom) to the hero background image in the Hero component, so the herbs and spices image gently moves across the viewport in a cinematic loop.",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-display-the-nature-glow-website-name-prominently-as-an-overlay-text-on-the-hero-section-positioned-so-it-is-clearly-visible-over-the-ken-burns-animated-herbs-and-spices-background-style-it-with-a-large-elegant-serif-font-playfair-display-white-or-cream-color-with-a-subtle-text-shadow-so-it-remains-legible-as-the-image-moves-beneath-it",
-      "title": "Display the 'Nature Glow' website name prominently as an overlay text on the hero section, positioned so it is clearly visible over the Ken Burns animated herbs and spices background. Style it with a large, elegant serif font (Playfair Display), white or cream color with a subtle text shadow, so it remains legible as the image moves beneath it.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "version": 1
     }
   ],
-  "new_feature_requests": [
-    {
-      "id": "AR-1",
-      "summary": "Ken Burns hero animation using uploaded herbs & spices image with 'Nature Glow' name visible overlay",
-      "reqIds": [],
-      "status": "pending"
-    }
-  ],
-  "gameProjectType": "none",
+  "new_feature_requests": [],
   "projectName": "Nature Glow",
   "clarification_mode": "instant",
   "clarification_rounds": 0

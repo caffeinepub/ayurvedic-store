@@ -1,13 +1,13 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-28T15:56:34.488Z",
-  "summary": "The diff implements REQ-2 (Ken Burns animation via animate-kenburns class) and REQ-3 (Nature Glow overlay text with Playfair Display serif font and text shadow). However, REQ-1 is only partially implemented: the Hero.tsx references a hashed image path ('/assets/3312bc175a87a2f9f067b6b442cc28e4.jpg') instead of the required path '/assets/generated/hero-herbs-spices.dim_1920x1080.jpg', and no new image file is added at the specified location.",
+  "generatedAt": "2026-02-28T16:52:48.783Z",
+  "summary": "The diff modifies Hero.tsx to use the new spices/herbs flat-lay image as the hero background via the correct asset path '/assets/generated/hero-spices.dim_1920x1080.jpg', while preserving Ken Burns animation, gradient overlays, text overlays, and CTA buttons. REQ-1 appears to be substantially implemented. However, the actual image file is not present in the diff (no added binary/asset files), and one additional overlay (amber tint gradient) appears to have been added beyond what was in the original component.",
   "missing_requirements": [
     {
       "id": "REQ-1",
-      "requirement": "Save the uploaded herbs and spices image as the hero background image at frontend/public/assets/generated/hero-herbs-spices.dim_1920x1080.jpg and reference it by that path in the Hero component.",
-      "reason": "Hero.tsx references '/assets/3312bc175a87a2f9f067b6b442cc28e4.jpg' (a hashed path) instead of '/assets/generated/hero-herbs-spices.dim_1920x1080.jpg' as required. Additionally, no image file is listed as added in the diff — the required file at frontend/public/assets/generated/hero-herbs-spices.dim_1920x1080.jpg is absent.",
+      "requirement": "The static asset file frontend/public/assets/generated/hero-spices.dim_1920x1080.jpg must be present for the hero background image to render.",
+      "reason": "The diff shows no added files, meaning the image asset itself (hero-spices.dim_1920x1080.jpg) is not included in the changeset. Without the actual image file in frontend/public/assets/generated/, the hero section cannot display the spices and herbs photo.",
       "evidence": [
         "frontend/src/components/Hero.tsx"
       ]
@@ -15,21 +15,14 @@
   ],
   "hallucinated_features": [
     {
-      "description": "A decorative animated golden underline beneath the 'Nature Glow' brand name that expands from width 0 to w-48 on mount.",
-      "reason": "The build request only asked for the 'Nature Glow' text with Playfair Display font, white/cream color, and subtle text shadow. The animated underline decoration was not requested.",
-      "evidence": [
-        "frontend/src/components/Hero.tsx"
-      ]
-    },
-    {
-      "description": "A mount-based fade/slide-in entrance animation applied to the 'Nature Glow' heading and other hero content elements using a useState/useEffect delayed mount pattern.",
-      "reason": "The build request did not request any entrance animation or fade-in effect for the overlay text or other hero content elements.",
+      "description": "An extra warm amber tint overlay was added to the hero section (a diagonal linear-gradient with rgba(101,67,33,0.30) to complement the herbs and spices palette).",
+      "reason": "The build request explicitly states 'Do not modify any hero text, overlays, animations, or CTA buttons — only swap the background image source.' Adding a new gradient overlay goes beyond swapping the background image source.",
       "evidence": [
         "frontend/src/components/Hero.tsx"
       ]
     }
   ],
-  "confidence": 0.82,
+  "confidence": 0.78,
   "changed_files": [
     "frontend-file-summaries.txt",
     "frontend/src/components/Hero.tsx",

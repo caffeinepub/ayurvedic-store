@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useInternetIdentity } from '../../hooks/useInternetIdentity';
 import { useActor } from '../../hooks/useActor';
-import { Leaf, Shield, Loader2, AlertCircle } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { Leaf, Shield, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 type LoginPhase =
@@ -12,30 +13,59 @@ type LoginPhase =
   | 'claiming-admin'
   | 'checking-admin'
   | 'access-denied'
-  | 'redirecting';
+  | 'redirecting'
+  | 'timeout';
+
+const INIT_TIMEOUT_MS = 12000;
 
 export default function AdminLogin() {
   const navigate = useNavigate();
-  const { login, clear, loginStatus, identity, isInitializing } = useInternetIdentity();
+  const queryClient = useQueryClient();
+  const { login, clear, loginStatus, identity } = useInternetIdentity();
   const { actor, isFetching: actorFetching } = useActor();
   const [phase, setPhase] = useState<LoginPhase>('idle');
   const [error, setError] = useState<string | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isAuthenticated = !!identity;
+
+  // Clear timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  // Timeout guard: if stuck in waiting-actor for too long, show error
+  useEffect(() => {
+    if (phase === 'waiting-actor') {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        setPhase('timeout');
+        setError('Connection timed out. The secure connection could not be established. Please retry.');
+      }, INIT_TIMEOUT_MS);
+    } else {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    }
+  }, [phase]);
 
   // Main auth flow effect
   useEffect(() => {
     if (phase === 'idle') return;
-    if (phase === 'logging-in') return; // waiting for loginStatus to change
+    if (phase === 'logging-in') return;
     if (phase === 'access-denied') return;
     if (phase === 'redirecting') return;
+    if (phase === 'timeout') return;
 
     // After login succeeds, wait for actor to be ready
     if (phase === 'waiting-actor') {
-      if (loginStatus === 'logging-in') return; // still logging in
-      if (!identity) return; // not authenticated yet
-      if (actorFetching) return; // actor still initializing
-      if (!actor) return; // actor not ready
+      if (loginStatus === 'logging-in') return;
+      if (!identity) return;
+      if (actorFetching) return;
+      if (!actor) return;
       // Actor is ready, proceed to claim/check admin
       setPhase('claiming-admin');
       return;
@@ -44,14 +74,11 @@ export default function AdminLogin() {
     if (phase === 'claiming-admin') {
       const claimAndCheck = async () => {
         try {
-          const principal = identity!.getPrincipal().toString();
-          // Try to set admin (works if no admin set yet, or if already admin)
           await actor!.setAdmin(identity!.getPrincipal() as any);
-          setPhase('checking-admin');
         } catch {
-          // setAdmin failed — might already be set to someone else
-          setPhase('checking-admin');
+          // setAdmin failed — might already be set to someone else, that's fine
         }
+        setPhase('checking-admin');
       };
       claimAndCheck();
       return;
@@ -68,7 +95,7 @@ export default function AdminLogin() {
             setPhase('access-denied');
             setError('Your account does not have admin privileges. Please sign in with the authorized admin account.');
           }
-        } catch (err) {
+        } catch {
           setPhase('access-denied');
           setError('Failed to verify admin status. Please try again.');
         }
@@ -100,13 +127,23 @@ export default function AdminLogin() {
     setError(null);
   };
 
-  const isLoading =
+  const handleRetry = () => {
+    setError(null);
+    setPhase('idle');
+    // Invalidate actor query to force re-initialization
+    queryClient.invalidateQueries({ queryKey: ['actor'] });
+  };
+
+  // Show loading only during active login flow phases
+  const isActivelyLoading =
     phase === 'logging-in' ||
     phase === 'waiting-actor' ||
     phase === 'claiming-admin' ||
     phase === 'checking-admin' ||
-    phase === 'redirecting' ||
-    isInitializing;
+    phase === 'redirecting';
+
+  const showAccessDenied = phase === 'access-denied';
+  const showTimeout = phase === 'timeout';
 
   const loadingMessage = () => {
     switch (phase) {
@@ -131,8 +168,8 @@ export default function AdminLogin() {
           <p className="text-gray-500 text-sm mt-1">Admin Dashboard</p>
         </div>
 
-        {/* Error state */}
-        {phase === 'access-denied' && error && (
+        {/* Access Denied error */}
+        {showAccessDenied && error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
             <div>
@@ -142,7 +179,18 @@ export default function AdminLogin() {
           </div>
         )}
 
-        {/* General error */}
+        {/* Timeout error */}
+        {showTimeout && (
+          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-amber-700 font-semibold text-sm">Connection Timeout</p>
+              <p className="text-amber-600 text-sm mt-1">{error}</p>
+            </div>
+          </div>
+        )}
+
+        {/* General idle error */}
         {error && phase === 'idle' && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
             <p className="text-red-600 text-sm">{error}</p>
@@ -150,7 +198,7 @@ export default function AdminLogin() {
         )}
 
         {/* Loading state */}
-        {isLoading && (
+        {isActivelyLoading && (
           <div className="mb-6 flex flex-col items-center gap-3 py-4">
             <Loader2 className="w-8 h-8 text-admin-accent animate-spin" />
             <p className="text-gray-600 text-sm text-center">{loadingMessage()}</p>
@@ -158,9 +206,9 @@ export default function AdminLogin() {
         )}
 
         {/* Action buttons */}
-        {!isLoading && (
+        {!isActivelyLoading && (
           <div className="space-y-3">
-            {phase === 'access-denied' ? (
+            {showAccessDenied ? (
               <>
                 <p className="text-center text-gray-500 text-sm">
                   Sign in with the authorized admin account
@@ -172,6 +220,23 @@ export default function AdminLogin() {
                   Sign in with different account
                 </Button>
               </>
+            ) : showTimeout ? (
+              <>
+                <Button
+                  onClick={handleRetry}
+                  className="w-full bg-admin-accent hover:bg-admin-accent/90 text-white rounded-xl py-3 font-semibold flex items-center justify-center gap-2"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Retry Connection
+                </Button>
+                <Button
+                  onClick={handleLogin}
+                  variant="outline"
+                  className="w-full rounded-xl py-3 font-semibold"
+                >
+                  Try Login Anyway
+                </Button>
+              </>
             ) : (
               <>
                 <div className="flex items-center gap-2 text-gray-500 text-sm justify-center mb-4">
@@ -180,7 +245,7 @@ export default function AdminLogin() {
                 </div>
                 <Button
                   onClick={handleLogin}
-                  disabled={isLoading}
+                  disabled={isActivelyLoading}
                   className="w-full bg-admin-accent hover:bg-admin-accent/90 text-white rounded-xl py-3 font-semibold"
                 >
                   Sign in with Internet Identity
