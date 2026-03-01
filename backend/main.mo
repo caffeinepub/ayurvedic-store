@@ -4,8 +4,9 @@ import Runtime "mo:core/Runtime";
 import Text "mo:core/Text";
 import Time "mo:core/Time";
 import Nat "mo:core/Nat";
-import Principal "mo:core/Principal";
 import Iter "mo:core/Iter";
+import Principal "mo:core/Principal";
+import Migration "migration";
 
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
@@ -14,9 +15,8 @@ import Storage "blob-storage/Storage";
 import Stripe "stripe/stripe";
 import OutCall "http-outcalls/outcall";
 
-
-// Ensure seamless upgrade
-
+// Data migration on every upgrade.
+(with migration = Migration.run)
 actor {
   include MixinStorage();
 
@@ -28,9 +28,11 @@ actor {
   };
 
   public type ProductStatus = {
-    #active;
+    #visible;
     #outOfStock;
     #launchingSoon;
+    #featured;
+    #notVisible;
   };
 
   public type ProductInput = {
@@ -75,9 +77,22 @@ actor {
     pincode : Text;
   };
 
+  public type GuestDetails = {
+    fullName : Text;
+    email : Text;
+    phoneNumber : Text;
+    addressLine1 : Text;
+    addressLine2 : Text;
+    city : Text;
+    state : Text;
+    pincode : Text;
+    orderNotes : ?Text;
+  };
+
   public type Order = {
     id : Nat;
     customerId : Principal;
+    guestDetails : ?GuestDetails;
     items : [OrderItem];
     shippingDetails : ShippingDetails;
     totalAmount : Nat;
@@ -88,11 +103,21 @@ actor {
     createdAt : Int;
   };
 
-  public type OrderInput = {
+  public type ExistingOrderInput = {
     items : [OrderItem];
     shippingDetails : ShippingDetails;
     totalAmount : Nat;
     razorpayOrderId : Text;
+    razorpayPaymentId : Text;
+  };
+
+  public type OrderInput = {
+    items : [OrderItem];
+    shippingDetails : ShippingDetails;
+    guestDetails : GuestDetails;
+    totalAmount : Nat;
+    razorpayOrderId : Text;
+    razorpayPaymentId : Text;
   };
 
   public type UserProfile = {
@@ -162,6 +187,12 @@ actor {
 
   func isAnonymous(p : Principal) : Bool {
     p.toText() == "2vxsx-fae";
+  };
+
+  // ── Helper: check if a product is visible to the public ─────────────────────
+
+  func isPubliclyVisible(p : Product) : Bool {
+    p.status != #notVisible;
   };
 
   // ── Admin functions ─────────────────────────────────────────────────────────
@@ -288,14 +319,36 @@ actor {
     product;
   };
 
-  /// Public: browse all products (storefront).
-  public query func getProducts() : async [Product] {
-    products.values().toArray();
+  /// Public: browse products (storefront).
+  /// When statusFilter is empty, defaults to all statuses except #notVisible.
+  /// When statusFilter is provided, only returns products matching those statuses,
+  /// but always excludes #notVisible to prevent leaking hidden products publicly.
+  public query func getProducts(statusFilter : [ProductStatus]) : async [Product] {
+    if (statusFilter.size() == 0) {
+      return products.values().toArray().filter(isPubliclyVisible);
+    };
+
+    // Even when a caller provides explicit statuses, #notVisible is always excluded
+    // from public-facing queries to prevent information leakage.
+    products.values().toArray().filter(
+      func(p) {
+        if (not isPubliclyVisible(p)) { return false };
+        statusFilter.find(
+          func(status) { status == p.status }
+        ) != null;
+      }
+    );
   };
 
   /// Public: get a single product by id (storefront).
+  /// Returns null for #notVisible products to prevent information leakage.
   public query func getProductById(id : Nat) : async ?Product {
-    products.get(id);
+    switch (products.get(id)) {
+      case (?product) {
+        if (isPubliclyVisible(product)) { ?product } else { null };
+      };
+      case (null) { null };
+    };
   };
 
   /// Admin-only: get all products including hidden/draft ones.
@@ -372,35 +425,47 @@ actor {
   };
 
   /// Public: get featured products for the storefront.
+  /// Excludes #notVisible products.
   public query func getFeaturedProducts() : async [Product] {
-    products.values().toArray().filter(func(p) { p.isFeatured });
+    products.values().toArray().filter(
+      func(p) { p.isFeatured and isPubliclyVisible(p) }
+    );
   };
 
   /// Public: check whether a product is in stock.
+  /// Returns false for #notVisible products.
   public query func isProductInStock(productId : Nat) : async Bool {
     switch (products.get(productId)) {
-      case (?product) { product.stockQuantity > 0 };
+      case (?product) { isPubliclyVisible(product) and product.stockQuantity > 0 };
       case (null) { false };
     };
   };
 
   /// Public: filter products by category.
+  /// Excludes #notVisible products.
   public query func getProductsByCategory(category : Text) : async [Product] {
-    products.values().toArray().filter(func(p) { p.category == category });
+    products.values().toArray().filter(
+      func(p) { p.category == category and isPubliclyVisible(p) }
+    );
   };
 
   /// Public: full-text search over product name and description.
+  /// Excludes #notVisible products.
   public query func searchProducts(searchTerm : Text) : async [Product] {
     products.values().toArray().filter(
       func(p) {
-        p.name.toLower().contains(#text (searchTerm.toLower())) or p.description.toLower().contains(#text (searchTerm.toLower()))
+        isPubliclyVisible(p) and (
+          p.name.toLower().contains(#text (searchTerm.toLower())) or
+          p.description.toLower().contains(#text (searchTerm.toLower()))
+        )
       }
     );
   };
 
   /// Public: paginated product listing.
+  /// Excludes #notVisible products.
   public query func getPaginatedProducts(page : Nat, pageSize : Nat) : async [Product] {
-    let allProducts = products.values().toArray();
+    let allProducts = products.values().toArray().filter(isPubliclyVisible);
     let startIndex = page * pageSize;
     if (startIndex >= allProducts.size()) { return [] };
     let endIndex = if ((page + 1) * pageSize > allProducts.size()) {
@@ -417,25 +482,23 @@ actor {
 
   // ── Order functions ─────────────────────────────────────────────────────────
 
-  /// Authenticated users only: place a new order.
+  /// Authenticated users or guests: place a new order.
   public shared ({ caller }) func createOrder(orderInput : OrderInput) : async Order {
-    if (not isAuthenticated(caller)) {
-      Runtime.trap("Not authenticated: Only authenticated users can place orders");
-    };
-
     let orderId = nextOrderId;
     let order : Order = {
       id = orderId;
       customerId = caller;
+      guestDetails = ?orderInput.guestDetails;
       items = orderInput.items;
       shippingDetails = orderInput.shippingDetails;
       totalAmount = orderInput.totalAmount;
       razorpayOrderId = orderInput.razorpayOrderId;
-      razorpayPaymentId = null;
-      paymentStatus = "pending";
+      razorpayPaymentId = ?orderInput.razorpayPaymentId;
+      paymentStatus = "paid";
       fulfillmentStatus = "Pending";
       createdAt = Time.now();
     };
+
     orders.add(orderId, order);
     nextOrderId += 1;
     order;
@@ -454,6 +517,7 @@ actor {
         let updatedOrder = {
           id = order.id;
           customerId = order.customerId;
+          guestDetails = order.guestDetails;
           items = order.items;
           shippingDetails = order.shippingDetails;
           totalAmount = order.totalAmount;
@@ -512,6 +576,7 @@ actor {
         let updatedOrder = {
           id = order.id;
           customerId = order.customerId;
+          guestDetails = order.guestDetails;
           items = order.items;
           shippingDetails = order.shippingDetails;
           totalAmount = order.totalAmount;

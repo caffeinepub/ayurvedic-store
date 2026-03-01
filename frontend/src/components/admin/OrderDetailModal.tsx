@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, MapPin, Phone, Mail, Package } from 'lucide-react';
+import { Loader2, MapPin, Phone, Mail, Package, User, StickyNote, Hash } from 'lucide-react';
 import { useUpdateFulfillmentStatus } from '../../hooks/useQueries';
 import type { Order } from '../../backend';
 import { toast } from 'sonner';
@@ -55,12 +55,32 @@ export default function OrderDetailModal({ order, onClose }: OrderDetailModalPro
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
 
+  // Prefer guestDetails for display, fall back to shippingDetails
+  const gd = order.guestDetails;
+  const sd = order.shippingDetails;
+
+  const displayName = gd?.fullName || sd.fullName || '—';
+  const displayEmail = gd?.email || sd.email || '—';
+  const displayPhone = gd?.phoneNumber || sd.phoneNumber || '—';
+  const displayAddress1 = gd?.addressLine1 || sd.addressLine1 || '';
+  const displayAddress2 = gd?.addressLine2 || sd.addressLine2 || '';
+  const displayCity = gd?.city || sd.city || '';
+  const displayState = gd?.state || sd.state || '';
+  const displayPincode = gd?.pincode || sd.pincode || '';
+  const displayNotes = gd?.orderNotes;
+
+  const isGuest = order.customerId.toString() === '2vxsx-fae';
+
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto bg-admin-card border-admin-border">
         <DialogHeader>
-          <DialogTitle className="text-admin-fg">
+          <DialogTitle className="text-admin-fg flex items-center gap-2">
+            <Hash className="w-4 h-4 text-admin-muted" />
             Order #{order.id.toString()}
+            {isGuest && (
+              <Badge className="bg-slate-100 text-slate-600 border-0 text-xs ml-1">Guest</Badge>
+            )}
           </DialogTitle>
         </DialogHeader>
 
@@ -98,47 +118,75 @@ export default function OrderDetailModal({ order, onClose }: OrderDetailModalPro
 
           {/* Customer Info */}
           <div>
-            <h4 className="text-admin-fg font-semibold text-sm mb-3">Customer & Shipping</h4>
+            <h4 className="text-admin-fg font-semibold text-sm mb-3">Customer Details</h4>
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2 text-admin-fg">
-                <Package className="w-4 h-4 text-admin-muted flex-shrink-0" />
-                <span className="font-medium">{order.shippingDetails.fullName}</span>
+                <User className="w-4 h-4 text-admin-muted flex-shrink-0" />
+                <span className="font-medium">{displayName}</span>
               </div>
               <div className="flex items-center gap-2 text-admin-muted">
                 <Mail className="w-4 h-4 flex-shrink-0" />
-                <span>{order.shippingDetails.email}</span>
+                <span>{displayEmail}</span>
               </div>
               <div className="flex items-center gap-2 text-admin-muted">
                 <Phone className="w-4 h-4 flex-shrink-0" />
-                <span>{order.shippingDetails.phoneNumber}</span>
-              </div>
-              <div className="flex items-start gap-2 text-admin-muted">
-                <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                <span>
-                  {order.shippingDetails.addressLine1}
-                  {order.shippingDetails.addressLine2 && `, ${order.shippingDetails.addressLine2}`}
-                  <br />
-                  {order.shippingDetails.city}, {order.shippingDetails.state} – {order.shippingDetails.pincode}
-                </span>
+                <span>{displayPhone}</span>
               </div>
             </div>
           </div>
 
           <Separator className="bg-admin-border" />
 
+          {/* Shipping Address */}
+          <div>
+            <h4 className="text-admin-fg font-semibold text-sm mb-3">Delivery Address</h4>
+            <div className="flex items-start gap-2 text-sm text-admin-muted">
+              <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <div>
+                <p>{displayAddress1}</p>
+                {displayAddress2 && <p>{displayAddress2}</p>}
+                <p>{[displayCity, displayState].filter(Boolean).join(', ')}{displayPincode ? ` – ${displayPincode}` : ''}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Order Notes */}
+          {displayNotes ? (
+            <>
+              <Separator className="bg-admin-border" />
+              <div>
+                <h4 className="text-admin-fg font-semibold text-sm mb-2 flex items-center gap-1.5">
+                  <StickyNote className="w-4 h-4 text-admin-muted" />
+                  Order Notes
+                </h4>
+                <p className="text-sm text-admin-muted italic bg-admin-bg rounded-lg px-3 py-2">{displayNotes}</p>
+              </div>
+            </>
+          ) : null}
+
+          <Separator className="bg-admin-border" />
+
           {/* Order Items */}
           <div>
-            <h4 className="text-admin-fg font-semibold text-sm mb-3">Items</h4>
+            <h4 className="text-admin-fg font-semibold text-sm mb-3 flex items-center gap-1.5">
+              <Package className="w-4 h-4 text-admin-muted" />
+              Items Ordered
+            </h4>
             <div className="space-y-2">
               {order.items.map((item, i) => (
-                <div key={i} className="flex items-center justify-between text-sm">
+                <div key={i} className="flex items-center justify-between text-sm bg-admin-bg rounded-lg px-3 py-2">
                   <div className="text-admin-fg">
                     <span className="font-medium">Product #{item.productId.toString()}</span>
                     <span className="text-admin-muted ml-2">× {item.quantity.toString()}</span>
                   </div>
-                  <span className="text-admin-fg font-medium">
-                    {formatCurrency(Number(item.unitPrice) * Number(item.quantity))}
-                  </span>
+                  <div className="text-right">
+                    <span className="text-admin-muted text-xs mr-2">
+                      ₹{Number(item.unitPrice).toLocaleString('en-IN')} each
+                    </span>
+                    <span className="text-admin-fg font-medium">
+                      {formatCurrency(Number(item.unitPrice) * Number(item.quantity))}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>

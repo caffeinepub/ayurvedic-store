@@ -10,7 +10,7 @@ export const sampleProducts: ProductInput[] = [
     category: 'Face Pack',
     stockQuantity: BigInt(50),
     isFeatured: true,
-    status: ProductStatus.active,
+    status: ProductStatus.visible,
     specifications: [
       { key: 'Weight', value: '100g' },
       { key: 'Skin Type', value: 'All skin types' },
@@ -26,7 +26,7 @@ export const sampleProducts: ProductInput[] = [
     category: 'Face Pack',
     stockQuantity: BigInt(35),
     isFeatured: true,
-    status: ProductStatus.active,
+    status: ProductStatus.visible,
     specifications: [
       { key: 'Weight', value: '75g' },
       { key: 'Skin Type', value: 'Oily, Acne-prone' },
@@ -42,7 +42,7 @@ export const sampleProducts: ProductInput[] = [
     category: 'Powder',
     stockQuantity: BigInt(20),
     isFeatured: true,
-    status: ProductStatus.active,
+    status: ProductStatus.featured,
     specifications: [
       { key: 'Weight', value: '50g' },
       { key: 'Skin Type', value: 'Dry, Sensitive' },

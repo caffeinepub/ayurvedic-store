@@ -1,8 +1,10 @@
-import { Link } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { XCircle, RefreshCw, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function PaymentFailure() {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center">
@@ -15,21 +17,21 @@ export default function PaymentFailure() {
           again or contact us if the issue persists.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link to="/checkout">
-            <Button className="bg-terracotta hover:bg-terracotta/90 text-cream font-semibold px-6">
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Try Again
-            </Button>
-          </Link>
-          <Link to="/shop">
-            <Button
-              variant="outline"
-              className="border-forest text-forest hover:bg-forest hover:text-cream font-semibold px-6"
-            >
-              <ShoppingBag className="w-4 h-4 mr-2" />
-              Back to Shop
-            </Button>
-          </Link>
+          <Button
+            onClick={() => navigate({ to: '/cart' })}
+            className="bg-terracotta hover:bg-terracotta/90 text-cream font-semibold px-6"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Try Again
+          </Button>
+          <Button
+            onClick={() => navigate({ to: '/shop' })}
+            variant="outline"
+            className="border-forest text-forest hover:bg-forest hover:text-cream font-semibold px-6"
+          >
+            <ShoppingBag className="w-4 h-4 mr-2" />
+            Back to Shop
+          </Button>
         </div>
       </div>
     </div>

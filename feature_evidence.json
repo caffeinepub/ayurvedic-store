@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-replace-the-current-hero-background-image-in-the-hero-component-with-the-newly-generated-static-asset-frontend-public-assets-generated-hero-spices-dim-1920x1080-jpg-the-image-should-be-used-as-the-full-screen-background-of-the-hero-section-preserving-all-existing-text-overlays-gradient-overlays-ken-burns-animation-and-cta-buttons-without-any-other-changes",
-      "featureTitle": "Replace the current hero background image in the Hero component with the newly generated static asset (frontend/public/assets/generated/hero-spices.dim_1920x1080.jpg). The image should be used as the full-screen background of the hero section, preserving all existing text overlays, gradient overlays, Ken Burns animation, and CTA buttons without any other changes.",
+      "featureId": "feature-update-the-cart-checkout-page-frontend-src-pages-cart-tsx-and-or-frontend-src-pages-checkout-tsx-to-collect-the-following-fields-from-all-customers-including-guests-with-no-login-required-full-name-email-address-phone-number-delivery-street-address-city-postal-code-and-order-notes-optional-validate-required-fields-before-allowing-order-submission-pass-all-collected-fields-to-the-order-creation-call",
+      "featureTitle": "Update the Cart/Checkout page (frontend/src/pages/Cart.tsx and/or frontend/src/pages/Checkout.tsx) to collect the following fields from all customers (including guests, with no login required): Full Name, Email Address, Phone Number, Delivery Street Address, City, Postal Code, and Order Notes (optional). Validate required fields before allowing order submission. Pass all collected fields to the order creation call.",
       "files": [
-        "frontend/src/components/Hero.tsx"
+        "frontend/src/pages/Cart.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -19,7 +19,51 @@
         "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-1"
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-redesign-the-admin-orders-page-frontend-src-pages-admin-adminorders-tsx-to-display-full-customer-details-inline-within-each-order-row-card-without-requiring-a-modal-click-each-order-entry-must-show-order-id-date-time-customer-full-name-email-phone-full-delivery-address-street-city-postal-code-ordered-items-with-quantities-and-unit-prices-order-total-and-order-status-use-an-expandable-row-or-an-always-visible-detail-section-beneath-each-row-in-the-list",
+      "featureTitle": "Redesign the Admin Orders page (frontend/src/pages/admin/AdminOrders.tsx) to display full customer details inline within each order row/card without requiring a modal click. Each order entry must show: Order ID, Date & Time, Customer Full Name, Email, Phone, Full Delivery Address (street, city, postal code), Ordered Items with quantities and unit prices, Order Total, and Order Status. Use an expandable row or an always-visible detail section beneath each row in the list.",
+      "files": [
+        "frontend/src/pages/admin/AdminOrders.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0",
+        "stripe@3.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-the-orderdetailmodal-frontend-src-components-admin-orderdetailmodal-tsx-to-display-all-new-customer-fields-fullname-email-phone-street-city-postalcode-ordernotes-when-an-admin-opens-an-individual-order-so-the-full-delivery-address-and-contact-info-are-shown-there-as-well",
+      "featureTitle": "Update the OrderDetailModal (frontend/src/components/admin/OrderDetailModal.tsx) to display all new customer fields (fullName, email, phone, street, city, postalCode, orderNotes) when an admin opens an individual order, so the full delivery address and contact info are shown there as well.",
+      "files": [
+        "frontend/src/components/admin/OrderDetailModal.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0",
+        "stripe@3.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
       ],
       "confidence": "high"
     }

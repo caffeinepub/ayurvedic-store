@@ -10,12 +10,24 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface GuestDetails {
+  'city' : string,
+  'fullName' : string,
+  'email' : string,
+  'state' : string,
+  'addressLine1' : string,
+  'addressLine2' : string,
+  'pincode' : string,
+  'phoneNumber' : string,
+  'orderNotes' : [] | [string],
+}
 export interface Order {
   'id' : bigint,
   'razorpayPaymentId' : [] | [string],
   'paymentStatus' : string,
   'fulfillmentStatus' : string,
   'createdAt' : bigint,
+  'guestDetails' : [] | [GuestDetails],
   'razorpayOrderId' : string,
   'totalAmount' : bigint,
   'customerId' : Principal,
@@ -23,6 +35,8 @@ export interface Order {
   'shippingDetails' : ShippingDetails,
 }
 export interface OrderInput {
+  'razorpayPaymentId' : string,
+  'guestDetails' : GuestDetails,
   'razorpayOrderId' : string,
   'totalAmount' : bigint,
   'items' : Array<OrderItem>,
@@ -56,9 +70,11 @@ export interface ProductInput {
   'category' : string,
   'priceInr' : bigint,
 }
-export type ProductStatus = { 'active' : null } |
+export type ProductStatus = { 'featured' : null } |
   { 'launchingSoon' : null } |
-  { 'outOfStock' : null };
+  { 'outOfStock' : null } |
+  { 'notVisible' : null } |
+  { 'visible' : null };
 export interface ShippingDetails {
   'city' : string,
   'fullName' : string,
@@ -168,7 +184,7 @@ export interface _SERVICE {
     string
   >,
   /**
-   * / Authenticated users only: place a new order.
+   * / Authenticated users or guests: place a new order.
    */
   'createOrder' : ActorMethod<[OrderInput], Order>,
   /**
@@ -194,6 +210,7 @@ export interface _SERVICE {
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   /**
    * / Public: get featured products for the storefront.
+   * / Excludes #notVisible products.
    */
   'getFeaturedProducts' : ActorMethod<[], Array<Product>>,
   /**
@@ -210,18 +227,24 @@ export interface _SERVICE {
   'getOrders' : ActorMethod<[], Array<Order>>,
   /**
    * / Public: paginated product listing.
+   * / Excludes #notVisible products.
    */
   'getPaginatedProducts' : ActorMethod<[bigint, bigint], Array<Product>>,
   /**
    * / Public: get a single product by id (storefront).
+   * / Returns null for #notVisible products to prevent information leakage.
    */
   'getProductById' : ActorMethod<[bigint], [] | [Product]>,
   /**
-   * / Public: browse all products (storefront).
+   * / Public: browse products (storefront).
+   * / When statusFilter is empty, defaults to all statuses except #notVisible.
+   * / When statusFilter is provided, only returns products matching those statuses,
+   * / but always excludes #notVisible to prevent leaking hidden products publicly.
    */
-  'getProducts' : ActorMethod<[], Array<Product>>,
+  'getProducts' : ActorMethod<[Array<ProductStatus>], Array<Product>>,
   /**
    * / Public: filter products by category.
+   * / Excludes #notVisible products.
    */
   'getProductsByCategory' : ActorMethod<[string], Array<Product>>,
   /**
@@ -245,6 +268,7 @@ export interface _SERVICE {
   'isCallerAdmin' : ActorMethod<[], boolean>,
   /**
    * / Public: check whether a product is in stock.
+   * / Returns false for #notVisible products.
    */
   'isProductInStock' : ActorMethod<[bigint], boolean>,
   'isStripeConfigured' : ActorMethod<[], boolean>,
@@ -254,6 +278,7 @@ export interface _SERVICE {
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   /**
    * / Public: full-text search over product name and description.
+   * / Excludes #notVisible products.
    */
   'searchProducts' : ActorMethod<[string], Array<Product>>,
   /**

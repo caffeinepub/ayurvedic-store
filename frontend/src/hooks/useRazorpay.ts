@@ -1,6 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useActor } from './useActor';
 import { useNavigate } from '@tanstack/react-router';
-import { useGetRazorpayKeyId } from './useQueries';
 import { useCart } from '../context/CartContext';
 
 declare global {
@@ -9,73 +10,78 @@ declare global {
   }
 }
 
-interface RazorpayCheckoutOptions {
-  productName: string;
-  amountInr: number; // in INR (will be converted to paise)
-  storeName?: string;
+export interface RazorpayOptions {
+  amount: number; // in paise
+  currency?: string;
+  name?: string;
   description?: string;
+  orderId?: string;
+  prefill?: {
+    name?: string;
+    email?: string;
+    contact?: string;
+  };
+  onSuccess?: (paymentId: string, orderId: string) => void;
+  onDismiss?: () => void;
 }
 
 export function useRazorpay() {
-  const [isLoading, setIsLoading] = useState(false);
-  const { data: razorpayKeyId } = useGetRazorpayKeyId();
-  const { clearCart } = useCart();
+  const { actor } = useActor();
   const navigate = useNavigate();
+  const { clearCart } = useCart();
+  const queryClient = useQueryClient();
 
   const openCheckout = useCallback(
-    async (options: RazorpayCheckoutOptions) => {
-      if (!razorpayKeyId) {
-        alert('Payment gateway is not configured. Please contact the store admin.');
-        return;
-      }
+    async (options: RazorpayOptions) => {
+      if (!actor) throw new Error('Actor not available');
 
-      if (!window.Razorpay) {
-        alert('Payment gateway failed to load. Please refresh the page and try again.');
-        return;
-      }
+      const keyId = await actor.getRazorpayKeyId();
+      if (!keyId) throw new Error('Razorpay key not configured');
 
-      setIsLoading(true);
+      return new Promise<{ paymentId: string; orderId: string }>((resolve, reject) => {
+        const rzp = new window.Razorpay({
+          key: keyId,
+          amount: options.amount,
+          currency: options.currency || 'INR',
+          name: options.name || 'Nature Glow',
+          description: options.description || 'Purchase',
+          order_id: options.orderId,
+          prefill: options.prefill || {},
+          theme: { color: '#8B6914' },
+          handler: async (response: any) => {
+            const paymentId: string = response.razorpay_payment_id || '';
+            const rzpOrderId: string = response.razorpay_order_id || options.orderId || '';
 
-      try {
-        const amountInPaise = Math.round(options.amountInr * 100);
+            // Invalidate orders cache so the orders page refreshes
+            queryClient.invalidateQueries({ queryKey: ['myOrders'] });
 
-        const rzpOptions = {
-          key: razorpayKeyId,
-          amount: amountInPaise,
-          currency: 'INR',
-          name: options.storeName || 'Nature Glow',
-          description: options.description || options.productName,
-          image: '/assets/generated/logo-mark.dim_200x200.png',
-          handler: function () {
             clearCart();
-            navigate({ to: '/payment-success' });
+
+            if (options.onSuccess) {
+              options.onSuccess(paymentId, rzpOrderId);
+            } else {
+              navigate({ to: '/payment-success' });
+            }
+
+            resolve({ paymentId, orderId: rzpOrderId });
           },
           modal: {
-            ondismiss: function () {
-              setIsLoading(false);
-              navigate({ to: '/payment-failure' });
+            ondismiss: () => {
+              if (options.onDismiss) {
+                options.onDismiss();
+              } else {
+                navigate({ to: '/payment-failure' });
+              }
+              reject(new Error('Payment dismissed'));
             },
           },
-          prefill: {},
-          theme: {
-            color: '#2D5016',
-          },
-        };
-
-        const rzp = new window.Razorpay(rzpOptions);
-        rzp.on('payment.failed', function () {
-          setIsLoading(false);
-          navigate({ to: '/payment-failure' });
         });
+
         rzp.open();
-      } catch (err) {
-        setIsLoading(false);
-        console.error('Razorpay error:', err);
-        navigate({ to: '/payment-failure' });
-      }
+      });
     },
-    [razorpayKeyId, clearCart, navigate]
+    [actor, navigate, clearCart, queryClient]
   );
 
-  return { openCheckout, isLoading, isConfigured: !!razorpayKeyId };
+  return { openCheckout };
 }

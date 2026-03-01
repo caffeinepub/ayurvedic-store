@@ -1,10 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Replace the hero section's background image with a spices and herbs flat-lay photo.
+**Goal:** Add guest checkout with full customer details collection and update the admin orders view to display all customer information inline.
 
 **Planned changes:**
-- Swap the current hero background image source with the new spices/herbs flat-lay asset (`hero-spices.dim_1920x1080.jpg`)
-- Preserve all existing hero text overlays, gradient overlays, Ken Burns zoom animation, and CTA buttons unchanged
+- Extend the backend Order type to include guest customer fields: fullName, email, phone, street, city, postalCode, and orderNotes; update order creation to accept and persist these fields with migration support for existing orders
+- Update the checkout page to show a guest-friendly form collecting Full Name, Email, Phone, Street Address, City, Postal Code, and Order Notes (optional), with required-field validation before submission
+- Redesign the Admin Orders page to display all customer details (Order ID, date/time, name, email, phone, delivery address, items with quantities and prices, order total, status) inline per order without requiring a modal
+- Update the OrderDetailModal to show all new customer fields (fullName, email, phone, street, city, postalCode, orderNotes), hiding orderNotes if empty
 
-**User-visible outcome:** The hero section displays the new Ayurvedic spices and herbs flat-lay photo (featuring mortar and pestle, turmeric, ginger, garlic, rosemary, lemon, etc.) as its full-screen background on both desktop and mobile.
+**User-visible outcome:** Customers (including guests) can complete checkout by filling in their contact and delivery details without logging in. Admins can view full customer information and order details directly in the orders list without opening a modal.

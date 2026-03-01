@@ -18,13 +18,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { Loader2, Plus, Trash2, Upload, Wand2, X } from 'lucide-react';
 import { useCreateProduct, useUpdateProduct } from '../../hooks/useQueries';
 import { ProductStatus } from '../../backend';
 import type { Product } from '../../backend';
 import { toast } from 'sonner';
 import AIImageGenerator from './AIImageGenerator';
+import StatusBadge from './StatusBadge';
 
 interface ProductFormModalProps {
   product?: Product;
@@ -35,6 +35,14 @@ interface SpecEntry {
   key: string;
   value: string;
 }
+
+const STATUS_OPTIONS: { value: ProductStatus; label: string }[] = [
+  { value: ProductStatus.visible, label: 'Visible' },
+  { value: ProductStatus.outOfStock, label: 'Out of Stock' },
+  { value: ProductStatus.launchingSoon, label: 'Launching Soon' },
+  { value: ProductStatus.featured, label: 'Featured' },
+  { value: ProductStatus.notVisible, label: 'Not Visible' },
+];
 
 export default function ProductFormModal({ product, onClose }: ProductFormModalProps) {
   const createProduct = useCreateProduct();
@@ -49,7 +57,7 @@ export default function ProductFormModal({ product, onClose }: ProductFormModalP
   const [stockQuantity, setStockQuantity] = useState(product ? Number(product.stockQuantity).toString() : '0');
   const [isFeatured, setIsFeatured] = useState(product?.isFeatured ?? false);
   const [status, setStatus] = useState<ProductStatus>(
-    product?.status ?? ProductStatus.active
+    product?.status ?? ProductStatus.visible
   );
   const [specs, setSpecs] = useState<SpecEntry[]>(
     product?.specifications?.map((s) => ({ key: s.key, value: s.value })) ?? []
@@ -110,12 +118,6 @@ export default function ProductFormModal({ product, onClose }: ProductFormModalP
       toast.error(err?.message ?? 'Failed to save product');
     }
   };
-
-  const statusOptions = [
-    { value: ProductStatus.active, label: 'Active' },
-    { value: ProductStatus.outOfStock, label: 'Out of Stock' },
-    { value: ProductStatus.launchingSoon, label: 'Launching Soon' },
-  ];
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
@@ -197,7 +199,7 @@ export default function ProductFormModal({ product, onClose }: ProductFormModalP
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {statusOptions.map((opt) => (
+                  {STATUS_OPTIONS.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}
                     </SelectItem>
@@ -205,6 +207,17 @@ export default function ProductFormModal({ product, onClose }: ProductFormModalP
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          {/* Status preview badge */}
+          <div className="flex items-center gap-2">
+            <span className="text-admin-muted text-xs">Status preview:</span>
+            <StatusBadge status={status} size="sm" />
+            {isFeatured && status !== ProductStatus.featured && (
+              <span className="inline-flex items-center rounded-full font-medium text-xs px-2 py-0.5 bg-amber-100 text-amber-700 border border-amber-200">
+                ⭐ Also Featured
+              </span>
+            )}
           </div>
 
           {/* Image Section */}
@@ -290,21 +303,8 @@ export default function ProductFormModal({ product, onClose }: ProductFormModalP
               onCheckedChange={(v) => setIsFeatured(!!v)}
             />
             <Label htmlFor="featured" className="text-admin-fg cursor-pointer">
-              Mark as Featured Product
+              Mark as Featured Product (shown in Featured section on homepage)
             </Label>
-          </div>
-
-          {/* Status badges preview */}
-          <div className="flex gap-2 flex-wrap">
-            {isFeatured && (
-              <Badge className="bg-amber-100 text-amber-700 border-0">⭐ Featured</Badge>
-            )}
-            {status === ProductStatus.outOfStock && (
-              <Badge className="bg-red-100 text-red-700 border-0">Out of Stock</Badge>
-            )}
-            {status === ProductStatus.launchingSoon && (
-              <Badge className="bg-purple-100 text-purple-700 border-0 font-bold">🚀 Launching Soon</Badge>
-            )}
           </div>
 
           {/* Specifications */}

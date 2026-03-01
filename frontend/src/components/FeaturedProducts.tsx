@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import ProductCard from './ProductCard';
 import { useGetFeaturedProducts } from '../hooks/useQueries';
+import { ProductStatus } from '../backend';
 
 export default function FeaturedProducts() {
   const { data: featuredProducts, isLoading } = useGetFeaturedProducts();
@@ -23,6 +24,11 @@ export default function FeaturedProducts() {
     if (headerRef.current) observer.observe(headerRef.current);
     return () => observer.disconnect();
   }, []);
+
+  // Filter: show products that are featured status OR have isFeatured flag, excluding notVisible
+  const displayProducts = featuredProducts?.filter(
+    p => p.status !== ProductStatus.notVisible
+  ) ?? [];
 
   return (
     <section className="py-20 bg-background">
@@ -65,9 +71,9 @@ export default function FeaturedProducts() {
               </div>
             ))}
           </div>
-        ) : featuredProducts && featuredProducts.length > 0 ? (
+        ) : displayProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredProducts.map((product) => (
+            {displayProducts.map((product) => (
               <ProductCard key={product.id.toString()} product={product} />
             ))}
           </div>

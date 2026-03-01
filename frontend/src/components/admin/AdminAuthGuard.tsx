@@ -1,87 +1,109 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useInternetIdentity } from '../../hooks/useInternetIdentity';
 import { useActor } from '../../hooks/useActor';
-import { useIsCallerAdmin } from '../../hooks/useQueries';
 import { useQueryClient } from '@tanstack/react-query';
-import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Loader2, ShieldAlert, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface AdminAuthGuardProps {
   children: React.ReactNode;
 }
 
-const GUARD_TIMEOUT_MS = 15000;
+type GuardState = 'loading' | 'verified' | 'denied' | 'error' | 'timeout';
 
 export default function AdminAuthGuard({ children }: AdminAuthGuardProps) {
   const navigate = useNavigate();
+  const { identity } = useInternetIdentity();
+  const { actor, isFetching: actorFetching } = useActor();
   const queryClient = useQueryClient();
-  const { identity, loginStatus, isInitializing } = useInternetIdentity();
-  const { isFetching: actorFetching } = useActor();
-  const { data: isAdmin, isLoading: adminLoading, isFetched: adminFetched } = useIsCallerAdmin();
-  const [timedOut, setTimedOut] = useState(false);
+
+  const [guardState, setGuardState] = useState<GuardState>('loading');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const isAuthenticated = !!identity;
-  const isLoggingIn = loginStatus === 'logging-in' || loginStatus === 'success';
-  const isStillLoading = isInitializing || isLoggingIn || actorFetching || adminLoading || !adminFetched;
-
-  // Timeout guard: if stuck loading for too long, show error
-  useEffect(() => {
-    if (!isStillLoading) {
-      setTimedOut(false);
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      setTimedOut(true);
-    }, GUARD_TIMEOUT_MS);
-
-    return () => clearTimeout(timer);
-  }, [isStillLoading]);
 
   useEffect(() => {
-    // Don't redirect during initialization or login transitions
-    if (isInitializing || isLoggingIn || actorFetching || adminLoading) return;
-
-    // If not authenticated, redirect to login
+    // Not authenticated at all — redirect to login
     if (!isAuthenticated) {
       navigate({ to: '/admin/login' });
       return;
     }
 
-    // If admin check is done and user is not admin, redirect to login
-    if (adminFetched && isAdmin === false) {
-      navigate({ to: '/admin/login' });
+    // Still waiting for actor
+    if (actorFetching || !actor) {
+      return;
     }
-  }, [isAuthenticated, isInitializing, isLoggingIn, actorFetching, adminLoading, adminFetched, isAdmin, navigate]);
 
-  const handleRetry = () => {
-    setTimedOut(false);
-    queryClient.invalidateQueries({ queryKey: ['actor'] });
-    queryClient.invalidateQueries({ queryKey: ['isCallerAdmin'] });
+    // Actor is ready — verify admin status
+    verifyAdmin(actor);
+  }, [isAuthenticated, actor, actorFetching]);
+
+  // Timeout: if still loading after 15 seconds, show timeout UI
+  useEffect(() => {
+    if (guardState !== 'loading') return;
+
+    const id = setTimeout(() => {
+      setGuardState('timeout');
+    }, 15_000);
+
+    return () => clearTimeout(id);
+  }, [guardState]);
+
+  const verifyAdmin = async (actorInstance: NonNullable<typeof actor>) => {
+    try {
+      let isAdmin = false;
+      try {
+        isAdmin = await actorInstance.isCallerAdmin();
+      } catch {
+        try {
+          isAdmin = await actorInstance.isAdmin();
+        } catch {
+          isAdmin = false;
+        }
+      }
+
+      if (isAdmin) {
+        setGuardState('verified');
+      } else {
+        setGuardState('denied');
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setErrorMessage(msg || 'Failed to verify admin status.');
+      setGuardState('error');
+    }
   };
 
-  // Show timeout error
-  if (timedOut && isStillLoading) {
+  const handleRetry = () => {
+    setGuardState('loading');
+    setErrorMessage('');
+    queryClient.invalidateQueries({ queryKey: ['isCallerAdmin'] });
+    queryClient.invalidateQueries({ queryKey: ['actor'] });
+  };
+
+  const handleBackToLogin = () => {
+    navigate({ to: '/admin/login' });
+  };
+
+  if (guardState === 'verified') {
+    return <>{children}</>;
+  }
+
+  if (guardState === 'denied') {
     return (
-      <div className="min-h-screen bg-admin-bg flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-sm flex flex-col items-center gap-4">
-          <AlertCircle className="w-12 h-12 text-amber-500" />
-          <h2 className="text-lg font-bold text-gray-900 text-center">Connection Timeout</h2>
-          <p className="text-gray-500 text-sm text-center">
-            The admin panel is taking too long to load. Please check your connection and try again.
+      <div className="min-h-screen bg-gradient-to-br from-forest-dark via-forest to-forest-light flex items-center justify-center p-4">
+        <div className="text-center max-w-sm">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-500/20 border border-red-500/40 mb-4">
+            <ShieldAlert className="w-8 h-8 text-red-400" />
+          </div>
+          <h2 className="text-xl font-semibold text-cream mb-2">Access Denied</h2>
+          <p className="text-cream/60 text-sm mb-6">
+            You do not have admin privileges to access this area.
           </p>
           <Button
-            onClick={handleRetry}
-            className="w-full bg-admin-accent hover:bg-admin-accent/90 text-white rounded-xl flex items-center justify-center gap-2"
-          >
-            <RefreshCw className="w-4 h-4" />
-            Retry
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => navigate({ to: '/admin/login' })}
-            className="w-full rounded-xl"
+            onClick={handleBackToLogin}
+            className="bg-gold hover:bg-gold/90 text-forest-dark font-semibold rounded-xl"
           >
             Back to Login
           </Button>
@@ -90,27 +112,49 @@ export default function AdminAuthGuard({ children }: AdminAuthGuardProps) {
     );
   }
 
-  // Show loading while checking
-  if (isStillLoading) {
+  if (guardState === 'error' || guardState === 'timeout') {
     return (
-      <div className="min-h-screen bg-admin-bg flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 text-admin-accent animate-spin" />
-          <p className="text-admin-muted text-sm">Verifying access...</p>
+      <div className="min-h-screen bg-gradient-to-br from-forest-dark via-forest to-forest-light flex items-center justify-center p-4">
+        <div className="text-center max-w-sm">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-500/20 border border-amber-500/40 mb-4">
+            <ShieldAlert className="w-8 h-8 text-amber-400" />
+          </div>
+          <h2 className="text-xl font-semibold text-cream mb-2">
+            {guardState === 'timeout' ? 'Connection Timeout' : 'Verification Error'}
+          </h2>
+          <p className="text-cream/60 text-sm mb-6">
+            {guardState === 'timeout'
+              ? 'Could not verify admin status in time. Please retry.'
+              : errorMessage || 'An error occurred while verifying your admin status.'}
+          </p>
+          <div className="flex gap-3 justify-center">
+            <Button
+              onClick={handleRetry}
+              className="bg-gold hover:bg-gold/90 text-forest-dark font-semibold rounded-xl"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Retry
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleBackToLogin}
+              className="border-white/20 text-cream hover:bg-white/10 rounded-xl"
+            >
+              Back to Login
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
 
-  // If authenticated and admin, render children
-  if (isAuthenticated && isAdmin) {
-    return <>{children}</>;
-  }
-
-  // Fallback loading while redirect happens
+  // Loading state
   return (
-    <div className="min-h-screen bg-admin-bg flex items-center justify-center">
-      <Loader2 className="w-10 h-10 text-admin-accent animate-spin" />
+    <div className="min-h-screen bg-gradient-to-br from-forest-dark via-forest to-forest-light flex items-center justify-center p-4">
+      <div className="text-center">
+        <Loader2 className="w-10 h-10 text-gold animate-spin mx-auto mb-4" />
+        <p className="text-cream/70 text-sm">Verifying admin access...</p>
+      </div>
     </div>
   );
 }

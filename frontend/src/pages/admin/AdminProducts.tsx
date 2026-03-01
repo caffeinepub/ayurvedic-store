@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useGetAllProducts, useDeleteProduct } from '../../hooks/useQueries';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   AlertDialog,
@@ -23,8 +22,11 @@ import {
   Star,
   Package,
   Loader2,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import ProductFormModal from '../../components/admin/ProductFormModal';
+import StatusBadge from '../../components/admin/StatusBadge';
 import { ProductStatus } from '../../backend';
 import type { Product } from '../../backend';
 import { toast } from 'sonner';
@@ -45,9 +47,11 @@ export default function AdminProducts() {
 
   const stats = {
     total: products.length,
-    active: products.filter((p) => p.status === ProductStatus.active).length,
+    visible: products.filter((p) => p.status === ProductStatus.visible).length,
+    featured: products.filter((p) => p.status === ProductStatus.featured).length,
     outOfStock: products.filter((p) => p.status === ProductStatus.outOfStock).length,
     launchingSoon: products.filter((p) => p.status === ProductStatus.launchingSoon).length,
+    notVisible: products.filter((p) => p.status === ProductStatus.notVisible).length,
   };
 
   const handleDelete = async () => {
@@ -60,16 +64,6 @@ export default function AdminProducts() {
     } finally {
       setDeletingId(null);
     }
-  };
-
-  const getStatusBadge = (product: Product) => {
-    if (product.status === ProductStatus.outOfStock) {
-      return <Badge className="bg-red-100 text-red-700 border-0 text-xs">Out of Stock</Badge>;
-    }
-    if (product.status === ProductStatus.launchingSoon) {
-      return <Badge className="bg-purple-100 text-purple-700 border-0 text-xs font-bold">🚀 Launching Soon</Badge>;
-    }
-    return <Badge className="bg-emerald-100 text-emerald-700 border-0 text-xs">Active</Badge>;
   };
 
   return (
@@ -90,17 +84,19 @@ export default function AdminProducts() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { label: 'Total', value: stats.total, color: 'text-admin-fg' },
-          { label: 'Active', value: stats.active, color: 'text-emerald-600' },
-          { label: 'Out of Stock', value: stats.outOfStock, color: 'text-red-600' },
-          { label: 'Launching Soon', value: stats.launchingSoon, color: 'text-purple-600' },
+          { label: 'Total', value: stats.total, color: 'text-admin-fg', icon: Package },
+          { label: 'Visible', value: stats.visible, color: 'text-emerald-600', icon: Eye },
+          { label: 'Featured', value: stats.featured, color: 'text-amber-600', icon: Star },
+          { label: 'Out of Stock', value: stats.outOfStock, color: 'text-red-600', icon: Package },
+          { label: 'Launching Soon', value: stats.launchingSoon, color: 'text-blue-600', icon: Package },
+          { label: 'Not Visible', value: stats.notVisible, color: 'text-gray-400', icon: EyeOff },
         ].map((s) => (
           <Card key={s.label} className="bg-admin-card border-admin-border">
-            <CardContent className="p-4 text-center">
-              <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
-              <p className="text-admin-muted text-xs mt-1">{s.label}</p>
+            <CardContent className="p-3 text-center">
+              <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
+              <p className="text-admin-muted text-xs mt-0.5">{s.label}</p>
             </CardContent>
           </Card>
         ))}
@@ -118,105 +114,156 @@ export default function AdminProducts() {
       </div>
 
       {/* Table */}
-      <Card className="bg-admin-card border-admin-border">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-admin-fg text-base flex items-center gap-2">
-            <Package className="w-4 h-4 text-admin-accent" />
-            Product Catalog ({filtered.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="space-y-3">
-              {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="text-center py-12">
-              <Package className="w-12 h-12 text-admin-muted mx-auto mb-3 opacity-40" />
-              <p className="text-admin-muted">
-                {search ? 'No products match your search' : 'No products yet. Add your first product!'}
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-admin-border">
-                    <th className="text-left py-3 px-3 text-admin-muted font-medium">Product</th>
-                    <th className="text-left py-3 px-3 text-admin-muted font-medium">Category</th>
-                    <th className="text-left py-3 px-3 text-admin-muted font-medium">Price</th>
-                    <th className="text-left py-3 px-3 text-admin-muted font-medium">Stock</th>
-                    <th className="text-left py-3 px-3 text-admin-muted font-medium">Status</th>
-                    <th className="text-left py-3 px-3 text-admin-muted font-medium">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((product) => (
-                    <tr key={product.id.toString()} className="border-b border-admin-border/50 hover:bg-admin-hover/30">
-                      <td className="py-3 px-3">
-                        <div className="flex items-center gap-3">
+      <Card className="bg-admin-card border-admin-border overflow-hidden">
+        {isLoading ? (
+          <div className="p-6 space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex items-center gap-4">
+                <Skeleton className="w-12 h-12 rounded-lg" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-1/3" />
+                  <Skeleton className="h-3 w-1/4" />
+                </div>
+                <Skeleton className="h-6 w-20" />
+                <Skeleton className="h-8 w-16" />
+              </div>
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="p-12 text-center">
+            <Package className="w-12 h-12 text-admin-muted mx-auto mb-3 opacity-40" />
+            <p className="text-admin-muted">
+              {search ? 'No products match your search' : 'No products yet'}
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-admin-border">
+                  <th className="text-left p-4 text-admin-muted text-xs font-semibold uppercase tracking-wider">
+                    Product
+                  </th>
+                  <th className="text-left p-4 text-admin-muted text-xs font-semibold uppercase tracking-wider hidden sm:table-cell">
+                    Category
+                  </th>
+                  <th className="text-left p-4 text-admin-muted text-xs font-semibold uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="text-left p-4 text-admin-muted text-xs font-semibold uppercase tracking-wider hidden md:table-cell">
+                    Price
+                  </th>
+                  <th className="text-left p-4 text-admin-muted text-xs font-semibold uppercase tracking-wider hidden md:table-cell">
+                    Stock
+                  </th>
+                  <th className="text-right p-4 text-admin-muted text-xs font-semibold uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-admin-border">
+                {filtered.map((product) => (
+                  <tr
+                    key={product.id.toString()}
+                    className="hover:bg-admin-hover/50 transition-colors"
+                  >
+                    {/* Product */}
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-admin-bg flex-shrink-0 border border-admin-border">
                           {product.imageUrl ? (
                             <img
                               src={product.imageUrl}
                               alt={product.name}
-                              className="w-10 h-10 rounded-lg object-cover border border-admin-border flex-shrink-0"
-                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
                             />
                           ) : (
-                            <div className="w-10 h-10 rounded-lg bg-admin-bg border border-admin-border flex items-center justify-center flex-shrink-0">
+                            <div className="w-full h-full flex items-center justify-center">
                               <Package className="w-4 h-4 text-admin-muted" />
                             </div>
                           )}
-                          <div>
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-admin-fg font-medium">{product.name}</span>
-                              {product.isFeatured && (
-                                <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                              )}
-                            </div>
-                          </div>
                         </div>
-                      </td>
-                      <td className="py-3 px-3 text-admin-muted">{product.category}</td>
-                      <td className="py-3 px-3 text-admin-fg font-medium">
+                        <div className="min-w-0">
+                          <p className="text-admin-fg text-sm font-medium truncate max-w-[160px]">
+                            {product.name}
+                          </p>
+                          {product.isFeatured && (
+                            <span className="text-amber-500 text-xs flex items-center gap-0.5">
+                              <Star className="w-3 h-3 fill-amber-500" />
+                              Featured
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Category */}
+                    <td className="p-4 hidden sm:table-cell">
+                      <span className="text-admin-muted text-sm">{product.category}</span>
+                    </td>
+
+                    {/* Status */}
+                    <td className="p-4">
+                      <StatusBadge status={product.status} size="sm" />
+                    </td>
+
+                    {/* Price */}
+                    <td className="p-4 hidden md:table-cell">
+                      <span className="text-admin-fg text-sm font-medium">
                         ₹{Number(product.priceInr).toLocaleString('en-IN')}
-                      </td>
-                      <td className="py-3 px-3 text-admin-muted">{Number(product.stockQuantity)}</td>
-                      <td className="py-3 px-3">{getStatusBadge(product)}</td>
-                      <td className="py-3 px-3">
-                        <div className="flex items-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => { setEditingProduct(product); setShowForm(true); }}
-                            className="w-8 h-8 text-admin-muted hover:text-admin-fg hover:bg-admin-hover"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setDeletingId(product.id)}
-                            className="w-8 h-8 text-red-400 hover:text-red-600 hover:bg-red-50"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
+                      </span>
+                    </td>
+
+                    {/* Stock */}
+                    <td className="p-4 hidden md:table-cell">
+                      <span className={`text-sm font-medium ${Number(product.stockQuantity) === 0 ? 'text-red-500' : 'text-admin-fg'}`}>
+                        {Number(product.stockQuantity)}
+                      </span>
+                    </td>
+
+                    {/* Actions */}
+                    <td className="p-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setEditingProduct(product);
+                            setShowForm(true);
+                          }}
+                          className="w-8 h-8 text-admin-muted hover:text-admin-fg hover:bg-admin-hover"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setDeletingId(product.id)}
+                          className="w-8 h-8 text-admin-muted hover:text-red-500 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Card>
 
       {/* Product Form Modal */}
       {showForm && (
         <ProductFormModal
           product={editingProduct}
-          onClose={() => { setShowForm(false); setEditingProduct(undefined); }}
+          onClose={() => {
+            setShowForm(false);
+            setEditingProduct(undefined);
+          }}
         />
       )}
 
@@ -230,7 +277,10 @@ export default function AdminProducts() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-admin-border text-admin-fg hover:bg-admin-hover">
+            <AlertDialogCancel
+              onClick={() => setDeletingId(null)}
+              className="border-admin-border text-admin-fg hover:bg-admin-hover"
+            >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction

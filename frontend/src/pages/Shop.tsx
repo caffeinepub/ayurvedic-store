@@ -8,9 +8,11 @@ import { useGetProducts } from '../hooks/useQueries';
 import { ProductStatus } from '../backend';
 
 const CATEGORIES = ['All', 'Face Pack', 'Powder'];
+
 const STATUS_FILTERS = [
   { label: 'All', value: 'all' },
-  { label: 'Available', value: ProductStatus.active },
+  { label: 'Available', value: ProductStatus.visible },
+  { label: 'Featured', value: ProductStatus.featured },
   { label: 'Out of Stock', value: ProductStatus.outOfStock },
   { label: 'Launching Soon', value: ProductStatus.launchingSoon },
 ];
@@ -24,17 +26,19 @@ export default function Shop() {
 
   const filtered = useMemo(() => {
     if (!products) return [];
-    return products.filter(p => {
-      const matchesSearch =
-        !search.trim() ||
-        p.name.toLowerCase().includes(search.toLowerCase()) ||
-        p.description.toLowerCase().includes(search.toLowerCase());
-      const matchesCategory =
-        selectedCategory === 'All' || p.category === selectedCategory;
-      const matchesStatus =
-        selectedStatus === 'all' || p.status === selectedStatus;
-      return matchesSearch && matchesCategory && matchesStatus;
-    });
+    return products
+      .filter(p => p.status !== ProductStatus.notVisible) // extra safety guard
+      .filter(p => {
+        const matchesSearch =
+          !search.trim() ||
+          p.name.toLowerCase().includes(search.toLowerCase()) ||
+          p.description.toLowerCase().includes(search.toLowerCase());
+        const matchesCategory =
+          selectedCategory === 'All' || p.category === selectedCategory;
+        const matchesStatus =
+          selectedStatus === 'all' || p.status === selectedStatus;
+        return matchesSearch && matchesCategory && matchesStatus;
+      });
   }, [products, search, selectedCategory, selectedStatus]);
 
   return (

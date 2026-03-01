@@ -1,24 +1,24 @@
-import { RouterProvider, createRouter, createRoute, createRootRoute, redirect, Outlet } from '@tanstack/react-router';
+import React from 'react';
+import { RouterProvider, createRouter, createRoute, createRootRoute, Outlet, redirect } from '@tanstack/react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from 'next-themes';
+import { Toaster } from '@/components/ui/sonner';
+import { CartProvider } from './context/CartContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import CartDrawer from './components/CartDrawer';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
-import { CartProvider } from './context/CartContext';
 import Home from './pages/Home';
 import Shop from './pages/Shop';
 import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
+import Orders from './pages/Orders';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentFailure from './pages/PaymentFailure';
 import AdminLogin from './pages/admin/AdminLogin';
+import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminSettings from './pages/admin/AdminSettings';
-import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminAuthGuard from './components/admin/AdminAuthGuard';
 import AdminLayout from './components/admin/AdminLayout';
@@ -26,18 +26,17 @@ import AdminLayout from './components/admin/AdminLayout';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      staleTime: 1000 * 60 * 5,
       retry: 1,
-      staleTime: 30000,
     },
   },
 });
 
-// Customer layout wrapper
+// Customer layout with Navbar + Footer
 function CustomerLayout() {
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
+    <div className="flex flex-col min-h-screen">
       <Navbar />
-      <CartDrawer />
       <main className="flex-1">
         <Outlet />
       </main>
@@ -59,6 +58,7 @@ const customerLayoutRoute = createRoute({
   component: CustomerLayout,
 });
 
+// Customer pages
 const homeRoute = createRoute({
   getParentRoute: () => customerLayoutRoute,
   path: '/',
@@ -73,7 +73,7 @@ const shopRoute = createRoute({
 
 const productDetailRoute = createRoute({
   getParentRoute: () => customerLayoutRoute,
-  path: '/product/$productId',
+  path: '/product/$id',
   component: ProductDetail,
 });
 
@@ -83,10 +83,10 @@ const cartRoute = createRoute({
   component: Cart,
 });
 
-const checkoutRoute = createRoute({
+const ordersRoute = createRoute({
   getParentRoute: () => customerLayoutRoute,
-  path: '/checkout',
-  component: Checkout,
+  path: '/orders',
+  component: Orders,
 });
 
 const paymentSuccessRoute = createRoute({
@@ -101,7 +101,7 @@ const paymentFailureRoute = createRoute({
   component: PaymentFailure,
 });
 
-// Admin routes (no layout guard for login)
+// Admin routes
 const adminIndexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin',
@@ -169,7 +169,7 @@ const routeTree = rootRoute.addChildren([
     shopRoute,
     productDetailRoute,
     cartRoute,
-    checkoutRoute,
+    ordersRoute,
     paymentSuccessRoute,
     paymentFailureRoute,
   ]),

@@ -30,6 +30,17 @@ export interface ProductInput {
     category: string;
     priceInr: bigint;
 }
+export interface GuestDetails {
+    city: string;
+    fullName: string;
+    email: string;
+    state: string;
+    addressLine1: string;
+    addressLine2: string;
+    pincode: string;
+    phoneNumber: string;
+    orderNotes?: string;
+}
 export interface TransformationOutput {
     status: bigint;
     body: Uint8Array;
@@ -51,6 +62,8 @@ export interface OrderItem {
     unitPrice: bigint;
 }
 export interface OrderInput {
+    razorpayPaymentId: string;
+    guestDetails: GuestDetails;
     razorpayOrderId: string;
     totalAmount: bigint;
     items: Array<OrderItem>;
@@ -62,6 +75,7 @@ export interface Order {
     paymentStatus: string;
     fulfillmentStatus: string;
     createdAt: bigint;
+    guestDetails?: GuestDetails;
     razorpayOrderId: string;
     totalAmount: bigint;
     customerId: Principal;
@@ -136,9 +150,11 @@ export interface UserProfile {
     email: string;
 }
 export enum ProductStatus {
-    active = "active",
+    featured = "featured",
     launchingSoon = "launchingSoon",
-    outOfStock = "outOfStock"
+    outOfStock = "outOfStock",
+    notVisible = "notVisible",
+    visible = "visible"
 }
 export enum UserRole {
     admin = "admin",
@@ -156,7 +172,7 @@ export interface backendInterface {
      */
     createCheckoutSession(items: Array<ShoppingItem>, successUrl: string, cancelUrl: string): Promise<string>;
     /**
-     * / Authenticated users only: place a new order.
+     * / Authenticated users or guests: place a new order.
      */
     createOrder(orderInput: OrderInput): Promise<Order>;
     /**
@@ -182,6 +198,7 @@ export interface backendInterface {
     getCallerUserRole(): Promise<UserRole>;
     /**
      * / Public: get featured products for the storefront.
+     * / Excludes #notVisible products.
      */
     getFeaturedProducts(): Promise<Array<Product>>;
     /**
@@ -198,18 +215,24 @@ export interface backendInterface {
     getOrders(): Promise<Array<Order>>;
     /**
      * / Public: paginated product listing.
+     * / Excludes #notVisible products.
      */
     getPaginatedProducts(page: bigint, pageSize: bigint): Promise<Array<Product>>;
     /**
      * / Public: get a single product by id (storefront).
+     * / Returns null for #notVisible products to prevent information leakage.
      */
     getProductById(id: bigint): Promise<Product | null>;
     /**
-     * / Public: browse all products (storefront).
+     * / Public: browse products (storefront).
+     * / When statusFilter is empty, defaults to all statuses except #notVisible.
+     * / When statusFilter is provided, only returns products matching those statuses,
+     * / but always excludes #notVisible to prevent leaking hidden products publicly.
      */
-    getProducts(): Promise<Array<Product>>;
+    getProducts(statusFilter: Array<ProductStatus>): Promise<Array<Product>>;
     /**
      * / Public: filter products by category.
+     * / Excludes #notVisible products.
      */
     getProductsByCategory(category: string): Promise<Array<Product>>;
     /**
@@ -233,6 +256,7 @@ export interface backendInterface {
     isCallerAdmin(): Promise<boolean>;
     /**
      * / Public: check whether a product is in stock.
+     * / Returns false for #notVisible products.
      */
     isProductInStock(productId: bigint): Promise<boolean>;
     isStripeConfigured(): Promise<boolean>;
@@ -242,6 +266,7 @@ export interface backendInterface {
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     /**
      * / Public: full-text search over product name and description.
+     * / Excludes #notVisible products.
      */
     searchProducts(searchTerm: string): Promise<Array<Product>>;
     /**

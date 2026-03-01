@@ -1,259 +1,276 @@
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useInternetIdentity } from '../../hooks/useInternetIdentity';
 import { useActor } from '../../hooks/useActor';
 import { useQueryClient } from '@tanstack/react-query';
-import { Leaf, Shield, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Loader2, ShieldCheck, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-type LoginPhase =
+type AdminLoginState =
   | 'idle'
   | 'logging-in'
   | 'waiting-actor'
-  | 'claiming-admin'
   | 'checking-admin'
+  | 'setting-admin'
+  | 'success'
   | 'access-denied'
-  | 'redirecting'
+  | 'error'
   | 'timeout';
-
-const INIT_TIMEOUT_MS = 12000;
 
 export default function AdminLogin() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { login, clear, loginStatus, identity } = useInternetIdentity();
+  const { login, loginStatus, identity, clear } = useInternetIdentity();
   const { actor, isFetching: actorFetching } = useActor();
-  const [phase, setPhase] = useState<LoginPhase>('idle');
-  const [error, setError] = useState<string | null>(null);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const queryClient = useQueryClient();
+
+  const [state, setState] = useState<AdminLoginState>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [timeoutId, setTimeoutId] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   const isAuthenticated = !!identity;
 
   // Clear timeout on unmount
   useEffect(() => {
     return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (timeoutId) clearTimeout(timeoutId);
     };
-  }, []);
+  }, [timeoutId]);
 
-  // Timeout guard: if stuck in waiting-actor for too long, show error
+  // When actor becomes available after login, proceed with admin check
   useEffect(() => {
-    if (phase === 'waiting-actor') {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => {
-        setPhase('timeout');
-        setError('Connection timed out. The secure connection could not be established. Please retry.');
-      }, INIT_TIMEOUT_MS);
-    } else {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
+    if (state === 'waiting-actor' && actor && !actorFetching) {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        setTimeoutId(null);
       }
+      handleAdminCheck(actor);
     }
-  }, [phase]);
+  }, [actor, actorFetching, state]);
 
-  // Main auth flow effect
-  useEffect(() => {
-    if (phase === 'idle') return;
-    if (phase === 'logging-in') return;
-    if (phase === 'access-denied') return;
-    if (phase === 'redirecting') return;
-    if (phase === 'timeout') return;
-
-    // After login succeeds, wait for actor to be ready
-    if (phase === 'waiting-actor') {
-      if (loginStatus === 'logging-in') return;
-      if (!identity) return;
-      if (actorFetching) return;
-      if (!actor) return;
-      // Actor is ready, proceed to claim/check admin
-      setPhase('claiming-admin');
-      return;
-    }
-
-    if (phase === 'claiming-admin') {
-      const claimAndCheck = async () => {
+  const handleAdminCheck = async (actorInstance: NonNullable<typeof actor>) => {
+    setState('checking-admin');
+    try {
+      let isAdmin = false;
+      try {
+        isAdmin = await actorInstance.isCallerAdmin();
+      } catch {
         try {
-          await actor!.setAdmin(identity!.getPrincipal() as any);
+          isAdmin = await actorInstance.isAdmin();
         } catch {
-          // setAdmin failed — might already be set to someone else, that's fine
+          isAdmin = false;
         }
-        setPhase('checking-admin');
-      };
-      claimAndCheck();
-      return;
-    }
+      }
 
-    if (phase === 'checking-admin') {
-      const checkAdmin = async () => {
-        try {
-          const isAdmin = await actor!.isCallerAdmin();
-          if (isAdmin) {
-            setPhase('redirecting');
-            navigate({ to: '/admin/dashboard' });
-          } else {
-            setPhase('access-denied');
-            setError('Your account does not have admin privileges. Please sign in with the authorized admin account.');
-          }
-        } catch {
-          setPhase('access-denied');
-          setError('Failed to verify admin status. Please try again.');
+      if (isAdmin) {
+        setState('success');
+        queryClient.invalidateQueries({ queryKey: ['isCallerAdmin'] });
+        setTimeout(() => navigate({ to: '/admin/products' }), 500);
+        return;
+      }
+
+      // Not admin yet — try to claim admin (bootstrap: first authenticated user)
+      setState('setting-admin');
+      try {
+        const principal = identity!.getPrincipal();
+        await actorInstance.setAdmin(principal);
+        queryClient.invalidateQueries({ queryKey: ['isCallerAdmin'] });
+        setState('success');
+        setTimeout(() => navigate({ to: '/admin/products' }), 500);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (msg.includes('Not authorized') || msg.includes('Only admin')) {
+          setState('access-denied');
+          setErrorMessage('You do not have admin privileges. Only the designated admin can access this panel.');
+        } else {
+          setState('error');
+          setErrorMessage(msg || 'Failed to verify admin status. Please try again.');
         }
-      };
-      checkAdmin();
-      return;
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setState('error');
+      setErrorMessage(msg || 'Failed to verify admin status. Please try again.');
     }
-  }, [phase, loginStatus, identity, actor, actorFetching, navigate]);
+  };
 
   const handleLogin = async () => {
-    setError(null);
-    setPhase('logging-in');
+    if (isAuthenticated) {
+      if (actor && !actorFetching) {
+        setState('checking-admin');
+        await handleAdminCheck(actor);
+      } else {
+        setState('waiting-actor');
+        startActorTimeout();
+      }
+      return;
+    }
+
+    setState('logging-in');
     try {
       await login();
-      setPhase('waiting-actor');
-    } catch (err: any) {
-      if (err?.message === 'User is already authenticated') {
-        setPhase('waiting-actor');
+      setState('waiting-actor');
+      startActorTimeout();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg === 'User is already authenticated') {
+        setState('waiting-actor');
+        startActorTimeout();
       } else {
-        setPhase('idle');
-        setError('Login failed. Please try again.');
+        setState('error');
+        setErrorMessage('Login failed. Please try again.');
       }
     }
   };
 
-  const handleSignOut = async () => {
-    await clear();
-    setPhase('idle');
-    setError(null);
+  const startActorTimeout = () => {
+    const id = setTimeout(() => {
+      setState('timeout');
+    }, 15_000);
+    setTimeoutId(id);
   };
 
   const handleRetry = () => {
-    setError(null);
-    setPhase('idle');
-    // Invalidate actor query to force re-initialization
+    setState('idle');
+    setErrorMessage('');
     queryClient.invalidateQueries({ queryKey: ['actor'] });
+    queryClient.invalidateQueries({ queryKey: ['isCallerAdmin'] });
   };
 
-  // Show loading only during active login flow phases
-  const isActivelyLoading =
-    phase === 'logging-in' ||
-    phase === 'waiting-actor' ||
-    phase === 'claiming-admin' ||
-    phase === 'checking-admin' ||
-    phase === 'redirecting';
+  const handleLogout = async () => {
+    await clear();
+    queryClient.clear();
+    setState('idle');
+    setErrorMessage('');
+  };
 
-  const showAccessDenied = phase === 'access-denied';
-  const showTimeout = phase === 'timeout';
+  const isLoading =
+    state === 'logging-in' ||
+    state === 'waiting-actor' ||
+    state === 'checking-admin' ||
+    state === 'setting-admin' ||
+    state === 'success';
 
-  const loadingMessage = () => {
-    switch (phase) {
+  const getLoadingMessage = () => {
+    switch (state) {
       case 'logging-in': return 'Connecting to Internet Identity...';
       case 'waiting-actor': return 'Initializing secure connection...';
-      case 'claiming-admin': return 'Setting up admin access...';
       case 'checking-admin': return 'Verifying admin privileges...';
-      case 'redirecting': return 'Redirecting to dashboard...';
+      case 'setting-admin': return 'Setting up admin access...';
+      case 'success': return 'Access granted! Redirecting...';
       default: return 'Loading...';
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-admin-bg to-admin-sidebar flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm">
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 bg-admin-accent rounded-2xl flex items-center justify-center mb-4 shadow-lg">
-            <Leaf className="w-8 h-8 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-forest-dark via-forest to-forest-light flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Logo / Brand */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gold/20 border border-gold/40 mb-4">
+            <ShieldCheck className="w-8 h-8 text-gold" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Nature Glow</h1>
-          <p className="text-gray-500 text-sm mt-1">Admin Dashboard</p>
+          <h1 className="font-serif text-3xl text-gold mb-1">Nature Glow</h1>
+          <p className="text-cream/60 text-sm">Admin Portal</p>
         </div>
 
-        {/* Access Denied error */}
-        {showAccessDenied && error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-red-700 font-semibold text-sm">Access Denied</p>
-              <p className="text-red-600 text-sm mt-1">{error}</p>
+        {/* Card */}
+        <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-8 shadow-2xl">
+          <h2 className="text-xl font-semibold text-cream mb-2 text-center">Admin Sign In</h2>
+          <p className="text-cream/50 text-sm text-center mb-8">
+            Authenticate with Internet Identity to access the admin dashboard.
+          </p>
+
+          {/* Loading state */}
+          {isLoading && (
+            <div className="flex flex-col items-center gap-4 py-6">
+              <Loader2 className="w-10 h-10 text-gold animate-spin" />
+              <p className="text-cream/70 text-sm text-center">{getLoadingMessage()}</p>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Timeout error */}
-        {showTimeout && (
-          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-amber-700 font-semibold text-sm">Connection Timeout</p>
-              <p className="text-amber-600 text-sm mt-1">{error}</p>
-            </div>
-          </div>
-        )}
-
-        {/* General idle error */}
-        {error && phase === 'idle' && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
-            <p className="text-red-600 text-sm">{error}</p>
-          </div>
-        )}
-
-        {/* Loading state */}
-        {isActivelyLoading && (
-          <div className="mb-6 flex flex-col items-center gap-3 py-4">
-            <Loader2 className="w-8 h-8 text-admin-accent animate-spin" />
-            <p className="text-gray-600 text-sm text-center">{loadingMessage()}</p>
-          </div>
-        )}
-
-        {/* Action buttons */}
-        {!isActivelyLoading && (
-          <div className="space-y-3">
-            {showAccessDenied ? (
-              <>
-                <p className="text-center text-gray-500 text-sm">
-                  Sign in with the authorized admin account
+          {/* Error state */}
+          {(state === 'error' || state === 'timeout') && (
+            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex gap-3">
+              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-red-300 text-sm font-medium">
+                  {state === 'timeout' ? 'Connection timed out' : 'Authentication Error'}
                 </p>
+                <p className="text-red-300/70 text-xs mt-1">
+                  {state === 'timeout'
+                    ? 'Could not establish a connection. Please check your network and try again.'
+                    : errorMessage}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Access denied state */}
+          {state === 'access-denied' && (
+            <div className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex gap-3">
+              <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-amber-300 text-sm font-medium">Access Denied</p>
+                <p className="text-amber-300/70 text-xs mt-1">{errorMessage}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Action buttons */}
+          {!isLoading && (
+            <div className="space-y-3">
+              {(state === 'idle' || state === 'error' || state === 'timeout') && (
                 <Button
-                  onClick={handleSignOut}
-                  className="w-full bg-admin-accent hover:bg-admin-accent/90 text-white rounded-xl py-3 font-semibold"
+                  onClick={handleLogin}
+                  className="w-full bg-gold hover:bg-gold/90 text-forest font-semibold py-3 rounded-xl"
                 >
-                  Sign in with different account
+                  <ShieldCheck className="w-4 h-4 mr-2" />
+                  {isAuthenticated ? 'Continue as Admin' : 'Login with Internet Identity'}
                 </Button>
-              </>
-            ) : showTimeout ? (
-              <>
+              )}
+
+              {(state === 'error' || state === 'timeout') && (
                 <Button
                   onClick={handleRetry}
-                  className="w-full bg-admin-accent hover:bg-admin-accent/90 text-white rounded-xl py-3 font-semibold flex items-center justify-center gap-2"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  Retry Connection
-                </Button>
-                <Button
-                  onClick={handleLogin}
                   variant="outline"
-                  className="w-full rounded-xl py-3 font-semibold"
+                  className="w-full border-white/20 text-cream hover:bg-white/10 py-3 rounded-xl"
                 >
-                  Try Login Anyway
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Retry
                 </Button>
-              </>
-            ) : (
-              <>
-                <div className="flex items-center gap-2 text-gray-500 text-sm justify-center mb-4">
-                  <Shield className="w-4 h-4" />
-                  <span>Secure admin access via Internet Identity</span>
-                </div>
+              )}
+
+              {state === 'access-denied' && (
+                <>
+                  <Button
+                    onClick={handleLogout}
+                    variant="outline"
+                    className="w-full border-white/20 text-cream hover:bg-white/10 py-3 rounded-xl"
+                  >
+                    Logout & Try Different Account
+                  </Button>
+                  <Button
+                    onClick={() => navigate({ to: '/' })}
+                    variant="ghost"
+                    className="w-full text-cream/50 hover:text-cream hover:bg-white/5 py-3 rounded-xl"
+                  >
+                    Back to Store
+                  </Button>
+                </>
+              )}
+
+              {isAuthenticated && state === 'idle' && (
                 <Button
-                  onClick={handleLogin}
-                  disabled={isActivelyLoading}
-                  className="w-full bg-admin-accent hover:bg-admin-accent/90 text-white rounded-xl py-3 font-semibold"
+                  onClick={handleLogout}
+                  variant="ghost"
+                  className="w-full text-cream/50 hover:text-cream hover:bg-white/5 py-3 rounded-xl text-sm"
                 >
-                  Sign in with Internet Identity
+                  Logout current account
                 </Button>
-              </>
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

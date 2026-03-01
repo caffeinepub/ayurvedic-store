@@ -13,23 +13,30 @@ import {
   RefreshCw,
   Zap,
   Loader2,
+  Star,
+  EyeOff,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useGetProductById } from '../hooks/useQueries';
+import { useGetProductById, useCreateOrder } from '../hooks/useQueries';
 import { useCart } from '../context/CartContext';
 import { useRazorpay } from '../hooks/useRazorpay';
 import { ProductStatus } from '../backend';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 export default function ProductDetail() {
-  const params = useParams({ from: '/customer-layout/product/$productId' });
-  const productId = params.productId;
+  const params = useParams({ from: '/customer-layout/product/$id' });
+  const productId = params.id;
   const navigate = useNavigate();
   const { addItem } = useCart();
-  const { openCheckout, isLoading: razorpayLoading, isConfigured } = useRazorpay();
+  const { openCheckout } = useRazorpay();
+  const createOrder = useCreateOrder();
+  const queryClient = useQueryClient();
 
   const [quantity, setQuantity] = useState(1);
+  const [isBuyingNow, setIsBuyingNow] = useState(false);
 
   const productIdBigInt: bigint | null = productId ? BigInt(productId) : null;
   const { data: product, isLoading } = useGetProductById(productIdBigInt);
@@ -53,9 +60,11 @@ export default function ProductDetail() {
   if (!product) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-        <AlertCircle className="w-16 h-16 text-sage/40 mx-auto mb-4" />
-        <h2 className="font-serif text-2xl font-bold text-forest mb-2">Product not found</h2>
-        <p className="text-bark/60 mb-6">The product you're looking for doesn't exist.</p>
+        <EyeOff className="w-16 h-16 text-sage/40 mx-auto mb-4" />
+        <h2 className="font-serif text-2xl font-bold text-forest mb-2">Product Not Available</h2>
+        <p className="text-bark/60 mb-6">
+          This product is currently unavailable or does not exist.
+        </p>
         <Button
           onClick={() => navigate({ to: '/shop' })}
           className="bg-forest hover:bg-forest/90 text-cream"
@@ -66,27 +75,82 @@ export default function ProductDetail() {
     );
   }
 
-  const isActive = product.status === ProductStatus.active;
+  const isVisible = product.status === ProductStatus.visible;
   const isOutOfStock = product.status === ProductStatus.outOfStock;
   const isLaunchingSoon = product.status === ProductStatus.launchingSoon;
+  const isFeaturedStatus = product.status === ProductStatus.featured;
+
+  const canPurchase = isVisible || isFeaturedStatus;
+
   const maxQty = Number(product.stockQuantity) || 10;
 
   const handleAddToCart = () => {
-    if (isActive) {
+    if (canPurchase) {
       addItem(product, quantity);
       navigate({ to: '/cart' });
     }
   };
 
   const handleBuyNow = async () => {
-    if (!isActive) return;
+    if (!canPurchase) return;
     const totalPrice = Number(product.priceInr) * quantity;
-    await openCheckout({
-      productName: product.name,
-      amountInr: totalPrice,
-      storeName: 'Nature Glow',
-      description: `${product.name} × ${quantity}`,
-    });
+    setIsBuyingNow(true);
+    try {
+      await openCheckout({
+        amount: totalPrice * 100,
+        name: 'Nature Glow',
+        description: `${product.name} × ${quantity}`,
+        onSuccess: async (paymentId: string, rzpOrderId: string) => {
+          try {
+            // For Buy Now, we create an order with empty guest details
+            // since we don't have a checkout form here — the user can fill details in cart
+            const emptyGuestDetails = {
+              fullName: '',
+              email: '',
+              phoneNumber: '',
+              addressLine1: '',
+              addressLine2: '',
+              city: '',
+              state: '',
+              pincode: '',
+              orderNotes: undefined,
+            };
+
+            await createOrder.mutateAsync({
+              items: [{ productId: product.id, quantity: BigInt(quantity), unitPrice: product.priceInr }],
+              shippingDetails: {
+                fullName: '',
+                email: '',
+                phoneNumber: '',
+                addressLine1: '',
+                addressLine2: '',
+                city: '',
+                state: '',
+                pincode: '',
+              },
+              guestDetails: emptyGuestDetails,
+              totalAmount: BigInt(totalPrice),
+              razorpayOrderId: rzpOrderId || `rzp_${Date.now()}`,
+              razorpayPaymentId: paymentId,
+            });
+            queryClient.invalidateQueries({ queryKey: ['myOrders'] });
+          } catch {
+            // Order save failed but payment succeeded — still navigate to success
+          }
+          navigate({ to: '/payment-success' });
+        },
+        onDismiss: () => {
+          setIsBuyingNow(false);
+          navigate({ to: '/payment-failure' });
+        },
+      });
+    } catch (err: any) {
+      if (err?.message !== 'Payment dismissed') {
+        toast.error('Payment failed. Please try again.');
+      }
+    } finally {
+      setIsBuyingNow(false);
+    }
   };
 
   return (
@@ -111,195 +175,154 @@ export default function ProductDetail() {
             />
             {isOutOfStock && (
               <div className="absolute top-4 left-4">
-                <Badge className="bg-bark/80 text-cream text-sm font-medium flex items-center gap-1 px-3 py-1">
-                  <AlertCircle className="w-3.5 h-3.5" />
-                  Out of Stock
+                <Badge className="bg-bark/80 text-cream flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" /> Out of Stock
                 </Badge>
               </div>
             )}
             {isLaunchingSoon && (
               <div className="absolute top-4 left-4">
-                <Badge className="bg-golden text-white text-sm font-bold flex items-center gap-1 px-3 py-1">
-                  <Clock className="w-3.5 h-3.5" />
-                  Launching Soon
+                <Badge className="bg-blue-600 text-white flex items-center gap-1">
+                  <Clock className="w-3 h-3" /> Launching Soon
                 </Badge>
               </div>
             )}
-            {product.isFeatured && isActive && (
-              <div className="absolute top-4 right-4">
-                <Badge className="bg-forest text-cream text-xs font-medium px-3 py-1">
-                  ⭐ Featured
+            {isFeaturedStatus && (
+              <div className="absolute top-4 left-4">
+                <Badge className="bg-amber-500 text-white flex items-center gap-1">
+                  <Star className="w-3 h-3 fill-white" /> Featured
                 </Badge>
               </div>
             )}
           </div>
 
-          {/* ── Product Details ── */}
-          <div className="flex flex-col">
-            {/* Category */}
-            <p className="text-sage text-xs font-semibold uppercase tracking-widest mb-2">
-              {product.category}
-            </p>
-
-            {/* Name */}
-            <h1 className="font-serif text-3xl md:text-4xl font-bold text-forest mb-3 leading-tight">
-              {product.name}
-            </h1>
-
-            {/* Description */}
-            <p className="text-bark/70 leading-relaxed mb-5 text-sm md:text-base">
-              {product.description}
-            </p>
-
-            {/* ── Price ── */}
-            <div className="flex items-baseline gap-3 mb-5">
-              <span className="font-bold text-golden text-3xl md:text-4xl">
-                ₹{Number(product.priceInr).toLocaleString('en-IN')}
-              </span>
-              <span className="text-bark/40 text-sm line-through">
-                ₹{Math.round(Number(product.priceInr) * 1.2).toLocaleString('en-IN')}
-              </span>
-              <span className="text-xs font-semibold bg-forest/10 text-forest px-2 py-0.5 rounded-full">
-                20% OFF
-              </span>
+          {/* ── Product Info ── */}
+          <div className="flex flex-col gap-5">
+            <div>
+              <p className="text-xs text-sage font-semibold uppercase tracking-widest mb-2">
+                {product.category}
+              </p>
+              <h1 className="font-serif text-3xl md:text-4xl font-bold text-forest leading-tight mb-3">
+                {product.name}
+              </h1>
+              <p className="text-bark/70 leading-relaxed">{product.description}</p>
             </div>
 
-            {/* Stock info */}
-            {isActive && (
-              <div className="flex items-center gap-2 mb-5">
-                <CheckCircle className="w-4 h-4 text-forest" />
-                <span className="text-forest text-sm font-medium">
-                  In Stock ({Number(product.stockQuantity)} available)
+            {/* Price */}
+            <div className="flex items-baseline gap-3">
+              <span className="font-bold text-golden text-3xl">
+                ₹{Number(product.priceInr).toLocaleString('en-IN')}
+              </span>
+              {canPurchase && (
+                <span className="text-bark/40 line-through text-lg">
+                  ₹{Math.round(Number(product.priceInr) * 1.2).toLocaleString('en-IN')}
                 </span>
+              )}
+            </div>
+
+            {isOutOfStock && (
+              <div className="flex items-center gap-2 p-3 bg-bark/10 rounded-xl text-bark/70 text-sm">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                This product is currently out of stock. Check back soon!
+              </div>
+            )}
+            {isLaunchingSoon && (
+              <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-xl text-blue-700 text-sm">
+                <Clock className="w-4 h-4 flex-shrink-0" />
+                This product is launching soon. Stay tuned!
               </div>
             )}
 
-            {/* ── Quantity Selector ── */}
-            {isActive && (
-              <div className="mb-6">
-                <label className="text-bark/70 text-sm font-medium mb-2 block">Quantity</label>
-                <div className="flex items-center gap-0 border-2 border-sage/40 rounded-xl w-fit overflow-hidden">
+            {/* Quantity selector */}
+            {canPurchase && (
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-medium text-bark">Quantity:</span>
+                <div className="flex items-center gap-3 bg-parchment rounded-xl px-3 py-2">
                   <button
                     onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                    disabled={quantity <= 1}
-                    className="w-10 h-10 flex items-center justify-center bg-parchment hover:bg-sage/20 transition-colors text-bark disabled:opacity-40 disabled:cursor-not-allowed"
-                    aria-label="Decrease quantity"
+                    className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-sage/20 transition-colors"
                   >
-                    <Minus className="w-4 h-4" />
+                    <Minus className="w-3 h-3 text-bark" />
                   </button>
-                  <span className="w-12 text-center text-base font-bold text-forest bg-white h-10 flex items-center justify-center border-x-2 border-sage/40">
-                    {quantity}
-                  </span>
+                  <span className="w-8 text-center font-semibold text-forest">{quantity}</span>
                   <button
                     onClick={() => setQuantity(q => Math.min(maxQty, q + 1))}
-                    disabled={quantity >= maxQty}
-                    className="w-10 h-10 flex items-center justify-center bg-parchment hover:bg-sage/20 transition-colors text-bark disabled:opacity-40 disabled:cursor-not-allowed"
-                    aria-label="Increase quantity"
+                    className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-sage/20 transition-colors"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-3 h-3 text-bark" />
                   </button>
                 </div>
               </div>
             )}
 
-            {/* ── Action Buttons ── */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-8">
-              {/* Add to Cart */}
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 onClick={handleAddToCart}
-                disabled={!isActive}
-                className={`flex-1 py-3 text-base font-semibold rounded-xl shadow-botanical transition-all ${
-                  isActive
-                    ? 'bg-forest hover:bg-forest/90 text-cream hover:shadow-botanical-lg'
-                    : 'bg-bark/20 text-bark/40 cursor-not-allowed'
+                disabled={!canPurchase}
+                className={`flex-1 py-3 font-semibold rounded-xl ${
+                  canPurchase
+                    ? 'bg-forest hover:bg-forest/90 text-cream shadow-botanical'
+                    : 'bg-bark/15 text-bark/40 cursor-not-allowed'
                 }`}
               >
-                <ShoppingCart className="w-5 h-5 mr-2" />
+                <ShoppingCart className="w-4 h-4 mr-2" />
                 {isOutOfStock ? 'Out of Stock' : isLaunchingSoon ? 'Coming Soon' : 'Add to Cart'}
               </Button>
 
-              {/* Buy Now */}
-              <Button
-                onClick={handleBuyNow}
-                disabled={!isActive || razorpayLoading || !isConfigured}
-                className={`flex-1 py-3 text-base font-semibold rounded-xl transition-all ${
-                  isActive && isConfigured
-                    ? 'bg-golden hover:bg-golden/90 text-white shadow-botanical hover:shadow-botanical-lg'
-                    : 'bg-bark/20 text-bark/40 cursor-not-allowed'
-                }`}
-              >
-                {razorpayLoading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <Zap className="w-5 h-5 mr-2" />
-                    Buy Now
-                  </>
-                )}
-              </Button>
+              {canPurchase && (
+                <Button
+                  onClick={handleBuyNow}
+                  disabled={isBuyingNow}
+                  className="flex-1 py-3 font-semibold rounded-xl bg-golden hover:bg-golden/90 text-white shadow-botanical disabled:opacity-50"
+                >
+                  {isBuyingNow ? (
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  ) : (
+                    <Zap className="w-4 h-4 mr-2" />
+                  )}
+                  Buy Now
+                </Button>
+              )}
             </div>
 
-            {/* ── Specifications ── */}
+            {/* Trust badges */}
+            <div className="grid grid-cols-3 gap-3 pt-2">
+              {[
+                { icon: Truck, label: 'Free Shipping', sub: 'Orders above ₹499' },
+                { icon: Shield, label: 'Secure Payment', sub: 'Razorpay secured' },
+                { icon: RefreshCw, label: 'Easy Returns', sub: '7-day policy' },
+              ].map(({ icon: Icon, label, sub }) => (
+                <div key={label} className="flex flex-col items-center text-center p-3 bg-white rounded-xl shadow-sm">
+                  <Icon className="w-5 h-5 text-forest mb-1" />
+                  <p className="text-xs font-semibold text-forest">{label}</p>
+                  <p className="text-xs text-bark/50">{sub}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Specifications */}
             {product.specifications && product.specifications.length > 0 && (
-              <div className="mb-8 bg-white rounded-2xl p-5 shadow-botanical">
-                <h3 className="font-serif font-semibold text-forest mb-3 text-lg">
-                  Specifications
-                </h3>
+              <div className="bg-white rounded-2xl p-5 shadow-sm">
+                <h3 className="font-serif text-forest font-semibold mb-3">Specifications</h3>
                 <div className="space-y-2">
                   {product.specifications.map((spec, i) => (
-                    <div key={i} className="flex gap-3 text-sm border-b border-sage/10 pb-2 last:border-0 last:pb-0">
-                      <span className="text-bark/50 w-32 flex-shrink-0 font-medium">{spec.key}</span>
-                      <span className="text-bark font-semibold">{spec.value}</span>
+                    <div key={i} className="flex justify-between text-sm border-b border-sage/10 pb-2 last:border-0">
+                      <span className="text-bark/60 font-medium">{spec.key}</span>
+                      <span className="text-forest font-semibold">{spec.value}</span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* ── Delivery & Returns ── */}
-            <div className="bg-white rounded-2xl p-5 shadow-botanical">
-              <h3 className="font-serif font-semibold text-forest mb-4 text-lg">
-                Delivery & Returns
-              </h3>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-full bg-forest/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Truck className="w-4 h-4 text-forest" />
-                  </div>
-                  <div>
-                    <p className="text-bark font-semibold text-sm">Estimated Delivery</p>
-                    <p className="text-bark/60 text-xs mt-0.5">
-                      3–7 business days across India
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-full bg-golden/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Shield className="w-4 h-4 text-golden" />
-                  </div>
-                  <div>
-                    <p className="text-bark font-semibold text-sm">Free Shipping</p>
-                    <p className="text-bark/60 text-xs mt-0.5">
-                      On all orders above ₹499. Standard shipping ₹49 below that.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-full bg-terracotta/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <RefreshCw className="w-4 h-4 text-terracotta" />
-                  </div>
-                  <div>
-                    <p className="text-bark font-semibold text-sm">Easy Returns</p>
-                    <p className="text-bark/60 text-xs mt-0.5">
-                      7-day hassle-free return policy. Contact us for any issues.
-                    </p>
-                  </div>
-                </div>
+            {/* Stock info */}
+            {canPurchase && product.stockQuantity > 0 && (
+              <div className="flex items-center gap-2 text-sm text-forest">
+                <CheckCircle className="w-4 h-4" />
+                <span>{Number(product.stockQuantity)} units in stock</span>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

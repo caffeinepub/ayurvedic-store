@@ -31,6 +31,17 @@ export const ShoppingItem = IDL.Record({
   'priceInCents' : IDL.Nat,
   'productDescription' : IDL.Text,
 });
+export const GuestDetails = IDL.Record({
+  'city' : IDL.Text,
+  'fullName' : IDL.Text,
+  'email' : IDL.Text,
+  'state' : IDL.Text,
+  'addressLine1' : IDL.Text,
+  'addressLine2' : IDL.Text,
+  'pincode' : IDL.Text,
+  'phoneNumber' : IDL.Text,
+  'orderNotes' : IDL.Opt(IDL.Text),
+});
 export const OrderItem = IDL.Record({
   'productId' : IDL.Nat,
   'quantity' : IDL.Nat,
@@ -47,6 +58,8 @@ export const ShippingDetails = IDL.Record({
   'phoneNumber' : IDL.Text,
 });
 export const OrderInput = IDL.Record({
+  'razorpayPaymentId' : IDL.Text,
+  'guestDetails' : GuestDetails,
   'razorpayOrderId' : IDL.Text,
   'totalAmount' : IDL.Nat,
   'items' : IDL.Vec(OrderItem),
@@ -58,6 +71,7 @@ export const Order = IDL.Record({
   'paymentStatus' : IDL.Text,
   'fulfillmentStatus' : IDL.Text,
   'createdAt' : IDL.Int,
+  'guestDetails' : IDL.Opt(GuestDetails),
   'razorpayOrderId' : IDL.Text,
   'totalAmount' : IDL.Nat,
   'customerId' : IDL.Principal,
@@ -65,9 +79,11 @@ export const Order = IDL.Record({
   'shippingDetails' : ShippingDetails,
 });
 export const ProductStatus = IDL.Variant({
-  'active' : IDL.Null,
+  'featured' : IDL.Null,
   'launchingSoon' : IDL.Null,
   'outOfStock' : IDL.Null,
+  'notVisible' : IDL.Null,
+  'visible' : IDL.Null,
 });
 export const Specification = IDL.Record({
   'key' : IDL.Text,
@@ -205,7 +221,11 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'getProductById' : IDL.Func([IDL.Nat], [IDL.Opt(Product)], ['query']),
-  'getProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
+  'getProducts' : IDL.Func(
+      [IDL.Vec(ProductStatus)],
+      [IDL.Vec(Product)],
+      ['query'],
+    ),
   'getProductsByCategory' : IDL.Func([IDL.Text], [IDL.Vec(Product)], ['query']),
   'getRazorpayKeyId' : IDL.Func([], [IDL.Text], ['query']),
   'getSiteSettings' : IDL.Func([], [SiteSettings], ['query']),
@@ -268,6 +288,17 @@ export const idlFactory = ({ IDL }) => {
     'priceInCents' : IDL.Nat,
     'productDescription' : IDL.Text,
   });
+  const GuestDetails = IDL.Record({
+    'city' : IDL.Text,
+    'fullName' : IDL.Text,
+    'email' : IDL.Text,
+    'state' : IDL.Text,
+    'addressLine1' : IDL.Text,
+    'addressLine2' : IDL.Text,
+    'pincode' : IDL.Text,
+    'phoneNumber' : IDL.Text,
+    'orderNotes' : IDL.Opt(IDL.Text),
+  });
   const OrderItem = IDL.Record({
     'productId' : IDL.Nat,
     'quantity' : IDL.Nat,
@@ -284,6 +315,8 @@ export const idlFactory = ({ IDL }) => {
     'phoneNumber' : IDL.Text,
   });
   const OrderInput = IDL.Record({
+    'razorpayPaymentId' : IDL.Text,
+    'guestDetails' : GuestDetails,
     'razorpayOrderId' : IDL.Text,
     'totalAmount' : IDL.Nat,
     'items' : IDL.Vec(OrderItem),
@@ -295,6 +328,7 @@ export const idlFactory = ({ IDL }) => {
     'paymentStatus' : IDL.Text,
     'fulfillmentStatus' : IDL.Text,
     'createdAt' : IDL.Int,
+    'guestDetails' : IDL.Opt(GuestDetails),
     'razorpayOrderId' : IDL.Text,
     'totalAmount' : IDL.Nat,
     'customerId' : IDL.Principal,
@@ -302,9 +336,11 @@ export const idlFactory = ({ IDL }) => {
     'shippingDetails' : ShippingDetails,
   });
   const ProductStatus = IDL.Variant({
-    'active' : IDL.Null,
+    'featured' : IDL.Null,
     'launchingSoon' : IDL.Null,
     'outOfStock' : IDL.Null,
+    'notVisible' : IDL.Null,
+    'visible' : IDL.Null,
   });
   const Specification = IDL.Record({ 'key' : IDL.Text, 'value' : IDL.Text });
   const ProductInput = IDL.Record({
@@ -433,7 +469,11 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'getProductById' : IDL.Func([IDL.Nat], [IDL.Opt(Product)], ['query']),
-    'getProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
+    'getProducts' : IDL.Func(
+        [IDL.Vec(ProductStatus)],
+        [IDL.Vec(Product)],
+        ['query'],
+      ),
     'getProductsByCategory' : IDL.Func(
         [IDL.Text],
         [IDL.Vec(Product)],

@@ -1,22 +1,57 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Replace hero image with uploaded spices/herbs flat-lay photo",
+  "title": "Guest checkout form with full customer details and inline admin order management",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Replace the current hero background image with the newly generated spices/herbs flat-lay photo while preserving all existing text overlays, gradient overlays, Ken Burns animation, and CTA buttons",
+      "id": "REQ-2",
+      "summary": "Extend checkout form to collect full guest customer details without requiring login",
       "acceptanceCriteria": [
-        "The hero section displays the spices and herbs flat-lay photo (mortar and pestle, turmeric, ginger, garlic, rosemary, lemon) as its background image",
-        "All existing hero text, gradient overlays, Ken Burns zoom animation, and CTA buttons remain intact and functional",
-        "No other sections or components are altered",
-        "The image renders correctly on both desktop and mobile viewports"
+        "The checkout form displays fields for Full Name, Email, Phone, Street, City, Postal Code, and Order Notes.",
+        "Required fields (Name, Email, Phone, Street, City, Postal Code) show validation errors if left empty on submit.",
+        "A guest (unauthenticated) user can complete checkout without logging in.",
+        "All form values are passed to the backend order creation call.",
+        "Order Notes field is optional and clearly labelled as such."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/Hero.tsx",
+          "path": "frontend/src/pages/Cart.tsx",
           "operation": "modify",
-          "description": "Update the background image source to reference the newly generated static asset at frontend/public/assets/generated/hero-spices.dim_1920x1080.jpg. Replace the existing backgroundImage URL in the component's styling/props while keeping all other hero functionality (text overlays, gradient overlays, Ken Burns animation, CTA buttons) completely unchanged. Ensure the image path is correct and the file is treated as a static asset accessible via /assets/generated/hero-spices.dim_1920x1080.jpg at runtime."
+          "description": "Extend the checkout form to collect fullName, email, phone, street (addressLine1), city, postalCode, and orderNotes fields. Update form validation to ensure all required fields (fullName, email, phone, street, city, postalCode) are present before submission. Pass the collected guest details to the backend createOrder call via the guestDetails field in OrderInput. Ensure the form works for both authenticated and guest users without requiring login. Mark the orderNotes field as optional in the UI."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Redesign Admin Orders page to display full customer details inline without requiring modal clicks",
+      "acceptanceCriteria": [
+        "The Admin Orders list shows Order ID, Date & Time, Customer Name, Email, Phone, and full delivery address for every order.",
+        "Each order in the list shows the ordered items with their quantities and individual prices.",
+        "The order total and current status (Pending, Processing, Delivered, etc.) are visible per order.",
+        "Guest orders (no registered account) display all collected customer details just as registered-user orders do.",
+        "No modal click is required to see the core customer details — they are visible inline or in an always-visible expanded section."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/admin/AdminOrders.tsx",
+          "operation": "modify",
+          "description": "Redesign the orders list to display full customer details inline for each order. Show Order ID, Date & Time, Customer Full Name (from guestDetails.fullName), Email (guestDetails.email), Phone (guestDetails.phoneNumber), and full delivery address (guestDetails.addressLine1, addressLine2, city, state, pincode) directly in each order row or in an always-visible expanded section. Display ordered items with quantities and unit prices inline. Show order total and fulfillment status. Ensure guest orders (where customerId may be anonymous) display all guestDetails fields. Use an expandable row pattern or card layout to keep all details accessible without requiring modal clicks for core information."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Update OrderDetailModal to display all new guest customer fields",
+      "acceptanceCriteria": [
+        "OrderDetailModal renders fullName, email, phone, street, city, postalCode, and orderNotes from the order record.",
+        "If orderNotes is empty, that field is hidden or labelled 'None'.",
+        "All fields are displayed for both guest and registered-user orders."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/admin/OrderDetailModal.tsx",
+          "operation": "modify",
+          "description": "Update the modal to render all guestDetails fields: fullName, email, phoneNumber, addressLine1, addressLine2, city, state, pincode, and orderNotes. Map backend field names (e.g., phoneNumber, addressLine1) to display labels (Phone, Street Address). If orderNotes is undefined or empty, hide the field or display 'None'. Ensure the modal works for both guest orders (anonymous customerId with guestDetails populated) and registered-user orders (authenticated customerId with optional guestDetails)."
         }
       ]
     }

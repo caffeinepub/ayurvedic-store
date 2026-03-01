@@ -10,7 +10,7 @@ export default function CartDrawer() {
 
   const handleCheckout = () => {
     closeCart();
-    navigate({ to: '/checkout' });
+    navigate({ to: '/cart' });
   };
 
   return (

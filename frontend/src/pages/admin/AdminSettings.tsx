@@ -62,7 +62,6 @@ export default function AdminSettings() {
   const handleSaveWhatsapp = async () => {
     try {
       await setWhatsappNumber.mutateAsync(whatsappNumber.trim());
-      // Explicitly invalidate and refetch so FloatingWhatsApp picks up the new number immediately
       await queryClient.invalidateQueries({ queryKey: ['whatsappNumber'] });
       toast.success('WhatsApp number saved successfully');
     } catch (err: any) {
