@@ -1,51 +1,27 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "E-commerce project with Razorpay payment integration. Improving checkout experience for both mobile and desktop users — desktop gets UPI QR code, cards, net banking, and wallets; mobile keeps direct UPI app options.",
+  "summary": "Razorpay checkout integration project with UPI payment option fix needed for desktop version.",
   "architectural_notes": [
-    "Razorpay Standard Checkout (modal/popup) used for payment integration",
-    "Device detection determines payment method defaults: desktop shows UPI QR code, cards, net banking, wallets; mobile shows direct UPI app options"
+    "Razorpay checkout must display UPI payment option on both desktop and mobile layouts."
   ],
   "known_issues": [
-    "Desktop Razorpay defaulted to UPI collect (push request to phone), causing friction — being fixed with QR code and card-first approach"
+    "UPI payment option missing in desktop version of Razorpay checkout."
   ],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-add-a-device-detection-utility-that-distinguishes-between-mobile-and-desktop-users-based-on-user-agent-and-or-screen-width-and-export-it-for-use-in-razorpay-checkout-flows",
-      "title": "Add a device detection utility that distinguishes between mobile and desktop users based on user agent and/or screen width, and export it for use in Razorpay checkout flows.",
+      "id": "feature-fix-the-razorpay-checkout-configuration-in-frontend-src-hooks-userazorpay-ts-so-that-the-upi-payment-method-is-included-and-visible-in-the-desktop-checkout-flow-the-device-aware-payment-method-configuration-currently-used-in-the-hook-must-be-updated-to-ensure-upi-is-not-excluded-or-omitted-when-the-device-is-detected-as-desktop-upi-should-appear-as-a-payment-option-on-both-mobile-and-desktop",
+      "title": "Fix the Razorpay checkout configuration in `frontend/src/hooks/useRazorpay.ts` so that the UPI payment method is included and visible in the desktop checkout flow. The device-aware payment method configuration currently used in the hook must be updated to ensure UPI is not excluded or omitted when the device is detected as desktop. UPI should appear as a payment option on both mobile and desktop.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
-    },
-    {
-      "id": "feature-update-the-razorpay-checkout-configuration-in-frontend-src-hooks-userazorpay-ts-and-any-direct-checkout-calls-in-frontend-src-components-productcard-tsx-frontend-src-pages-cart-tsx-and-frontend-src-pages-productdetail-tsx-so-that-on-desktop-the-razorpay-modal-opens-with-config-display-preferences-sequence-prioritising-cards-then-net-banking-then-upi-qr-code-method-upi-flow-qr-and-the-upi-collect-intent-flow-is-disabled-on-mobile-the-existing-flow-is-preserved-with-upi-apps-intent-cards-and-wallets-as-primary-options",
-      "title": "Update the Razorpay checkout configuration in `frontend/src/hooks/useRazorpay.ts` and any direct checkout calls in `frontend/src/components/ProductCard.tsx`, `frontend/src/pages/Cart.tsx`, and `frontend/src/pages/ProductDetail.tsx` so that: on desktop, the Razorpay modal opens with `config.display.preferences.sequence` prioritising cards, then net banking, then UPI QR code (method: 'upi', flow: 'qr'), and the UPI collect/intent flow is disabled; on mobile, the existing flow is preserved with UPI apps (intent), cards, and wallets as primary options.",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-the-razorpay-checkout-modal-is-responsive-and-well-styled-for-both-mobile-and-desktop-screen-sizes-no-clipped-elements-appropriate-modal-width-on-desktop-and-full-screen-bottom-sheet-style-on-mobile-if-supported-by-razorpay-s-config",
-      "title": "Ensure the Razorpay checkout modal is responsive and well-styled for both mobile and desktop screen sizes — no clipped elements, appropriate modal width on desktop, and full-screen/bottom-sheet style on mobile if supported by Razorpay's config.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "version": 1
     }
   ],
-  "new_feature_requests": [
-    {
-      "id": "AR-1",
-      "summary": "Improve Razorpay payment experience: device detection to show UPI QR code + cards + net banking + wallets on desktop; direct UPI app options on mobile",
-      "reqIds": [],
-      "status": "pending"
-    }
-  ],
+  "new_feature_requests": [],
   "gameProjectType": "none",
-  "projectName": "Nature Glow Ayurvedic",
+  "projectName": "Nature Glow",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

@@ -29,15 +29,16 @@ export interface RazorpayOptions {
 /**
  * Builds device-aware Razorpay display configuration.
  *
- * Desktop: Prioritises Cards → Net Banking → UPI QR code.
- *          UPI collect/intent (push request to phone) is excluded to avoid friction.
+ * Desktop: Cards → Net Banking → UPI (all flows: intent, collect, qr) → Wallets.
+ *          UPI is now fully enabled on desktop so users can pay via UPI QR,
+ *          collect (VPA entry), or intent (if a UPI app is installed on desktop).
  *
- * Mobile:  Keeps the default Razorpay flow which surfaces UPI intent apps
- *          (Google Pay, Paytm, PhonePe), cards, and wallets natively.
+ * Mobile:  UPI intent apps (Google Pay, Paytm, PhonePe) are surfaced first,
+ *          followed by cards, wallets, and net banking.
  */
 function buildRazorpayConfig(mobile: boolean) {
   if (mobile) {
-    // Mobile: let Razorpay use its default ordering which surfaces UPI intent apps first
+    // Mobile: surface UPI intent apps first, then other methods
     return {
       config: {
         display: {
@@ -66,7 +67,7 @@ function buildRazorpayConfig(mobile: boolean) {
     };
   }
 
-  // Desktop: Cards first, then Net Banking, then UPI QR only (no collect/intent)
+  // Desktop: Cards first, then Net Banking, then full UPI (all flows), then Wallets
   return {
     config: {
       display: {
@@ -79,12 +80,12 @@ function buildRazorpayConfig(mobile: boolean) {
             name: 'Net Banking',
             instruments: [{ method: 'netbanking' }],
           },
-          upi_qr: {
-            name: 'UPI QR Code',
+          upi: {
+            name: 'UPI',
             instruments: [
               {
                 method: 'upi',
-                flows: ['qr'],
+                flows: ['intent', 'collect', 'qr'],
               },
             ],
           },
@@ -93,7 +94,7 @@ function buildRazorpayConfig(mobile: boolean) {
             instruments: [{ method: 'wallet' }],
           },
         },
-        sequence: ['block.card', 'block.netbanking', 'block.upi_qr', 'block.wallet'],
+        sequence: ['block.card', 'block.netbanking', 'block.upi', 'block.wallet'],
         preferences: {
           show_default_blocks: false,
         },

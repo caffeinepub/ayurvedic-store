@@ -1,47 +1,21 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-03-01T21:08:23.821Z",
+  "generatedAt": "2026-03-01T21:26:08.477Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 1,
+    "implemented": 1,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Add a device detection utility that distinguishes between mobile and desktop users based on user agent and/or screen width, and export it for use in Razorpay checkout flows.",
+        "summary": "Fix the Razorpay checkout configuration in `frontend/src/hooks/useRazorpay.ts` so that the UPI payment method is included and visible in the desktop checkout flow. The device-aware payment method configuration currently used in the hook must be updated to ensure UPI is not excluded or omitted when the device is detected as desktop. UPI should appear as a payment option on both mobile and desktop.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/utils/deviceDetection.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/utils/deviceDetection.ts"
-        ]
-      },
-      {
-        "id": "REQ-2",
-        "summary": "Update the Razorpay checkout configuration in `frontend/src/hooks/useRazorpay.ts` and any direct checkout calls in `frontend/src/components/ProductCard.tsx`, `frontend/src/pages/Cart.tsx`, and `frontend/src/pages/ProductDetail.tsx` so that: on desktop, the Razorpay modal opens with `config.display.preferences.sequence` prioritising cards, then net banking, then UPI QR code (method: 'upi', flow: 'qr'), and the UPI collect/intent flow is disabled; on mobile, the existing flow is preserved with UPI apps (intent), cards, and wallets as primary options.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useRazorpay.ts",
-          "frontend/src/components/ProductCard.tsx",
-          "frontend/src/pages/Cart.tsx",
-          "frontend/src/pages/ProductDetail.tsx"
-        ],
-        "matchedFiles": [
           "frontend/src/hooks/useRazorpay.ts"
-        ]
-      },
-      {
-        "id": "REQ-3",
-        "summary": "Ensure the Razorpay checkout modal is responsive and well-styled for both mobile and desktop screen sizes — no clipped elements, appropriate modal width on desktop, and full-screen/bottom-sheet style on mobile if supported by Razorpay's config.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useRazorpay.ts",
-          "frontend/src/index.css"
         ],
         "matchedFiles": [
           "frontend/src/hooks/useRazorpay.ts"
@@ -55,7 +29,6 @@
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/hooks/useRazorpay.ts",
-    "frontend/src/utils/deviceDetection.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

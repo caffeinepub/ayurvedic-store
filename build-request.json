@@ -1,77 +1,42 @@
 {
   "kind": "build_request",
-  "title": "Improve Razorpay checkout experience for desktop and mobile users",
-  "projectName": "Nature Glow Ayurvedic",
+  "title": "Fix UPI payment option missing in desktop Razorpay checkout",
+  "projectName": "Nature Glow",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Add a device detection utility that distinguishes between mobile and desktop users based on user agent and/or screen width, and export it for use in Razorpay checkout flows.",
+      "text": "Fix the Razorpay checkout configuration in `frontend/src/hooks/useRazorpay.ts` so that the UPI payment method is included and visible in the desktop checkout flow. The device-aware payment method configuration currently used in the hook must be updated to ensure UPI is not excluded or omitted when the device is detected as desktop. UPI should appear as a payment option on both mobile and desktop.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-7",
-          "msg-9"
+          "msg-6",
+          "msg-7"
         ],
         "quotes": [
-          "Detect whether the user is on desktop or mobile"
+          "In the desktop version the upi option is missing. Kindly fix it.",
+          "I'll fix the UPI payment option so it appears correctly in the desktop version of the Razorpay checkout."
         ]
       },
       "acceptanceCriteria": [
-        "The utility correctly identifies mobile devices (phones/tablets) vs. desktop browsers.",
-        "The result is available to all components that initiate Razorpay checkout."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Update the Razorpay checkout configuration in `frontend/src/hooks/useRazorpay.ts` and any direct checkout calls in `frontend/src/components/ProductCard.tsx`, `frontend/src/pages/Cart.tsx`, and `frontend/src/pages/ProductDetail.tsx` so that: on desktop, the Razorpay modal opens with `config.display.preferences.sequence` prioritising cards, then net banking, then UPI QR code (method: 'upi', flow: 'qr'), and the UPI collect/intent flow is disabled; on mobile, the existing flow is preserved with UPI apps (intent), cards, and wallets as primary options.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-7",
-          "msg-9"
-        ],
-        "quotes": [
-          "On desktop, show a UPI QR code (instead of collect request) along with cards, net banking, and wallets as primary options",
-          "Mobile: Keep the existing smooth flow with direct UPI app options (Google Pay, Paytm, PhonePe), cards, and wallets"
-        ]
-      },
-      "acceptanceCriteria": [
-        "On desktop, the Razorpay modal shows Cards as the default/first tab, followed by Net Banking and UPI QR code.",
-        "On desktop, the UPI collect (push request to phone) flow is not presented to the user.",
-        "On mobile, the Razorpay modal shows UPI app options (Google Pay, Paytm, PhonePe intent), cards, and wallets as before.",
-        "Payment completion and order creation still work correctly on both device types after the change."
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Ensure the Razorpay checkout modal is responsive and well-styled for both mobile and desktop screen sizes — no clipped elements, appropriate modal width on desktop, and full-screen/bottom-sheet style on mobile if supported by Razorpay's config.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-9"
-        ],
-        "quotes": [
-          "Responsive, clean modal styling for both screen sizes"
-        ]
-      },
-      "acceptanceCriteria": [
-        "On desktop, the Razorpay modal is properly sized and centered without overflowing the viewport.",
-        "On mobile, the modal displays correctly without layout issues.",
-        "No visual regressions on existing cart/product pages."
+        "The UPI payment option is visible in the Razorpay checkout modal when accessed from a desktop browser.",
+        "The UPI payment option continues to be visible in the Razorpay checkout modal when accessed from a mobile browser.",
+        "No other existing payment methods (cards, net banking, wallets, etc.) are removed from the desktop or mobile checkout configuration.",
+        "The fix is applied in `frontend/src/hooks/useRazorpay.ts` within the device-aware payment method configuration logic.",
+        "The `isMobileDevice()` utility in `frontend/src/utils/deviceDetection.ts` is not broken or changed in a way that affects other features."
       ]
     }
   ],
   "constraints": [
-    "Do not modify immutable frontend paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui.",
-    "Razorpay Standard Checkout script is already loaded via frontend/index.html — do not add a duplicate script tag.",
-    "Backend order creation and payment verification logic must remain unchanged."
+    "Do not remove or disable any existing payment methods (cards, net banking, wallets) from either mobile or desktop configurations.",
+    "Do not modify files listed in frontend.immutablePaths.",
+    "Do not change the backend schema or Motoko actor."
   ],
   "nonGoals": [
-    "Replacing Razorpay with a different payment provider.",
-    "Adding new payment methods not already supported by Razorpay (e.g., BNPL).",
-    "Changes to the backend Razorpay key storage or order creation flow.",
-    "Any changes to Stripe checkout flow."
+    "Adding new payment methods beyond fixing UPI visibility.",
+    "Redesigning the checkout UI or Razorpay modal styling.",
+    "Changes to the mobile checkout configuration unless required to fix the desktop UPI issue.",
+    "Backend changes."
   ],
   "imageRequirements": {
     "required": [],

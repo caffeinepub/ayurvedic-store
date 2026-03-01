@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-device-detection-utility-that-distinguishes-between-mobile-and-desktop-users-based-on-user-agent-and-or-screen-width-and-export-it-for-use-in-razorpay-checkout-flows",
-      "featureTitle": "Add a device detection utility that distinguishes between mobile and desktop users based on user agent and/or screen width, and export it for use in Razorpay checkout flows.",
+      "featureId": "feature-fix-the-razorpay-checkout-configuration-in-frontend-src-hooks-userazorpay-ts-so-that-the-upi-payment-method-is-included-and-visible-in-the-desktop-checkout-flow-the-device-aware-payment-method-configuration-currently-used-in-the-hook-must-be-updated-to-ensure-upi-is-not-excluded-or-omitted-when-the-device-is-detected-as-desktop-upi-should-appear-as-a-payment-option-on-both-mobile-and-desktop",
+      "featureTitle": "Fix the Razorpay checkout configuration in `frontend/src/hooks/useRazorpay.ts` so that the UPI payment method is included and visible in the desktop checkout flow. The device-aware payment method configuration currently used in the hook must be updated to ensure UPI is not excluded or omitted when the device is detected as desktop. UPI should appear as a payment option on both mobile and desktop.",
       "files": [
-        "frontend/src/utils/deviceDetection.ts"
+        "frontend/src/hooks/useRazorpay.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -20,50 +20,6 @@
       ],
       "testIds": [
         "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-the-razorpay-checkout-configuration-in-frontend-src-hooks-userazorpay-ts-and-any-direct-checkout-calls-in-frontend-src-components-productcard-tsx-frontend-src-pages-cart-tsx-and-frontend-src-pages-productdetail-tsx-so-that-on-desktop-the-razorpay-modal-opens-with-config-display-preferences-sequence-prioritising-cards-then-net-banking-then-upi-qr-code-method-upi-flow-qr-and-the-upi-collect-intent-flow-is-disabled-on-mobile-the-existing-flow-is-preserved-with-upi-apps-intent-cards-and-wallets-as-primary-options",
-      "featureTitle": "Update the Razorpay checkout configuration in `frontend/src/hooks/useRazorpay.ts` and any direct checkout calls in `frontend/src/components/ProductCard.tsx`, `frontend/src/pages/Cart.tsx`, and `frontend/src/pages/ProductDetail.tsx` so that: on desktop, the Razorpay modal opens with `config.display.preferences.sequence` prioritising cards, then net banking, then UPI QR code (method: 'upi', flow: 'qr'), and the UPI collect/intent flow is disabled; on mobile, the existing flow is preserved with UPI apps (intent), cards, and wallets as primary options.",
-      "files": [
-        "frontend/src/hooks/useRazorpay.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-ensure-the-razorpay-checkout-modal-is-responsive-and-well-styled-for-both-mobile-and-desktop-screen-sizes-no-clipped-elements-appropriate-modal-width-on-desktop-and-full-screen-bottom-sheet-style-on-mobile-if-supported-by-razorpay-s-config",
-      "featureTitle": "Ensure the Razorpay checkout modal is responsive and well-styled for both mobile and desktop screen sizes — no clipped elements, appropriate modal width on desktop, and full-screen/bottom-sheet style on mobile if supported by Razorpay's config.",
-      "files": [
-        "frontend/src/hooks/useRazorpay.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-3"
       ],
       "confidence": "high"
     }
