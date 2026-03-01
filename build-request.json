@@ -1,110 +1,77 @@
 {
   "kind": "build_request",
-  "title": "Guest checkout form with full customer details and inline admin order management",
-  "projectName": "Nature Glow Ayurveda",
+  "title": "Improve Razorpay checkout experience for desktop and mobile users",
+  "projectName": "Nature Glow Ayurvedic",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Extend the backend Order type to include guest customer details: fullName (Text), email (Text), phone (Text), street (Text), city (Text), postalCode (Text), and orderNotes (Text, optional). Update all order creation endpoints (createOrder, or equivalent) to accept and persist these fields. Ensure existing orders remain intact via migration.",
-      "target": "backend",
+      "text": "Add a device detection utility that distinguishes between mobile and desktop users based on user agent and/or screen width, and export it for use in Razorpay checkout flows.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-18",
-          "msg-20"
+          "msg-7",
+          "msg-9"
         ],
         "quotes": [
-          "name, email, phone number, delivery address — are there other fields also whichbever according to you.",
-          "show a list of all orders with customer details inline"
+          "Detect whether the user is on desktop or mobile"
         ]
       },
       "acceptanceCriteria": [
-        "Order records in stable storage include fullName, email, phone, street, city, postalCode, and orderNotes fields.",
-        "createOrder (or equivalent) accepts the new customer detail fields and persists them.",
-        "Existing orders are not lost after upgrade; migration preserves all prior fields.",
-        "Querying an order returns all new customer detail fields."
+        "The utility correctly identifies mobile devices (phones/tablets) vs. desktop browsers.",
+        "The result is available to all components that initiate Razorpay checkout."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Update the Cart/Checkout page (frontend/src/pages/Cart.tsx and/or frontend/src/pages/Checkout.tsx) to collect the following fields from all customers (including guests, with no login required): Full Name, Email Address, Phone Number, Delivery Street Address, City, Postal Code, and Order Notes (optional). Validate required fields before allowing order submission. Pass all collected fields to the order creation call.",
+      "text": "Update the Razorpay checkout configuration in `frontend/src/hooks/useRazorpay.ts` and any direct checkout calls in `frontend/src/components/ProductCard.tsx`, `frontend/src/pages/Cart.tsx`, and `frontend/src/pages/ProductDetail.tsx` so that: on desktop, the Razorpay modal opens with `config.display.preferences.sequence` prioritising cards, then net banking, then UPI QR code (method: 'upi', flow: 'qr'), and the UPI collect/intent flow is disabled; on mobile, the existing flow is preserved with UPI apps (intent), cards, and wallets as primary options.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-18",
-          "msg-20"
+          "msg-7",
+          "msg-9"
         ],
         "quotes": [
-          "name, email, phone number, delivery address — are there other fields also whichbever according to you.",
-          "Checkout Form (for all customers, including guests)"
+          "On desktop, show a UPI QR code (instead of collect request) along with cards, net banking, and wallets as primary options",
+          "Mobile: Keep the existing smooth flow with direct UPI app options (Google Pay, Paytm, PhonePe), cards, and wallets"
         ]
       },
       "acceptanceCriteria": [
-        "The checkout form displays fields for Full Name, Email, Phone, Street, City, Postal Code, and Order Notes.",
-        "Required fields (Name, Email, Phone, Street, City, Postal Code) show validation errors if left empty on submit.",
-        "A guest (unauthenticated) user can complete checkout without logging in.",
-        "All form values are passed to the backend order creation call.",
-        "Order Notes field is optional and clearly labelled as such."
+        "On desktop, the Razorpay modal shows Cards as the default/first tab, followed by Net Banking and UPI QR code.",
+        "On desktop, the UPI collect (push request to phone) flow is not presented to the user.",
+        "On mobile, the Razorpay modal shows UPI app options (Google Pay, Paytm, PhonePe intent), cards, and wallets as before.",
+        "Payment completion and order creation still work correctly on both device types after the change."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Redesign the Admin Orders page (frontend/src/pages/admin/AdminOrders.tsx) to display full customer details inline within each order row/card without requiring a modal click. Each order entry must show: Order ID, Date & Time, Customer Full Name, Email, Phone, Full Delivery Address (street, city, postal code), Ordered Items with quantities and unit prices, Order Total, and Order Status. Use an expandable row or an always-visible detail section beneath each row in the list.",
+      "text": "Ensure the Razorpay checkout modal is responsive and well-styled for both mobile and desktop screen sizes — no clipped elements, appropriate modal width on desktop, and full-screen/bottom-sheet style on mobile if supported by Razorpay's config.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-17",
-          "msg-18",
-          "msg-20"
+          "msg-9"
         ],
         "quotes": [
-          "In the admin panel I don't see user detail likenname address order id. Even if the customer is not register.",
-          "show a list of all orders with customer details inline",
-          "Order ID, Date & time, Customer name, email, phone, delivery address, Items ordered with quantities and prices, Order total, Order status"
+          "Responsive, clean modal styling for both screen sizes"
         ]
       },
       "acceptanceCriteria": [
-        "The Admin Orders list shows Order ID, Date & Time, Customer Name, Email, Phone, and full delivery address for every order.",
-        "Each order in the list shows the ordered items with their quantities and individual prices.",
-        "The order total and current status (Pending, Processing, Delivered, etc.) are visible per order.",
-        "Guest orders (no registered account) display all collected customer details just as registered-user orders do.",
-        "No modal click is required to see the core customer details — they are visible inline or in an always-visible expanded section."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Update the OrderDetailModal (frontend/src/components/admin/OrderDetailModal.tsx) to display all new customer fields (fullName, email, phone, street, city, postalCode, orderNotes) when an admin opens an individual order, so the full delivery address and contact info are shown there as well.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-17",
-          "msg-20"
-        ],
-        "quotes": [
-          "I don't see user detail likenname address order id",
-          "Customer name, email, phone, delivery address"
-        ]
-      },
-      "acceptanceCriteria": [
-        "OrderDetailModal renders fullName, email, phone, street, city, postalCode, and orderNotes from the order record.",
-        "If orderNotes is empty, that field is hidden or labelled 'None'.",
-        "All fields are displayed for both guest and registered-user orders."
+        "On desktop, the Razorpay modal is properly sized and centered without overflowing the viewport.",
+        "On mobile, the modal displays correctly without layout issues.",
+        "No visual regressions on existing cart/product pages."
       ]
     }
   ],
   "constraints": [
-    "All Motoko logic must remain in backend/main.mo (single-actor architecture).",
-    "Guest checkout must not require Internet Identity login.",
-    "Do not remove or break existing Razorpay payment integration.",
-    "Immutable frontend paths (hooks, main.tsx, ui components) must not be modified.",
-    "Existing order data must be preserved via migration.mo when upgrading stable storage."
+    "Do not modify immutable frontend paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui.",
+    "Razorpay Standard Checkout script is already loaded via frontend/index.html — do not add a duplicate script tag.",
+    "Backend order creation and payment verification logic must remain unchanged."
   ],
   "nonGoals": [
-    "Adding a new user registration or login flow.",
-    "Sending confirmation emails or SMS to customers.",
-    "Building a separate guest account system.",
-    "Changing the product management or settings admin pages.",
-    "Adding real-time order updates or WebSocket functionality."
+    "Replacing Razorpay with a different payment provider.",
+    "Adding new payment methods not already supported by Razorpay (e.g., BNPL).",
+    "Changes to the backend Razorpay key storage or order creation flow.",
+    "Any changes to Stripe checkout flow."
   ],
   "imageRequirements": {
     "required": [],

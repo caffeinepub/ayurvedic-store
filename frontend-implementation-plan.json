@@ -1,57 +1,73 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Guest checkout form with full customer details and inline admin order management",
+  "title": "Improve Razorpay checkout experience for desktop and mobile users",
   "requirements": [
     {
-      "id": "REQ-2",
-      "summary": "Extend checkout form to collect full guest customer details without requiring login",
+      "id": "REQ-1",
+      "summary": "Add a device detection utility that distinguishes between mobile and desktop users based on user agent and/or screen width, and export it for use in Razorpay checkout flows.",
       "acceptanceCriteria": [
-        "The checkout form displays fields for Full Name, Email, Phone, Street, City, Postal Code, and Order Notes.",
-        "Required fields (Name, Email, Phone, Street, City, Postal Code) show validation errors if left empty on submit.",
-        "A guest (unauthenticated) user can complete checkout without logging in.",
-        "All form values are passed to the backend order creation call.",
-        "Order Notes field is optional and clearly labelled as such."
+        "The utility correctly identifies mobile devices (phones/tablets) vs. desktop browsers.",
+        "The result is available to all components that initiate Razorpay checkout."
       ],
       "file_operations": [
         {
+          "path": "frontend/src/utils/deviceDetection.ts",
+          "operation": "create",
+          "description": "Create a device detection utility that exports a function to determine if the current user is on a mobile device. Use user agent detection (checking for mobile/tablet keywords) combined with screen width thresholds (e.g., < 768px for mobile). Export a `isMobileDevice()` function that returns a boolean and can be imported by checkout components."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Update the Razorpay checkout configuration in `frontend/src/hooks/useRazorpay.ts` and any direct checkout calls in `frontend/src/components/ProductCard.tsx`, `frontend/src/pages/Cart.tsx`, and `frontend/src/pages/ProductDetail.tsx` so that: on desktop, the Razorpay modal opens with `config.display.preferences.sequence` prioritising cards, then net banking, then UPI QR code (method: 'upi', flow: 'qr'), and the UPI collect/intent flow is disabled; on mobile, the existing flow is preserved with UPI apps (intent), cards, and wallets as primary options.",
+      "acceptanceCriteria": [
+        "On desktop, the Razorpay modal shows Cards as the default/first tab, followed by Net Banking and UPI QR code.",
+        "On desktop, the UPI collect (push request to phone) flow is not presented to the user.",
+        "On mobile, the Razorpay modal shows UPI app options (Google Pay, Paytm, PhonePe intent), cards, and wallets as before.",
+        "Payment completion and order creation still work correctly on both device types after the change."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useRazorpay.ts",
+          "operation": "modify",
+          "description": "Import the `isMobileDevice()` utility from `frontend/src/utils/deviceDetection.ts`. Modify the Razorpay options configuration inside the hook to conditionally set `config.display.preferences.sequence` based on device type. For desktop users (!isMobileDevice()), set the sequence to prioritize ['card', 'netbanking', 'upi'] and configure UPI method with flow: 'qr' to show only the QR code option and exclude the collect/intent flow. For mobile users (isMobileDevice()), preserve the existing configuration which defaults to UPI intent apps, cards, and wallets. Ensure the hook returns the modified configuration to all checkout flows."
+        },
+        {
+          "path": "frontend/src/components/ProductCard.tsx",
+          "operation": "modify",
+          "description": "Review the Buy Now handler that invokes Razorpay checkout. Ensure it uses the updated `useRazorpay` hook which now includes device-specific configuration. Verify that the Razorpay options passed to the checkout include the device-aware display preferences. No additional device detection logic is needed here if the hook already handles it; just ensure the component correctly applies the hook's returned configuration."
+        },
+        {
           "path": "frontend/src/pages/Cart.tsx",
           "operation": "modify",
-          "description": "Extend the checkout form to collect fullName, email, phone, street (addressLine1), city, postalCode, and orderNotes fields. Update form validation to ensure all required fields (fullName, email, phone, street, city, postalCode) are present before submission. Pass the collected guest details to the backend createOrder call via the guestDetails field in OrderInput. Ensure the form works for both authenticated and guest users without requiring login. Mark the orderNotes field as optional in the UI."
+          "description": "Review the checkout handler that initiates Razorpay payment. Ensure it uses the updated `useRazorpay` hook with device-specific configuration. Verify that the Razorpay checkout options include the device-aware display preferences and that payment flows (success, failure) still function correctly after the configuration changes. Test that cart clearing and order creation still work on both desktop and mobile."
+        },
+        {
+          "path": "frontend/src/pages/ProductDetail.tsx",
+          "operation": "modify",
+          "description": "Review the Buy Now handler that calls Razorpay checkout. Ensure it uses the updated `useRazorpay` hook with device-specific configuration. Verify that the Razorpay checkout options include the device-aware display preferences and that the payment success/failure navigation still works correctly on both device types."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Redesign Admin Orders page to display full customer details inline without requiring modal clicks",
+      "summary": "Ensure the Razorpay checkout modal is responsive and well-styled for both mobile and desktop screen sizes — no clipped elements, appropriate modal width on desktop, and full-screen/bottom-sheet style on mobile if supported by Razorpay's config.",
       "acceptanceCriteria": [
-        "The Admin Orders list shows Order ID, Date & Time, Customer Name, Email, Phone, and full delivery address for every order.",
-        "Each order in the list shows the ordered items with their quantities and individual prices.",
-        "The order total and current status (Pending, Processing, Delivered, etc.) are visible per order.",
-        "Guest orders (no registered account) display all collected customer details just as registered-user orders do.",
-        "No modal click is required to see the core customer details — they are visible inline or in an always-visible expanded section."
+        "On desktop, the Razorpay modal is properly sized and centered without overflowing the viewport.",
+        "On mobile, the modal displays correctly without layout issues.",
+        "No visual regressions on existing cart/product pages."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/admin/AdminOrders.tsx",
+          "path": "frontend/src/hooks/useRazorpay.ts",
           "operation": "modify",
-          "description": "Redesign the orders list to display full customer details inline for each order. Show Order ID, Date & Time, Customer Full Name (from guestDetails.fullName), Email (guestDetails.email), Phone (guestDetails.phoneNumber), and full delivery address (guestDetails.addressLine1, addressLine2, city, state, pincode) directly in each order row or in an always-visible expanded section. Display ordered items with quantities and unit prices inline. Show order total and fulfillment status. Ensure guest orders (where customerId may be anonymous) display all guestDetails fields. Use an expandable row pattern or card layout to keep all details accessible without requiring modal clicks for core information."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Update OrderDetailModal to display all new guest customer fields",
-      "acceptanceCriteria": [
-        "OrderDetailModal renders fullName, email, phone, street, city, postalCode, and orderNotes from the order record.",
-        "If orderNotes is empty, that field is hidden or labelled 'None'.",
-        "All fields are displayed for both guest and registered-user orders."
-      ],
-      "file_operations": [
+          "description": "Add Razorpay modal theming and responsive configuration to the options object. Use `config.modal` settings to control modal appearance: set `backdrop_close` to true for better UX, configure `animation` for smooth transitions, and use `confirm_close` to prevent accidental dismissals. For mobile devices, explore Razorpay's responsive modal options to ensure the checkout renders as a full-screen or bottom-sheet style interface. For desktop, ensure the modal has appropriate width constraints (e.g., max-width) and is centered. Test that no UI elements are clipped or overflow the viewport on either device type."
+        },
         {
-          "path": "frontend/src/components/admin/OrderDetailModal.tsx",
+          "path": "frontend/src/index.css",
           "operation": "modify",
-          "description": "Update the modal to render all guestDetails fields: fullName, email, phoneNumber, addressLine1, addressLine2, city, state, pincode, and orderNotes. Map backend field names (e.g., phoneNumber, addressLine1) to display labels (Phone, Street Address). If orderNotes is undefined or empty, hide the field or display 'None'. Ensure the modal works for both guest orders (anonymous customerId with guestDetails populated) and registered-user orders (authenticated customerId with optional guestDetails)."
+          "description": "Add any necessary global CSS overrides or utility classes to support Razorpay modal responsiveness if needed. This may include ensuring z-index layering is correct, preventing body scroll when the modal is open, or adding media query adjustments for small screens. Only add styles if the default Razorpay modal styling causes visual regressions or layout issues on the existing cart/product pages."
         }
       ]
     }

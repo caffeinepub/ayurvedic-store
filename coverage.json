@@ -1,73 +1,61 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-03-01T19:32:51.898Z",
+  "generatedAt": "2026-03-01T21:08:23.821Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
+    "total": 3,
     "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Extend the backend Order type to include guest customer details: fullName (Text), email (Text), phone (Text), street (Text), city (Text), postalCode (Text), and orderNotes (Text, optional). Update all order creation endpoints (createOrder, or equivalent) to accept and persist these fields. Ensure existing orders remain intact via migration.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
+        "summary": "Add a device detection utility that distinguishes between mobile and desktop users based on user agent and/or screen width, and export it for use in Razorpay checkout flows.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/utils/deviceDetection.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/utils/deviceDetection.ts"
+        ]
       },
       {
         "id": "REQ-2",
-        "summary": "Update the Cart/Checkout page (frontend/src/pages/Cart.tsx and/or frontend/src/pages/Checkout.tsx) to collect the following fields from all customers (including guests, with no login required): Full Name, Email Address, Phone Number, Delivery Street Address, City, Postal Code, and Order Notes (optional). Validate required fields before allowing order submission. Pass all collected fields to the order creation call.",
+        "summary": "Update the Razorpay checkout configuration in `frontend/src/hooks/useRazorpay.ts` and any direct checkout calls in `frontend/src/components/ProductCard.tsx`, `frontend/src/pages/Cart.tsx`, and `frontend/src/pages/ProductDetail.tsx` so that: on desktop, the Razorpay modal opens with `config.display.preferences.sequence` prioritising cards, then net banking, then UPI QR code (method: 'upi', flow: 'qr'), and the UPI collect/intent flow is disabled; on mobile, the existing flow is preserved with UPI apps (intent), cards, and wallets as primary options.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/Cart.tsx"
+          "frontend/src/hooks/useRazorpay.ts",
+          "frontend/src/components/ProductCard.tsx",
+          "frontend/src/pages/Cart.tsx",
+          "frontend/src/pages/ProductDetail.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/Cart.tsx"
+          "frontend/src/hooks/useRazorpay.ts"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Redesign the Admin Orders page (frontend/src/pages/admin/AdminOrders.tsx) to display full customer details inline within each order row/card without requiring a modal click. Each order entry must show: Order ID, Date & Time, Customer Full Name, Email, Phone, Full Delivery Address (street, city, postal code), Ordered Items with quantities and unit prices, Order Total, and Order Status. Use an expandable row or an always-visible detail section beneath each row in the list.",
+        "summary": "Ensure the Razorpay checkout modal is responsive and well-styled for both mobile and desktop screen sizes — no clipped elements, appropriate modal width on desktop, and full-screen/bottom-sheet style on mobile if supported by Razorpay's config.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/admin/AdminOrders.tsx"
+          "frontend/src/hooks/useRazorpay.ts",
+          "frontend/src/index.css"
         ],
         "matchedFiles": [
-          "frontend/src/pages/admin/AdminOrders.tsx"
-        ]
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Update the OrderDetailModal (frontend/src/components/admin/OrderDetailModal.tsx) to display all new customer fields (fullName, email, phone, street, city, postalCode, orderNotes) when an admin opens an individual order, so the full delivery address and contact info are shown there as well.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/admin/OrderDetailModal.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/admin/OrderDetailModal.tsx"
+          "frontend/src/hooks/useRazorpay.ts"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/components/ProductCard.tsx",
-    "frontend/src/components/admin/OrderDetailModal.tsx",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/pages/Cart.tsx",
-    "frontend/src/pages/ProductDetail.tsx",
-    "frontend/src/pages/admin/AdminOrders.tsx",
+    "frontend/src/hooks/useRazorpay.ts",
+    "frontend/src/utils/deviceDetection.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

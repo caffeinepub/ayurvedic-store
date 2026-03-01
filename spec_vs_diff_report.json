@@ -1,46 +1,42 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-03-01T19:32:51.892Z",
-  "summary": "The diff implements most of the requested requirements. REQ-1 (backend Order type extension + migration), REQ-2 (Cart checkout form with validation), REQ-3 (AdminOrders inline card redesign), and REQ-4 (OrderDetailModal customer fields) are all addressed. However, the backend field naming uses different conventions than specified (e.g., 'phoneNumber' instead of 'phone', 'addressLine1/addressLine2' instead of 'street', 'pincode' instead of 'postalCode'). Migration.mo handles existing order preservation. The Cart.tsx form collects all required fields with validation.",
+  "generatedAt": "2026-03-01T21:08:23.817Z",
+  "summary": "The diff implements REQ-1 (device detection utility) and REQ-2 (device-aware Razorpay config in useRazorpay.ts) reasonably well. However, REQ-2 requires updates to ProductCard.tsx, Cart.tsx, and ProductDetail.tsx as well, and those files are not modified in the diff for Razorpay config purposes. REQ-3 (modal responsiveness/styling) is only partially addressed with no explicit CSS or width-related Razorpay config properties visible.",
   "missing_requirements": [
     {
-      "id": "REQ-1",
-      "requirement": "The spec requires fields named: fullName, email, phone, street, city, postalCode, orderNotes. The backend uses phoneNumber, addressLine1/addressLine2, pincode instead of phone, street, postalCode.",
-      "reason": "The field names in the backend GuestDetails type differ from the spec: 'phone' becomes 'phoneNumber', 'street' becomes 'addressLine1'/'addressLine2', 'postalCode' becomes 'pincode'. The exact field names specified in REQ-1 acceptance criteria are not matched.",
+      "id": "REQ-2",
+      "requirement": "Update direct checkout calls in frontend/src/components/ProductCard.tsx, frontend/src/pages/Cart.tsx, and frontend/src/pages/ProductDetail.tsx to use device-aware Razorpay configuration.",
+      "reason": "The diff only modifies useRazorpay.ts for device-aware config. ProductCard.tsx and ProductDetail.tsx are mentioned in file summaries but only for unrelated guestDetails fixes. Cart.tsx is not modified at all. If these files make direct Razorpay calls outside of useRazorpay, they would not receive the device-aware configuration.",
       "evidence": [
-        "backend/main.mo",
-        "backend/migration.mo"
+        "frontend/src/components/ProductCard.tsx",
+        "frontend/src/pages/Cart.tsx",
+        "frontend/src/pages/ProductDetail.tsx"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "Ensure the Razorpay checkout modal is responsive and well-styled with appropriate modal width on desktop and full-screen/bottom-sheet style on mobile.",
+      "reason": "The diff shows no explicit CSS changes, viewport-width constraints, or Razorpay config properties addressing modal sizing and centering on desktop or full-screen display on mobile. The truncated useRazorpay.ts shows confirm_close in modal config but no width or responsive styling properties.",
+      "evidence": [
+        "frontend/src/hooks/useRazorpay.ts"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "ProductCard.tsx and ProductDetail.tsx updated with empty guestDetails passed to createOrder for Buy Now flows",
-      "reason": "The build request did not request updating Buy Now flows in ProductCard or ProductDetail pages. These are additional changes not mentioned in any requirement.",
+      "description": "Wallet block added to the desktop Razorpay configuration sequence.",
+      "reason": "REQ-2 specifies the desktop sequence as cards, net banking, then UPI QR code only. The diff adds a wallet block to the desktop config and includes it in the sequence. Wallets on desktop were not part of the requested desktop sequence.",
       "evidence": [
-        "frontend/src/components/ProductCard.tsx",
-        "frontend/src/pages/ProductDetail.tsx"
-      ]
-    },
-    {
-      "description": "Inline fulfillment status dropdown added directly in the AdminOrders card component allowing status updates without opening a modal",
-      "reason": "REQ-3 only requested displaying order status inline, not providing an inline status update control. The spec does not mention adding status-change functionality to the orders list view.",
-      "evidence": [
-        "frontend/src/pages/admin/AdminOrders.tsx"
+        "frontend/src/hooks/useRazorpay.ts"
       ]
     }
   ],
-  "confidence": 0.78,
+  "confidence": 0.72,
   "changed_files": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/ProductCard.tsx",
-    "frontend/src/components/admin/OrderDetailModal.tsx",
-    "frontend/src/pages/Cart.tsx",
-    "frontend/src/pages/ProductDetail.tsx",
-    "frontend/src/pages/admin/AdminOrders.tsx",
+    "frontend/src/hooks/useRazorpay.ts",
+    "frontend/src/utils/deviceDetection.ts",
     "project_state.json"
   ]
 }

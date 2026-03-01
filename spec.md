@@ -1,12 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Add guest checkout with full customer details collection and update the admin orders view to display all customer information inline.
+**Goal:** Improve the Razorpay checkout experience by tailoring payment method presentation and modal styling for desktop and mobile users.
 
 **Planned changes:**
-- Extend the backend Order type to include guest customer fields: fullName, email, phone, street, city, postalCode, and orderNotes; update order creation to accept and persist these fields with migration support for existing orders
-- Update the checkout page to show a guest-friendly form collecting Full Name, Email, Phone, Street Address, City, Postal Code, and Order Notes (optional), with required-field validation before submission
-- Redesign the Admin Orders page to display all customer details (Order ID, date/time, name, email, phone, delivery address, items with quantities and prices, order total, status) inline per order without requiring a modal
-- Update the OrderDetailModal to show all new customer fields (fullName, email, phone, street, city, postalCode, orderNotes), hiding orderNotes if empty
+- Add a device detection utility that identifies mobile vs. desktop based on user agent and/or screen width, exported for use across checkout flows.
+- Update Razorpay checkout configuration in `useRazorpay.ts`, `ProductCard.tsx`, `Cart.tsx`, and `ProductDetail.tsx` to show Cards → Net Banking → UPI QR code (no UPI collect/intent) on desktop, and preserve the existing UPI app intent + cards + wallets flow on mobile.
+- Ensure the Razorpay modal is properly sized and centered on desktop, and displays correctly (full-screen/bottom-sheet style) on mobile without layout issues.
 
-**User-visible outcome:** Customers (including guests) can complete checkout by filling in their contact and delivery details without logging in. Admins can view full customer information and order details directly in the orders list without opening a modal.
+**User-visible outcome:** Desktop users see a UPI QR code alongside cards and net banking in the Razorpay modal, while mobile users continue to get direct UPI app options. The modal displays cleanly on both device types with no clipped or overflowing elements.

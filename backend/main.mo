@@ -6,7 +6,7 @@ import Time "mo:core/Time";
 import Nat "mo:core/Nat";
 import Iter "mo:core/Iter";
 import Principal "mo:core/Principal";
-import Migration "migration";
+
 
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
@@ -16,7 +16,7 @@ import Stripe "stripe/stripe";
 import OutCall "http-outcalls/outcall";
 
 // Data migration on every upgrade.
-(with migration = Migration.run)
+
 actor {
   include MixinStorage();
 
