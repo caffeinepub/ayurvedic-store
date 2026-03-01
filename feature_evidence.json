@@ -2,10 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-razorpay-checkout-configuration-in-frontend-src-hooks-userazorpay-ts-so-that-the-upi-payment-method-is-included-and-visible-in-the-desktop-checkout-flow-the-device-aware-payment-method-configuration-currently-used-in-the-hook-must-be-updated-to-ensure-upi-is-not-excluded-or-omitted-when-the-device-is-detected-as-desktop-upi-should-appear-as-a-payment-option-on-both-mobile-and-desktop",
-      "featureTitle": "Fix the Razorpay checkout configuration in `frontend/src/hooks/useRazorpay.ts` so that the UPI payment method is included and visible in the desktop checkout flow. The device-aware payment method configuration currently used in the hook must be updated to ensure UPI is not excluded or omitted when the device is detected as desktop. UPI should appear as a payment option on both mobile and desktop.",
+      "featureId": "feature-update-the-adminauthguard-component-and-adminlogin-page-so-that-admin-authentication-is-verified-exclusively-by-calling-the-backend-isadmin-check-against-the-authenticated-internet-identity-principal-remove-any-logic-that-could-silently-reset-reassign-or-fail-to-find-the-admin-principal-after-a-deployment-on-login-if-the-backend-confirms-the-principal-is-admin-grant-access-immediately-without-any-re-bootstrapping-that-could-overwrite-the-stored-principal",
+      "featureTitle": "Update the AdminAuthGuard component and AdminLogin page so that admin authentication is verified exclusively by calling the backend `isAdmin` check against the authenticated Internet Identity principal. Remove any logic that could silently reset, reassign, or fail to find the admin principal after a deployment. On login, if the backend confirms the principal is admin, grant access immediately without any re-bootstrapping that could overwrite the stored principal.",
       "files": [
-        "frontend/src/hooks/useRazorpay.ts"
+        "frontend/src/components/admin/AdminAuthGuard.tsx",
+        "frontend/src/pages/admin/AdminLogin.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -19,7 +20,64 @@
         "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-1"
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-restore-the-full-storefront-to-version-32-functionality-product-listings-on-the-home-and-shop-pages-product-detail-pages-cart-with-quantity-controls-checkout-form-with-shipping-details-and-razorpay-payment-integration-including-upi-as-a-visible-payment-method-on-both-mobile-and-desktop-ensure-the-upi-payment-option-appears-in-the-razorpay-checkout-modal-on-desktop-not-just-mobile",
+      "featureTitle": "Restore the full storefront to Version 32 functionality: product listings on the Home and Shop pages, product detail pages, cart with quantity controls, checkout form with shipping details, and Razorpay payment integration including UPI as a visible payment method on both mobile and desktop. Ensure the UPI payment option appears in the Razorpay checkout modal on desktop (not just mobile).",
+      "files": [
+        "frontend/src/components/AboutAyurveda.tsx",
+        "frontend/src/components/Benefits.tsx",
+        "frontend/src/components/CartDrawer.tsx",
+        "frontend/src/components/FeaturedProducts.tsx",
+        "frontend/src/components/Hero.tsx",
+        "frontend/src/components/ProductCard.tsx",
+        "frontend/src/components/Testimonials.tsx",
+        "frontend/src/hooks/useRazorpay.ts",
+        "frontend/src/pages/Cart.tsx",
+        "frontend/src/pages/Home.tsx",
+        "frontend/src/pages/ProductDetail.tsx",
+        "frontend/src/pages/Shop.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0",
+        "stripe@3.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-the-backend-data-schema-product-catalog-order-management-user-management-site-settings-store-name-contact-email-announcement-banner-razorpay-key-whatsapp-number-and-all-admin-panel-pages-dashboard-products-orders-settings-users-are-fully-functional-as-they-were-in-version-32",
+      "featureTitle": "Ensure the backend data schema, product catalog, order management, user management, site settings (store name, contact email, announcement banner, Razorpay key, WhatsApp number), and all admin panel pages (Dashboard, Products, Orders, Settings, Users) are fully functional as they were in Version 32.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/admin/AdminSettings.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0",
+        "stripe@3.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
       ],
       "confidence": "high"
     }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { ShoppingBag, Loader2, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -22,7 +22,7 @@ interface ShippingForm {
 
 export default function Checkout() {
   const navigate = useNavigate();
-  const { items, totalAmount, clearCart } = useCart();
+  const { items, totalPrice, clearCart } = useCart();
   const createCheckoutSession = useCreateCheckoutSession();
   const { data: stripeConfigured } = useIsStripeConfigured();
 
@@ -38,7 +38,7 @@ export default function Checkout() {
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,15 +55,21 @@ export default function Checkout() {
     }
 
     try {
-      const shoppingItems: ShoppingItem[] = items.map(item => ({
-        productName: item.product.name,
-        productDescription: item.product.description.slice(0, 100),
+      const shoppingItems: ShoppingItem[] = items.map((item) => ({
+        productName: item.name,
+        productDescription: item.name,
         quantity: BigInt(item.quantity),
-        priceInCents: BigInt(Number(item.product.priceInr) * 100),
+        priceInCents: BigInt(Number(item.priceInr) * 100),
         currency: 'inr',
       }));
 
-      const session = await createCheckoutSession.mutateAsync(shoppingItems);
+      const baseUrl = `${window.location.protocol}//${window.location.host}`;
+      const session = await createCheckoutSession.mutateAsync({
+        items: shoppingItems,
+        successUrl: `${baseUrl}/payment-success`,
+        cancelUrl: `${baseUrl}/payment-failure`,
+      });
+
       if (!session?.url) {
         throw new Error('Payment session URL missing');
       }
@@ -73,6 +79,8 @@ export default function Checkout() {
       toast.error(err.message || 'Failed to initiate payment. Please try again.');
     }
   };
+
+  const totalAmount = Number(totalPrice);
 
   if (items.length === 0) {
     return (
@@ -239,24 +247,30 @@ export default function Checkout() {
           <div>
             <h2 className="font-serif text-xl font-semibold text-forest mb-6">Order Summary</h2>
             <div className="bg-parchment rounded-2xl p-6 space-y-4">
-              {items.map(item => (
+              {items.map((item) => (
                 <div
-                  key={item.product.id.toString()}
+                  key={item.productId.toString()}
                   className="flex items-center gap-3"
                 >
-                  <img
-                    src={item.product.imageUrl}
-                    alt={item.product.name}
-                    className="w-14 h-14 object-cover rounded-lg"
-                  />
-                  <div className="flex-1">
-                    <p className="font-serif font-semibold text-forest text-sm">
-                      {item.product.name}
+                  {item.imageUrl ? (
+                    <img
+                      src={item.imageUrl}
+                      alt={item.name}
+                      className="w-14 h-14 object-cover rounded-lg shrink-0"
+                    />
+                  ) : (
+                    <div className="w-14 h-14 rounded-lg bg-sage/20 shrink-0 flex items-center justify-center">
+                      <ShoppingBag className="w-6 h-6 text-forest/20" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-serif font-semibold text-forest text-sm truncate">
+                      {item.name}
                     </p>
                     <p className="text-bark/60 text-xs">Qty: {item.quantity}</p>
                   </div>
-                  <p className="font-bold text-terracotta text-sm">
-                    ₹{(Number(item.product.priceInr) * item.quantity).toLocaleString('en-IN')}
+                  <p className="font-bold text-terracotta text-sm shrink-0">
+                    ₹{(Number(item.priceInr) * item.quantity).toLocaleString('en-IN')}
                   </p>
                 </div>
               ))}

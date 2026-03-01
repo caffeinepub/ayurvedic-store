@@ -1,34 +1,130 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-03-01T21:26:08.477Z",
+  "generatedAt": "2026-03-01T22:06:49.543Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 1,
-    "implemented": 1,
+    "total": 4,
+    "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Fix the Razorpay checkout configuration in `frontend/src/hooks/useRazorpay.ts` so that the UPI payment method is included and visible in the desktop checkout flow. The device-aware payment method configuration currently used in the hook must be updated to ensure UPI is not excluded or omitted when the device is detected as desktop. UPI should appear as a payment option on both mobile and desktop.",
+        "summary": "In the backend, store the admin principal as a stable variable initialized exactly once at first deployment. On canister upgrade, never overwrite or reset this stable admin principal. Expose an `isAdmin(principal)` query that checks against this stored principal. If the stable admin principal is not yet set (empty/null), allow the first caller of a bootstrap function to claim admin status — after that, the principal is permanently locked.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Update the AdminAuthGuard component and AdminLogin page so that admin authentication is verified exclusively by calling the backend `isAdmin` check against the authenticated Internet Identity principal. Remove any logic that could silently reset, reassign, or fail to find the admin principal after a deployment. On login, if the backend confirms the principal is admin, grant access immediately without any re-bootstrapping that could overwrite the stored principal.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useRazorpay.ts"
+          "frontend/src/pages/admin/AdminLogin.tsx",
+          "frontend/src/components/admin/AdminAuthGuard.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useRazorpay.ts"
+          "frontend/src/pages/admin/AdminLogin.tsx",
+          "frontend/src/components/admin/AdminAuthGuard.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Restore the full storefront to Version 32 functionality: product listings on the Home and Shop pages, product detail pages, cart with quantity controls, checkout form with shipping details, and Razorpay payment integration including UPI as a visible payment method on both mobile and desktop. Ensure the UPI payment option appears in the Razorpay checkout modal on desktop (not just mobile).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/Home.tsx",
+          "frontend/src/components/Hero.tsx",
+          "frontend/src/components/FeaturedProducts.tsx",
+          "frontend/src/components/Benefits.tsx",
+          "frontend/src/components/Testimonials.tsx",
+          "frontend/src/components/AboutAyurveda.tsx",
+          "frontend/src/pages/Shop.tsx",
+          "frontend/src/pages/ProductDetail.tsx",
+          "frontend/src/components/ProductCard.tsx",
+          "frontend/src/hooks/useRazorpay.ts",
+          "frontend/src/pages/Cart.tsx",
+          "frontend/src/components/CartDrawer.tsx",
+          "frontend/src/contexts/CartContext.tsx",
+          "frontend/src/pages/Orders.tsx",
+          "frontend/src/pages/PaymentSuccess.tsx",
+          "frontend/src/pages/PaymentFailure.tsx",
+          "frontend/src/components/Navbar.tsx",
+          "frontend/src/components/MobileNavDrawer.tsx",
+          "frontend/src/components/FloatingWhatsApp.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/Home.tsx",
+          "frontend/src/components/Hero.tsx",
+          "frontend/src/components/FeaturedProducts.tsx",
+          "frontend/src/components/Benefits.tsx",
+          "frontend/src/components/Testimonials.tsx",
+          "frontend/src/components/AboutAyurveda.tsx",
+          "frontend/src/pages/Shop.tsx",
+          "frontend/src/pages/ProductDetail.tsx",
+          "frontend/src/components/ProductCard.tsx",
+          "frontend/src/hooks/useRazorpay.ts",
+          "frontend/src/pages/Cart.tsx",
+          "frontend/src/components/CartDrawer.tsx"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Ensure the backend data schema, product catalog, order management, user management, site settings (store name, contact email, announcement banner, Razorpay key, WhatsApp number), and all admin panel pages (Dashboard, Products, Orders, Settings, Users) are fully functional as they were in Version 32.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/admin/AdminDashboard.tsx",
+          "frontend/src/pages/admin/AdminProducts.tsx",
+          "frontend/src/components/admin/ProductFormModal.tsx",
+          "frontend/src/components/admin/AIImageGenerator.tsx",
+          "frontend/src/pages/admin/AdminOrders.tsx",
+          "frontend/src/components/admin/OrderDetailModal.tsx",
+          "frontend/src/pages/admin/AdminSettings.tsx",
+          "frontend/src/pages/admin/AdminUsers.tsx",
+          "frontend/src/components/admin/UserDetailModal.tsx",
+          "frontend/src/components/admin/AdminLayout.tsx",
+          "frontend/src/components/admin/StatusBadge.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/SeedProducts.tsx",
+          "frontend/src/utils/seedProducts.ts",
+          "frontend/src/components/Footer.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/admin/AdminSettings.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/src/App.tsx",
+    "frontend/src/components/AboutAyurveda.tsx",
+    "frontend/src/components/Benefits.tsx",
+    "frontend/src/components/CartDrawer.tsx",
+    "frontend/src/components/FeaturedProducts.tsx",
+    "frontend/src/components/Hero.tsx",
+    "frontend/src/components/ProductCard.tsx",
+    "frontend/src/components/Testimonials.tsx",
+    "frontend/src/components/admin/AdminAuthGuard.tsx",
+    "frontend/src/context/CartContext.tsx",
+    "frontend/src/hooks/useQueries.ts",
     "frontend/src/hooks/useRazorpay.ts",
+    "frontend/src/pages/Cart.tsx",
+    "frontend/src/pages/Checkout.tsx",
+    "frontend/src/pages/Home.tsx",
+    "frontend/src/pages/ProductDetail.tsx",
+    "frontend/src/pages/Shop.tsx",
+    "frontend/src/pages/admin/AdminLogin.tsx",
+    "frontend/src/pages/admin/AdminSettings.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

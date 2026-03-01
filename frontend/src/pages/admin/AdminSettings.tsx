@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useGetSiteSettings, useSetSiteSettings, useWhatsappNumber, useSetWhatsappNumber } from '../../hooks/useQueries';
+import {
+  useGetSiteSettings,
+  useSetSiteSettings,
+  useWhatsappNumber,
+  useSetWhatsappNumber,
+} from '../../hooks/useQueries';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,14 +13,24 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Settings, CreditCard, Store, Mail, Megaphone, Loader2, CheckCircle, AlertCircle, MessageCircle } from 'lucide-react';
+import {
+  Settings,
+  CreditCard,
+  Store,
+  Mail,
+  Megaphone,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+  MessageCircle,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 
 export default function AdminSettings() {
   const { data: settings, isLoading } = useGetSiteSettings();
   const setSiteSettings = useSetSiteSettings();
-  const { data: whatsappNumberData, isLoading: whatsappLoading } = useWhatsappNumber();
+  const { data: whatsappNumberData } = useWhatsappNumber();
   const setWhatsappNumber = useSetWhatsappNumber();
   const queryClient = useQueryClient();
 
@@ -83,192 +98,184 @@ export default function AdminSettings() {
     <div className="p-6 space-y-6 max-w-3xl">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-primary/10">
-          <Settings className="w-6 h-6 text-primary" />
+        <div className="p-2 rounded-lg bg-admin-accent/10">
+          <Settings className="w-6 h-6 text-admin-accent" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Settings</h1>
-          <p className="text-sm text-muted-foreground">Manage your store configuration</p>
+          <h1 className="text-2xl font-bold text-admin-fg">Settings</h1>
+          <p className="text-sm text-admin-muted">Manage your store configuration</p>
         </div>
       </div>
 
       {/* Store Info */}
-      <Card>
+      <Card className="bg-admin-card border-admin-border">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Store className="w-5 h-5 text-primary" />
-            <CardTitle className="text-lg">Store Information</CardTitle>
+            <Store className="w-5 h-5 text-admin-accent" />
+            <CardTitle className="text-admin-fg text-base">Store Information</CardTitle>
           </div>
-          <CardDescription>Basic details about your store</CardDescription>
+          <CardDescription className="text-admin-muted">
+            Basic details about your store
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="storeName">Store Name</Label>
+          <div className="space-y-1.5">
+            <Label className="text-admin-fg">Store Name</Label>
             <Input
-              id="storeName"
               value={storeName}
               onChange={(e) => setStoreName(e.target.value)}
               placeholder="Nature Glow"
+              className="bg-admin-bg border-admin-border text-admin-fg"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="contactEmail">
-              <span className="flex items-center gap-1">
-                <Mail className="w-4 h-4" /> Contact Email
-              </span>
+          <div className="space-y-1.5">
+            <Label className="text-admin-fg flex items-center gap-2">
+              <Mail className="w-4 h-4" />
+              Contact Email
             </Label>
             <Input
-              id="contactEmail"
               type="email"
               value={contactEmail}
               onChange={(e) => setContactEmail(e.target.value)}
               placeholder="hello@natureglow.com"
+              className="bg-admin-bg border-admin-border text-admin-fg"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="announcementBanner">
-              <span className="flex items-center gap-1">
-                <Megaphone className="w-4 h-4" /> Announcement Banner
-              </span>
+          <div className="space-y-1.5">
+            <Label className="text-admin-fg flex items-center gap-2">
+              <Megaphone className="w-4 h-4" />
+              Announcement Banner
             </Label>
             <Textarea
-              id="announcementBanner"
               value={announcementBanner}
               onChange={(e) => setAnnouncementBanner(e.target.value)}
               placeholder="Free shipping on orders above ₹499!"
               rows={2}
+              className="bg-admin-bg border-admin-border text-admin-fg resize-none"
             />
-            <p className="text-xs text-muted-foreground">Leave empty to hide the banner.</p>
+            <p className="text-admin-muted text-xs">
+              Leave empty to hide the announcement banner.
+            </p>
           </div>
         </CardContent>
       </Card>
 
       {/* Razorpay */}
-      <Card>
+      <Card className="bg-admin-card border-admin-border">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <CreditCard className="w-5 h-5 text-primary" />
-            <CardTitle className="text-lg">Razorpay Integration</CardTitle>
+            <CreditCard className="w-5 h-5 text-admin-accent" />
+            <CardTitle className="text-admin-fg text-base">Payment Gateway</CardTitle>
           </div>
-          <CardDescription>Configure your Razorpay payment gateway</CardDescription>
+          <CardDescription className="text-admin-muted">
+            Configure Razorpay for accepting payments
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="razorpayKeyId">Razorpay Key ID</Label>
-            <div className="flex gap-2 items-center">
+          <div className="space-y-1.5">
+            <Label className="text-admin-fg">Razorpay Key ID</Label>
+            <div className="relative">
               <Input
-                id="razorpayKeyId"
                 value={razorpayKeyId}
                 onChange={(e) => setRazorpayKeyId(e.target.value)}
                 placeholder="rzp_live_... or rzp_test_..."
-                className="font-mono text-sm"
+                className="bg-admin-bg border-admin-border text-admin-fg pr-24"
               />
               {razorpayKeyId && (
-                isValidKey ? (
-                  <Badge variant="default" className="shrink-0 flex items-center gap-1">
-                    <CheckCircle className="w-3 h-3" />
-                    {isLiveKey ? 'Live' : 'Test'}
-                  </Badge>
-                ) : (
-                  <Badge variant="destructive" className="shrink-0 flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
-                    Invalid
-                  </Badge>
-                )
+                <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                  {isValidKey ? (
+                    <Badge className="bg-emerald-100 text-emerald-700 border-0 text-xs">
+                      {isLiveKey ? 'Live' : 'Test'}
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-red-100 text-red-700 border-0 text-xs">Invalid</Badge>
+                  )}
+                </div>
               )}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Your Razorpay Key ID starts with <code className="bg-muted px-1 rounded">rzp_live_</code> (production) or{' '}
-              <code className="bg-muted px-1 rounded">rzp_test_</code> (testing).
-            </p>
-          </div>
-
-          <Separator />
-
-          <div className="rounded-lg bg-muted/50 p-4 space-y-2 text-sm text-muted-foreground">
-            <p className="font-medium text-foreground">How to get your Razorpay Key ID:</p>
-            <ol className="list-decimal list-inside space-y-1">
-              <li>Log in to your <a href="https://dashboard.razorpay.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">Razorpay Dashboard</a></li>
-              <li>Go to <strong>Settings → API Keys</strong></li>
-              <li>Generate or copy your Key ID</li>
-              <li>Paste it above and save</li>
-            </ol>
+            {razorpayKeyId && !isValidKey && (
+              <div className="flex items-center gap-2 text-red-500 text-xs">
+                <AlertCircle className="w-3.5 h-3.5" />
+                Key must start with rzp_live_ or rzp_test_
+              </div>
+            )}
+            {isLiveKey && (
+              <div className="flex items-center gap-2 text-amber-600 text-xs">
+                <AlertCircle className="w-3.5 h-3.5" />
+                You are using a live key — real payments will be processed.
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
 
-      {/* Save Store + Razorpay Settings */}
+      {/* WhatsApp */}
+      <Card className="bg-admin-card border-admin-border">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <MessageCircle className="w-5 h-5 text-admin-accent" />
+            <CardTitle className="text-admin-fg text-base">WhatsApp Support</CardTitle>
+          </div>
+          <CardDescription className="text-admin-muted">
+            Configure the WhatsApp floating button
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label className="text-admin-fg">WhatsApp Number</Label>
+            <Input
+              value={whatsappNumber}
+              onChange={(e) => setWhatsappNumberState(e.target.value)}
+              placeholder="+91 98765 43210"
+              className="bg-admin-bg border-admin-border text-admin-fg"
+            />
+            <p className="text-admin-muted text-xs">
+              Include country code (e.g. +91 for India)
+            </p>
+          </div>
+          <Button
+            onClick={handleSaveWhatsapp}
+            disabled={setWhatsappNumber.isPending}
+            size="sm"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white"
+          >
+            {setWhatsappNumber.isPending ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <CheckCircle className="w-3.5 h-3.5 mr-2" />
+                Save WhatsApp Number
+              </>
+            )}
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Separator className="bg-admin-border" />
+
+      {/* Save Button */}
       <div className="flex justify-end">
         <Button
           onClick={handleSave}
           disabled={setSiteSettings.isPending}
-          className="min-w-[140px]"
+          className="bg-admin-accent hover:bg-admin-accent/90 text-white px-8"
         >
           {setSiteSettings.isPending ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Saving…
+              Saving...
             </>
           ) : (
-            'Save Settings'
+            <>
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Save Settings
+            </>
           )}
         </Button>
       </div>
-
-      {/* WhatsApp */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <MessageCircle className="w-5 h-5 text-green-600" />
-            <CardTitle className="text-lg">WhatsApp Contact</CardTitle>
-          </div>
-          <CardDescription>
-            Add your WhatsApp number to show a floating chat button on all customer-facing pages.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {whatsappLoading ? (
-            <Skeleton className="h-10 w-full" />
-          ) : (
-            <div className="space-y-2">
-              <Label htmlFor="whatsappNumber">WhatsApp Number (with country code)</Label>
-              <Input
-                id="whatsappNumber"
-                value={whatsappNumber}
-                onChange={(e) => setWhatsappNumberState(e.target.value)}
-                placeholder="e.g. 919876543210"
-                className="font-mono text-sm"
-              />
-              <p className="text-xs text-muted-foreground">
-                Enter the number in international format without <code className="bg-muted px-1 rounded">+</code> or spaces.
-                Example: <code className="bg-muted px-1 rounded">919876543210</code> for an Indian number.
-                Leave empty to hide the WhatsApp button.
-              </p>
-            </div>
-          )}
-
-          <div className="flex justify-end">
-            <Button
-              onClick={handleSaveWhatsapp}
-              disabled={setWhatsappNumber.isPending || whatsappLoading}
-              variant="outline"
-              className="min-w-[160px] border-green-600 text-green-700 hover:bg-green-50"
-            >
-              {setWhatsappNumber.isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Saving…
-                </>
-              ) : (
-                <>
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Save WhatsApp Number
-                </>
-              )}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

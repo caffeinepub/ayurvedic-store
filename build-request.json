@@ -1,42 +1,110 @@
 {
   "kind": "build_request",
-  "title": "Fix UPI payment option missing in desktop Razorpay checkout",
+  "title": "Restore Version 32 & Permanently Preserve Admin Internet Identity Principal",
   "projectName": "Nature Glow",
-  "priority": "normal",
+  "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Fix the Razorpay checkout configuration in `frontend/src/hooks/useRazorpay.ts` so that the UPI payment method is included and visible in the desktop checkout flow. The device-aware payment method configuration currently used in the hook must be updated to ensure UPI is not excluded or omitted when the device is detected as desktop. UPI should appear as a payment option on both mobile and desktop.",
+      "text": "In the backend, store the admin principal as a stable variable initialized exactly once at first deployment. On canister upgrade, never overwrite or reset this stable admin principal. Expose an `isAdmin(principal)` query that checks against this stored principal. If the stable admin principal is not yet set (empty/null), allow the first caller of a bootstrap function to claim admin status — after that, the principal is permanently locked.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-6",
+          "msg-8"
+        ],
+        "quotes": [
+          "admin be tied to the deployer's Internet Identity (so only you can ever access it)",
+          "Admin access permanently tied to the deployer's Internet Identity principal — set once at deploy time and never overwritten or reset during future builds"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Admin principal is stored in a stable variable and survives canister upgrades without being reset.",
+        "No code path during upgrade or redeployment can overwrite the stored admin principal.",
+        "The bootstrap/claim function succeeds only once; subsequent calls by any principal are rejected.",
+        "isAdmin() returns true only for the stored admin principal and false for all others."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Update the AdminAuthGuard component and AdminLogin page so that admin authentication is verified exclusively by calling the backend `isAdmin` check against the authenticated Internet Identity principal. Remove any logic that could silently reset, reassign, or fail to find the admin principal after a deployment. On login, if the backend confirms the principal is admin, grant access immediately without any re-bootstrapping that could overwrite the stored principal.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-6",
-          "msg-7"
+          "msg-8"
         ],
         "quotes": [
-          "In the desktop version the upi option is missing. Kindly fix it.",
-          "I'll fix the UPI payment option so it appears correctly in the desktop version of the Razorpay checkout."
+          "admin be tied to the deployer's Internet Identity (so only you can ever access it)",
+          "I have lost the admin access. Every time i try to build something new I loose the admin access"
         ]
       },
       "acceptanceCriteria": [
-        "The UPI payment option is visible in the Razorpay checkout modal when accessed from a desktop browser.",
-        "The UPI payment option continues to be visible in the Razorpay checkout modal when accessed from a mobile browser.",
-        "No other existing payment methods (cards, net banking, wallets, etc.) are removed from the desktop or mobile checkout configuration.",
-        "The fix is applied in `frontend/src/hooks/useRazorpay.ts` within the device-aware payment method configuration logic.",
-        "The `isMobileDevice()` utility in `frontend/src/utils/deviceDetection.ts` is not broken or changed in a way that affects other features."
+        "Logging in with the admin Internet Identity principal grants full admin panel access.",
+        "Logging in with any non-admin principal shows an 'Access Denied' state.",
+        "After any future deployment or build, the admin principal can still log in without re-bootstrapping.",
+        "AdminLogin does not call any bootstrap/claim function if an admin principal is already set in the backend."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Restore the full storefront to Version 32 functionality: product listings on the Home and Shop pages, product detail pages, cart with quantity controls, checkout form with shipping details, and Razorpay payment integration including UPI as a visible payment method on both mobile and desktop. Ensure the UPI payment option appears in the Razorpay checkout modal on desktop (not just mobile).",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-5",
+          "msg-8"
+        ],
+        "quotes": [
+          "Restore it to version 32",
+          "All product listings, cart, checkout, and UPI payment features restored",
+          "The UPI option fix is ready in Draft Version 33"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Home page displays hero section, featured products, benefits, testimonials, and About Ayurveda section.",
+        "Shop page shows all visible products with search and category filters.",
+        "Product detail page renders correctly with add-to-cart and buy-now buttons.",
+        "Cart drawer and Cart page work with quantity controls and checkout form.",
+        "Razorpay checkout modal shows UPI as a payment option on both desktop and mobile.",
+        "Orders page displays authenticated user's order history.",
+        "Payment success and failure pages render correctly after checkout."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Ensure the backend data schema, product catalog, order management, user management, site settings (store name, contact email, announcement banner, Razorpay key, WhatsApp number), and all admin panel pages (Dashboard, Products, Orders, Settings, Users) are fully functional as they were in Version 32.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-5",
+          "msg-8"
+        ],
+        "quotes": [
+          "Restore it to version 32",
+          "All product listings, cart, checkout, and UPI payment features restored"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Admin Dashboard shows revenue, order, product, and user stats with charts.",
+        "Admin Products page allows creating, editing, and deleting products.",
+        "Admin Orders page allows viewing and updating fulfillment status.",
+        "Admin Settings page saves store configuration including Razorpay key and WhatsApp number.",
+        "Admin Users page displays all registered users with detail modal.",
+        "Backend persists all state (products, orders, users, settings) correctly across upgrades."
       ]
     }
   ],
   "constraints": [
-    "Do not remove or disable any existing payment methods (cards, net banking, wallets) from either mobile or desktop configurations.",
-    "Do not modify files listed in frontend.immutablePaths.",
-    "Do not change the backend schema or Motoko actor."
+    "The admin principal stable variable must never be reset or overwritten on canister upgrade.",
+    "Admin access must be based solely on Internet Identity principal — no username/password fallback.",
+    "Do not edit files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui."
   ],
   "nonGoals": [
-    "Adding new payment methods beyond fixing UPI visibility.",
-    "Redesigning the checkout UI or Razorpay modal styling.",
-    "Changes to the mobile checkout configuration unless required to fix the desktop UPI issue.",
-    "Backend changes."
+    "Adding new features beyond Version 32 functionality.",
+    "Supporting multiple admin principals.",
+    "Email or SMS-based authentication.",
+    "Any third-party auth provider other than Internet Identity."
   ],
   "imageRequirements": {
     "required": [],

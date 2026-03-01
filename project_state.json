@@ -1,27 +1,64 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Razorpay checkout integration project with UPI payment option fix needed for desktop version.",
+  "summary": "Ayurvedic Facepack Ecommerce Store with admin access tied to deployer's Internet Identity principal. Admin credentials are hardcoded at deploy time and permanently preserved across all future builds/updates.",
   "architectural_notes": [
-    "Razorpay checkout must display UPI payment option on both desktop and mobile layouts."
+    "Admin access is tied to the deployer's Internet Identity principal, hardcoded at deploy time and never reset during future deployments."
   ],
   "known_issues": [
-    "UPI payment option missing in desktop version of Razorpay checkout."
+    "Admin access was lost after Version 33 deployment — rolling back to Version 32 and implementing permanent admin principal preservation."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-fix-the-razorpay-checkout-configuration-in-frontend-src-hooks-userazorpay-ts-so-that-the-upi-payment-method-is-included-and-visible-in-the-desktop-checkout-flow-the-device-aware-payment-method-configuration-currently-used-in-the-hook-must-be-updated-to-ensure-upi-is-not-excluded-or-omitted-when-the-device-is-detected-as-desktop-upi-should-appear-as-a-payment-option-on-both-mobile-and-desktop",
-      "title": "Fix the Razorpay checkout configuration in `frontend/src/hooks/useRazorpay.ts` so that the UPI payment method is included and visible in the desktop checkout flow. The device-aware payment method configuration currently used in the hook must be updated to ensure UPI is not excluded or omitted when the device is detected as desktop. UPI should appear as a payment option on both mobile and desktop.",
+      "id": "feature-update-the-adminauthguard-component-and-adminlogin-page-so-that-admin-authentication-is-verified-exclusively-by-calling-the-backend-isadmin-check-against-the-authenticated-internet-identity-principal-remove-any-logic-that-could-silently-reset-reassign-or-fail-to-find-the-admin-principal-after-a-deployment-on-login-if-the-backend-confirms-the-principal-is-admin-grant-access-immediately-without-any-re-bootstrapping-that-could-overwrite-the-stored-principal",
+      "title": "Update the AdminAuthGuard component and AdminLogin page so that admin authentication is verified exclusively by calling the backend `isAdmin` check against the authenticated Internet Identity principal. Remove any logic that could silently reset, reassign, or fail to find the admin principal after a deployment. On login, if the backend confirms the principal is admin, grant access immediately without any re-bootstrapping that could overwrite the stored principal.",
       "reqIds": [
-        "REQ-1"
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-restore-the-full-storefront-to-version-32-functionality-product-listings-on-the-home-and-shop-pages-product-detail-pages-cart-with-quantity-controls-checkout-form-with-shipping-details-and-razorpay-payment-integration-including-upi-as-a-visible-payment-method-on-both-mobile-and-desktop-ensure-the-upi-payment-option-appears-in-the-razorpay-checkout-modal-on-desktop-not-just-mobile",
+      "title": "Restore the full storefront to Version 32 functionality: product listings on the Home and Shop pages, product detail pages, cart with quantity controls, checkout form with shipping details, and Razorpay payment integration including UPI as a visible payment method on both mobile and desktop. Ensure the UPI payment option appears in the Razorpay checkout modal on desktop (not just mobile).",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-backend-data-schema-product-catalog-order-management-user-management-site-settings-store-name-contact-email-announcement-banner-razorpay-key-whatsapp-number-and-all-admin-panel-pages-dashboard-products-orders-settings-users-are-fully-functional-as-they-were-in-version-32",
+      "title": "Ensure the backend data schema, product catalog, order management, user management, site settings (store name, contact email, announcement banner, Razorpay key, WhatsApp number), and all admin panel pages (Dashboard, Products, Orders, Settings, Users) are fully functional as they were in Version 32.",
+      "reqIds": [
+        "REQ-4"
       ],
       "version": 1
     }
   ],
-  "new_feature_requests": [],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Restore app to Version 32 functionality (product listings, cart, checkout, UPI payment)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Permanently tie admin access to deployer's Internet Identity principal so it is never lost or overwritten during future builds or updates",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "In the backend, store the admin principal as a stable variable initialized exactly once at first deployment. On canister upgrade, never overwrite or reset this stable admin principal. Expose an `isAdmin(principal)` query that checks against this stored principal. If the stable admin principal is not yet set (empty/null), allow the first caller of a bootstrap function to claim admin status — after that, the principal is permanently locked.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    }
+  ],
   "gameProjectType": "none",
-  "projectName": "Nature Glow",
+  "projectName": "Ayurvedic Facepack Ecommerce Store",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

@@ -4,9 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
 import { CartProvider } from './context/CartContext';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import FloatingWhatsApp from './components/FloatingWhatsApp';
+
+// Pages
 import Home from './pages/Home';
 import Shop from './pages/Shop';
 import ProductDetail from './pages/ProductDetail';
@@ -14,29 +13,40 @@ import Cart from './pages/Cart';
 import Orders from './pages/Orders';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentFailure from './pages/PaymentFailure';
+
+// Admin Pages
 import AdminLogin from './pages/admin/AdminLogin';
-import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminUsers from './pages/admin/AdminUsers';
+import AdminDashboard from './pages/admin/AdminDashboard';
+
+// Admin Components
 import AdminAuthGuard from './components/admin/AdminAuthGuard';
 import AdminLayout from './components/admin/AdminLayout';
+
+// Layout
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import CartDrawer from './components/CartDrawer';
+import FloatingWhatsApp from './components/FloatingWhatsApp';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5,
-      retry: 1,
+      retry: 2,
     },
   },
 });
 
-// Customer layout with Navbar + Footer
+// Root layout for customer-facing pages
 function CustomerLayout() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
+      <CartDrawer />
       <main className="flex-1">
         <Outlet />
       </main>
@@ -46,19 +56,34 @@ function CustomerLayout() {
   );
 }
 
-// Root route
-const rootRoute = createRootRoute({
-  component: () => <Outlet />,
-});
+// Admin layout wrapper
+function AdminLayoutWrapper() {
+  return (
+    <AdminAuthGuard>
+      <AdminLayout>
+        <Outlet />
+      </AdminLayout>
+    </AdminAuthGuard>
+  );
+}
 
-// Customer layout route
+// Admin root redirect component — must be uppercase to use hooks
+function AdminRootRedirect() {
+  React.useEffect(() => {
+    window.location.replace('/admin/products');
+  }, []);
+  return null;
+}
+
+// Routes
+const rootRoute = createRootRoute();
+
 const customerLayoutRoute = createRoute({
   getParentRoute: () => rootRoute,
   id: 'customer-layout',
   component: CustomerLayout,
 });
 
-// Customer pages
 const homeRoute = createRoute({
   getParentRoute: () => customerLayoutRoute,
   path: '/',
@@ -102,65 +127,54 @@ const paymentFailureRoute = createRoute({
 });
 
 // Admin routes
-const adminIndexRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/admin',
-  beforeLoad: () => {
-    throw redirect({ to: '/admin/login' });
-  },
-});
-
 const adminLoginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin/login',
   component: AdminLogin,
 });
 
-// Protected admin layout wrapper
-function ProtectedAdminLayout() {
-  return (
-    <AdminAuthGuard>
-      <AdminLayout>
-        <Outlet />
-      </AdminLayout>
-    </AdminAuthGuard>
-  );
-}
-
-const adminProtectedRoute = createRoute({
+const adminIndexRoute = createRoute({
   getParentRoute: () => rootRoute,
-  id: 'admin-protected',
-  component: ProtectedAdminLayout,
+  path: '/admin',
+  beforeLoad: () => {
+    throw redirect({ to: '/admin/products' });
+  },
+});
+
+const adminLayoutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: 'admin-layout',
+  component: AdminLayoutWrapper,
 });
 
 const adminDashboardRoute = createRoute({
-  getParentRoute: () => adminProtectedRoute,
+  getParentRoute: () => adminLayoutRoute,
   path: '/admin/dashboard',
   component: AdminDashboard,
 });
 
 const adminProductsRoute = createRoute({
-  getParentRoute: () => adminProtectedRoute,
+  getParentRoute: () => adminLayoutRoute,
   path: '/admin/products',
   component: AdminProducts,
 });
 
 const adminOrdersRoute = createRoute({
-  getParentRoute: () => adminProtectedRoute,
+  getParentRoute: () => adminLayoutRoute,
   path: '/admin/orders',
   component: AdminOrders,
 });
 
-const adminUsersRoute = createRoute({
-  getParentRoute: () => adminProtectedRoute,
-  path: '/admin/users',
-  component: AdminUsers,
-});
-
 const adminSettingsRoute = createRoute({
-  getParentRoute: () => adminProtectedRoute,
+  getParentRoute: () => adminLayoutRoute,
   path: '/admin/settings',
   component: AdminSettings,
+});
+
+const adminUsersRoute = createRoute({
+  getParentRoute: () => adminLayoutRoute,
+  path: '/admin/users',
+  component: AdminUsers,
 });
 
 const routeTree = rootRoute.addChildren([
@@ -175,12 +189,12 @@ const routeTree = rootRoute.addChildren([
   ]),
   adminIndexRoute,
   adminLoginRoute,
-  adminProtectedRoute.addChildren([
+  adminLayoutRoute.addChildren([
     adminDashboardRoute,
     adminProductsRoute,
     adminOrdersRoute,
-    adminUsersRoute,
     adminSettingsRoute,
+    adminUsersRoute,
   ]),
 ]);
 
@@ -194,13 +208,13 @@ declare module '@tanstack/react-router' {
 
 export default function App() {
   return (
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
         <CartProvider>
           <RouterProvider router={router} />
           <Toaster richColors position="top-right" />
         </CartProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }

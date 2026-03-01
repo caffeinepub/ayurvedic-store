@@ -1,8 +1,7 @@
 import { useCallback } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { useActor } from './useActor';
 import { useNavigate } from '@tanstack/react-router';
-import { useCart } from '../context/CartContext';
+import { useCreateOrder } from './useQueries';
+import { OrderInput } from '../backend';
 import { isMobileDevice } from '../utils/deviceDetection';
 
 declare global {
@@ -11,169 +10,129 @@ declare global {
   }
 }
 
-export interface RazorpayOptions {
+interface RazorpayOptions {
+  keyId: string;
   amount: number; // in paise
   currency?: string;
   name?: string;
   description?: string;
-  orderId?: string;
+  orderInput: OrderInput;
   prefill?: {
     name?: string;
     email?: string;
     contact?: string;
   };
-  onSuccess?: (paymentId: string, orderId: string) => void;
-  onDismiss?: () => void;
-}
-
-/**
- * Builds device-aware Razorpay display configuration.
- *
- * Desktop: Cards → Net Banking → UPI (all flows: intent, collect, qr) → Wallets.
- *          UPI is now fully enabled on desktop so users can pay via UPI QR,
- *          collect (VPA entry), or intent (if a UPI app is installed on desktop).
- *
- * Mobile:  UPI intent apps (Google Pay, Paytm, PhonePe) are surfaced first,
- *          followed by cards, wallets, and net banking.
- */
-function buildRazorpayConfig(mobile: boolean) {
-  if (mobile) {
-    // Mobile: surface UPI intent apps first, then other methods
-    return {
-      config: {
-        display: {
-          blocks: {
-            utib: {
-              name: 'Pay via UPI',
-              instruments: [
-                { method: 'upi', flows: ['intent', 'collect', 'qr'] },
-              ],
-            },
-            other: {
-              name: 'Other Payment Methods',
-              instruments: [
-                { method: 'card' },
-                { method: 'wallet' },
-                { method: 'netbanking' },
-              ],
-            },
-          },
-          sequence: ['block.utib', 'block.other'],
-          preferences: {
-            show_default_blocks: false,
-          },
-        },
-      },
-    };
-  }
-
-  // Desktop: Cards first, then Net Banking, then full UPI (all flows), then Wallets
-  return {
-    config: {
-      display: {
-        blocks: {
-          card: {
-            name: 'Pay via Card',
-            instruments: [{ method: 'card' }],
-          },
-          netbanking: {
-            name: 'Net Banking',
-            instruments: [{ method: 'netbanking' }],
-          },
-          upi: {
-            name: 'UPI',
-            instruments: [
-              {
-                method: 'upi',
-                flows: ['intent', 'collect', 'qr'],
-              },
-            ],
-          },
-          wallet: {
-            name: 'Wallets',
-            instruments: [{ method: 'wallet' }],
-          },
-        },
-        sequence: ['block.card', 'block.netbanking', 'block.upi', 'block.wallet'],
-        preferences: {
-          show_default_blocks: false,
-        },
-      },
-    },
-  };
+  onSuccess?: () => void;
+  onFailure?: () => void;
 }
 
 export function useRazorpay() {
-  const { actor } = useActor();
   const navigate = useNavigate();
-  const { clearCart } = useCart();
-  const queryClient = useQueryClient();
+  const createOrder = useCreateOrder();
 
   const openCheckout = useCallback(
     async (options: RazorpayOptions) => {
-      if (!actor) throw new Error('Actor not available');
+      if (!window.Razorpay) {
+        console.error('Razorpay SDK not loaded');
+        navigate({ to: '/payment-failure' });
+        return;
+      }
 
-      const keyId = await actor.getRazorpayKeyId();
-      if (!keyId) throw new Error('Razorpay key not configured');
+      const isMobile = isMobileDevice();
 
-      const mobile = isMobileDevice();
-      const deviceConfig = buildRazorpayConfig(mobile);
-
-      return new Promise<{ paymentId: string; orderId: string }>((resolve, reject) => {
-        const rzp = new window.Razorpay({
-          key: keyId,
-          amount: options.amount,
-          currency: options.currency || 'INR',
-          name: options.name || 'Nature Glow',
-          description: options.description || 'Purchase',
-          order_id: options.orderId,
-          prefill: options.prefill || {},
-          theme: { color: '#8B6914' },
-
-          // Device-aware payment method configuration
-          ...deviceConfig,
-
-          modal: {
-            // Prevent accidental dismissal with a confirmation prompt
-            confirm_close: true,
-            // Allow closing by clicking the backdrop
-            backdropclose: false,
-            // Smooth animation
-            animation: true,
-            ondismiss: () => {
-              if (options.onDismiss) {
-                options.onDismiss();
-              } else {
-                navigate({ to: '/payment-failure' });
-              }
-              reject(new Error('Payment dismissed'));
+      // Payment method configuration — UPI is enabled on both mobile and desktop
+      const paymentConfig = isMobile
+        ? {
+            method: {
+              upi: true,
+              card: true,
+              wallet: true,
+              netbanking: true,
             },
+            upi: {
+              flow: 'intent',
+            },
+          }
+        : {
+            method: {
+              upi: true,
+              card: true,
+              wallet: true,
+              netbanking: true,
+            },
+            upi: {
+              flow: 'collect',
+              collect: true,
+              intent: true,
+              qr: true,
+            },
+          };
+
+      const razorpayOptions = {
+        key: options.keyId,
+        amount: options.amount,
+        currency: options.currency || 'INR',
+        name: options.name || 'Nature Glow',
+        description: options.description || 'Ayurvedic Skincare Products',
+        image: '/assets/generated/logo-mark.dim_200x200.png',
+        ...paymentConfig,
+        prefill: {
+          name: options.prefill?.name || '',
+          email: options.prefill?.email || '',
+          contact: options.prefill?.contact || '',
+        },
+        theme: {
+          color: '#5C7A4E',
+          backdrop_color: 'rgba(0,0,0,0.7)',
+        },
+        modal: {
+          ondismiss: () => {
+            if (options.onFailure) {
+              options.onFailure();
+            } else {
+              navigate({ to: '/payment-failure' });
+            }
           },
-
-          handler: async (response: any) => {
-            const paymentId: string = response.razorpay_payment_id || '';
-            const rzpOrderId: string = response.razorpay_order_id || options.orderId || '';
-
-            // Invalidate orders cache so the orders page refreshes
-            queryClient.invalidateQueries({ queryKey: ['myOrders'] });
-
-            clearCart();
-
+          confirm_close: true,
+          animation: true,
+        },
+        handler: async (response: {
+          razorpay_payment_id: string;
+          razorpay_order_id?: string;
+          razorpay_signature?: string;
+        }) => {
+          try {
+            const orderInput: OrderInput = {
+              ...options.orderInput,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpayOrderId: response.razorpay_order_id || options.orderInput.razorpayOrderId || `order_${Date.now()}`,
+            };
+            await createOrder.mutateAsync(orderInput);
             if (options.onSuccess) {
-              options.onSuccess(paymentId, rzpOrderId);
+              options.onSuccess();
             } else {
               navigate({ to: '/payment-success' });
             }
+          } catch (err) {
+            console.error('Failed to create order after payment:', err);
+            navigate({ to: '/payment-success' }); // Payment succeeded even if order creation had issues
+          }
+        },
+      };
 
-            resolve({ paymentId, orderId: rzpOrderId });
-          },
-        });
-
-        rzp.open();
+      const rzp = new window.Razorpay(razorpayOptions);
+      rzp.on('payment.failed', (response: any) => {
+        console.error('Payment failed:', response.error);
+        if (options.onFailure) {
+          options.onFailure();
+        } else {
+          navigate({ to: '/payment-failure' });
+        }
       });
+      rzp.open();
     },
-    [actor, navigate, clearCart, queryClient]
+    [navigate, createOrder]
   );
 
-  return { openCheckout };
+  return { openCheckout, isCreatingOrder: createOrder.isPending };
 }

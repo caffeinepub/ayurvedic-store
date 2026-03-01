@@ -7,15 +7,12 @@ import Nat "mo:core/Nat";
 import Iter "mo:core/Iter";
 import Principal "mo:core/Principal";
 
-
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
 import MixinStorage "blob-storage/Mixin";
 import Storage "blob-storage/Storage";
 import Stripe "stripe/stripe";
 import OutCall "http-outcalls/outcall";
-
-// Data migration on every upgrade.
 
 actor {
   include MixinStorage();
@@ -685,4 +682,3 @@ actor {
     whatsappButtonSettings := settings;
   };
 };
-
