@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
 import { useGetOrders, useUpdateFulfillmentStatus } from '../../hooks/useQueries';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -12,14 +11,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  ShoppingCart,
   Search,
-  CheckCircle,
-  Clock,
-  IndianRupee,
   ChevronDown,
   ChevronUp,
-  Mail,
   Phone,
   MapPin,
   User,
@@ -65,19 +59,13 @@ function OrderCard({ order }: { order: Order }) {
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
 
-  // Prefer guestDetails for display, fall back to shippingDetails
-  const gd = order.guestDetails;
-  const sd = order.shippingDetails;
+  // Use guestDeliveryInfo if available, otherwise fall back to deliveryInfo
+  const gdi = order.guestDeliveryInfo;
+  const di = order.deliveryInfo;
 
-  const displayName = gd?.fullName || sd.fullName || '—';
-  const displayEmail = gd?.email || sd.email || '—';
-  const displayPhone = gd?.phoneNumber || sd.phoneNumber || '—';
-  const displayAddress1 = gd?.addressLine1 || sd.addressLine1 || '';
-  const displayAddress2 = gd?.addressLine2 || sd.addressLine2 || '';
-  const displayCity = gd?.city || sd.city || '';
-  const displayState = gd?.state || sd.state || '';
-  const displayPincode = gd?.pincode || sd.pincode || '';
-  const displayNotes = gd?.orderNotes;
+  const displayName = gdi?.fullName || di?.fullName || 'Not provided';
+  const displayPhone = gdi?.phoneNumber || di?.phoneNumber || 'Not provided';
+  const displayAddress = gdi?.address || di?.address || 'Not provided';
 
   const isGuest = order.customerId.toString() === '2vxsx-fae';
 
@@ -152,20 +140,12 @@ function OrderCard({ order }: { order: Order }) {
       <div className="px-4 pb-3 border-t border-admin-border/40 bg-admin-bg/30">
         <div className="flex flex-wrap gap-x-6 gap-y-1.5 pt-2.5">
           <div className="flex items-center gap-1.5 text-xs text-admin-muted">
-            <Mail className="w-3.5 h-3.5 flex-shrink-0" />
-            <span>{displayEmail}</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-admin-muted">
             <Phone className="w-3.5 h-3.5 flex-shrink-0" />
             <span>{displayPhone}</span>
           </div>
           <div className="flex items-center gap-1.5 text-xs text-admin-muted">
             <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
-            <span>
-              {[displayAddress1, displayAddress2, displayCity, displayState, displayPincode]
-                .filter(Boolean)
-                .join(', ')}
-            </span>
+            <span className="truncate max-w-xs">{displayAddress}</span>
           </div>
         </div>
       </div>
@@ -173,6 +153,31 @@ function OrderCard({ order }: { order: Order }) {
       {/* Expanded: Items + Notes */}
       {expanded && (
         <div className="px-4 pb-4 border-t border-admin-border/60 space-y-4 pt-3">
+          {/* Delivery Info Section */}
+          <div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <MapPin className="w-3.5 h-3.5 text-admin-muted" />
+              <span className="text-xs font-semibold text-admin-fg uppercase tracking-wide">Delivery Information</span>
+            </div>
+            <div className="bg-admin-hover/20 rounded-lg px-3 py-2.5 space-y-1.5 text-sm">
+              <div className="flex items-center gap-2">
+                <User className="w-3.5 h-3.5 text-admin-muted flex-shrink-0" />
+                <span className="text-admin-muted text-xs">Name:</span>
+                <span className="text-admin-fg font-medium">{displayName}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone className="w-3.5 h-3.5 text-admin-muted flex-shrink-0" />
+                <span className="text-admin-muted text-xs">Phone:</span>
+                <span className="text-admin-fg font-medium">{displayPhone}</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <MapPin className="w-3.5 h-3.5 text-admin-muted flex-shrink-0 mt-0.5" />
+                <span className="text-admin-muted text-xs">Address:</span>
+                <span className="text-admin-fg">{displayAddress}</span>
+              </div>
+            </div>
+          </div>
+
           {/* Items */}
           <div>
             <div className="flex items-center gap-1.5 mb-2">
@@ -207,19 +212,6 @@ function OrderCard({ order }: { order: Order }) {
             </div>
           </div>
 
-          {/* Order Notes */}
-          {displayNotes && (
-            <div>
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <StickyNote className="w-3.5 h-3.5 text-admin-muted" />
-                <span className="text-xs font-semibold text-admin-fg uppercase tracking-wide">Order Notes</span>
-              </div>
-              <p className="text-sm text-admin-muted bg-admin-hover/20 rounded-lg px-3 py-2 italic">
-                {displayNotes}
-              </p>
-            </div>
-          )}
-
           {/* Razorpay IDs */}
           {(order.razorpayOrderId || order.razorpayPaymentId) && (
             <div className="space-y-1 text-xs text-admin-muted border-t border-admin-border/40 pt-2">
@@ -240,48 +232,36 @@ function OrderCard({ order }: { order: Order }) {
 export default function AdminOrders() {
   const { data: orders = [], isLoading } = useGetOrders();
   const [search, setSearch] = useState('');
-  const [paymentFilter, setPaymentFilter] = useState('all');
-  const [fulfillmentFilter, setFulfillmentFilter] = useState('all');
   const [sortKey, setSortKey] = useState<SortKey>('date');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
-
-  const stats = useMemo(() => {
-    const total = orders.length;
-    const paid = orders.filter((o) => o.paymentStatus === 'paid').length;
-    const pending = orders.filter((o) => o.paymentStatus === 'pending').length;
-    const revenue = orders
-      .filter((o) => o.paymentStatus === 'paid')
-      .reduce((sum, o) => sum + Number(o.totalAmount), 0);
-    return { total, paid, pending, revenue };
-  }, [orders]);
+  const [filterPayment, setFilterPayment] = useState<string>('all');
+  const [filterFulfillment, setFilterFulfillment] = useState<string>('all');
 
   const filtered = useMemo(() => {
     let result = [...orders];
 
-    if (search) {
+    if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter((o) => {
-        const gd = o.guestDetails;
-        const sd = o.shippingDetails;
-        const name = (gd?.fullName || sd.fullName || '').toLowerCase();
-        const email = (gd?.email || sd.email || '').toLowerCase();
-        const phone = (gd?.phoneNumber || sd.phoneNumber || '').toLowerCase();
+        const gdi = o.guestDeliveryInfo;
+        const di = o.deliveryInfo;
+        const name = (gdi?.fullName || di?.fullName || '').toLowerCase();
+        const phone = (gdi?.phoneNumber || di?.phoneNumber || '').toLowerCase();
+        const address = (gdi?.address || di?.address || '').toLowerCase();
         return (
           o.id.toString().includes(q) ||
           name.includes(q) ||
-          email.includes(q) ||
           phone.includes(q) ||
-          o.customerId.toString().toLowerCase().includes(q)
+          address.includes(q)
         );
       });
     }
 
-    if (paymentFilter !== 'all') {
-      result = result.filter((o) => o.paymentStatus === paymentFilter);
+    if (filterPayment !== 'all') {
+      result = result.filter((o) => o.paymentStatus === filterPayment);
     }
-
-    if (fulfillmentFilter !== 'all') {
-      result = result.filter((o) => o.fulfillmentStatus === fulfillmentFilter);
+    if (filterFulfillment !== 'all') {
+      result = result.filter((o) => o.fulfillmentStatus === filterFulfillment);
     }
 
     result.sort((a, b) => {
@@ -294,80 +274,38 @@ export default function AdminOrders() {
     });
 
     return result;
-  }, [orders, search, paymentFilter, fulfillmentFilter, sortKey, sortDir]);
+  }, [orders, search, sortKey, sortDir, filterPayment, filterFulfillment]);
 
-  const toggleSort = (key: SortKey) => {
-    if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
-    else { setSortKey(key); setSortDir('desc'); }
-  };
+  const totalRevenue = orders
+    .filter((o) => o.paymentStatus === 'paid')
+    .reduce((sum, o) => sum + Number(o.totalAmount), 0);
 
-  const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
-
-  const fulfillmentStatuses = [...new Set(orders.map((o) => o.fulfillmentStatus))];
+  const pendingCount = orders.filter((o) => o.fulfillmentStatus === 'Pending').length;
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
+      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-admin-fg">Orders</h1>
-        <p className="text-admin-muted text-sm mt-1">Manage and track customer orders — all details visible inline</p>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {[
-          { label: 'Total Orders', value: stats.total, icon: ShoppingCart, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'Paid', value: stats.paid, icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'Pending', value: stats.pending, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'Revenue', value: formatCurrency(stats.revenue), icon: IndianRupee, color: 'text-purple-600', bg: 'bg-purple-50' },
-        ].map((s) => (
-          <Card key={s.label} className="bg-admin-card border-admin-border">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className={`w-9 h-9 rounded-lg ${s.bg} flex items-center justify-center flex-shrink-0`}>
-                  <s.icon className={`w-4 h-4 ${s.color}`} />
-                </div>
-                <div>
-                  <p className="text-admin-muted text-xs">{s.label}</p>
-                  <p className={`font-bold ${s.color}`}>{s.value}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        <p className="text-admin-muted text-sm mt-1">
+          {orders.length} total orders · ₹{totalRevenue.toLocaleString('en-IN')} revenue · {pendingCount} pending
+        </p>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
+      <div className="flex flex-wrap gap-3">
+        <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-admin-muted" />
           <Input
-            placeholder="Search by order ID, name, email, phone..."
+            placeholder="Search by order ID, name, phone, address..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 bg-admin-card border-admin-border text-admin-fg"
+            className="pl-9 bg-admin-card border-admin-border text-admin-fg placeholder:text-admin-muted"
           />
         </div>
 
-        {/* Sort */}
-        <Select value={`${sortKey}-${sortDir}`} onValueChange={(v) => {
-          const [k, d] = v.split('-') as [SortKey, SortDir];
-          setSortKey(k);
-          setSortDir(d);
-        }}>
-          <SelectTrigger className="w-full sm:w-44 bg-admin-card border-admin-border text-admin-fg">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="date-desc">Newest First</SelectItem>
-            <SelectItem value="date-asc">Oldest First</SelectItem>
-            <SelectItem value="total-desc">Highest Amount</SelectItem>
-            <SelectItem value="total-asc">Lowest Amount</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <Select value={paymentFilter} onValueChange={setPaymentFilter}>
-          <SelectTrigger className="w-full sm:w-40 bg-admin-card border-admin-border text-admin-fg">
+        <Select value={filterPayment} onValueChange={setFilterPayment}>
+          <SelectTrigger className="w-36 bg-admin-card border-admin-border text-admin-fg">
             <SelectValue placeholder="Payment" />
           </SelectTrigger>
           <SelectContent>
@@ -377,46 +315,62 @@ export default function AdminOrders() {
           </SelectContent>
         </Select>
 
-        <Select value={fulfillmentFilter} onValueChange={setFulfillmentFilter}>
-          <SelectTrigger className="w-full sm:w-44 bg-admin-card border-admin-border text-admin-fg">
+        <Select value={filterFulfillment} onValueChange={setFilterFulfillment}>
+          <SelectTrigger className="w-40 bg-admin-card border-admin-border text-admin-fg">
             <SelectValue placeholder="Fulfillment" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Statuses</SelectItem>
-            {fulfillmentStatuses.map((s) => (
+            {FULFILLMENT_STATUSES.map((s) => (
               <SelectItem key={s} value={s}>{s}</SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={`${sortKey}-${sortDir}`}
+          onValueChange={(v) => {
+            const [key, dir] = v.split('-') as [SortKey, SortDir];
+            setSortKey(key);
+            setSortDir(dir);
+          }}
+        >
+          <SelectTrigger className="w-44 bg-admin-card border-admin-border text-admin-fg">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="date-desc">Newest First</SelectItem>
+            <SelectItem value="date-asc">Oldest First</SelectItem>
+            <SelectItem value="total-desc">Highest Amount</SelectItem>
+            <SelectItem value="total-asc">Lowest Amount</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       {/* Orders List */}
-      <Card className="bg-admin-card border-admin-border">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-admin-fg text-base flex items-center justify-between">
-            <span>Orders ({filtered.length})</span>
-            <span className="text-xs font-normal text-admin-muted">Click any order to expand items</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="text-center py-12">
-              <ShoppingCart className="w-12 h-12 text-admin-muted mx-auto mb-3 opacity-40" />
-              <p className="text-admin-muted">No orders found</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {filtered.map((order) => (
-                <OrderCard key={order.id.toString()} order={order} />
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {isLoading ? (
+        <div className="space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 rounded-xl" />
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="text-center py-16 text-admin-muted">
+          <Package className="w-12 h-12 mx-auto mb-3 opacity-30" />
+          <p className="font-medium">No orders found</p>
+          <p className="text-sm mt-1">
+            {search || filterPayment !== 'all' || filterFulfillment !== 'all'
+              ? 'Try adjusting your filters'
+              : 'Orders will appear here once customers start purchasing'}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filtered.map((order) => (
+            <OrderCard key={order.id.toString()} order={order} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

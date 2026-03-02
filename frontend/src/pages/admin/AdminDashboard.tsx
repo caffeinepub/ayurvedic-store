@@ -69,139 +69,147 @@ export default function AdminDashboard() {
   // Revenue by month (last 6 months)
   const revenueByMonth = useMemo(() => {
     const monthMap: Record<string, number> = {};
-    const now = new Date();
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const key = d.toLocaleString('default', { month: 'short', year: '2-digit' });
-      monthMap[key] = 0;
-    }
     orders
       .filter((o) => o.paymentStatus === 'paid')
       .forEach((o) => {
-        const d = new Date(Number(o.createdAt) / 1_000_000);
-        const key = d.toLocaleString('default', { month: 'short', year: '2-digit' });
-        if (key in monthMap) {
-          monthMap[key] += Number(o.totalAmount);
-        }
+        const date = new Date(Number(o.createdAt) / 1_000_000);
+        const key = date.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
+        monthMap[key] = (monthMap[key] || 0) + Number(o.totalAmount);
       });
-    return Object.entries(monthMap).map(([month, revenue]) => ({ month, revenue }));
-  }, [orders]);
-
-  // Recent orders
-  const recentOrders = useMemo(() => {
-    return [...orders]
-      .sort((a, b) => Number(b.createdAt) - Number(a.createdAt))
-      .slice(0, 8);
+    return Object.entries(monthMap)
+      .slice(-6)
+      .map(([month, revenue]) => ({ month, revenue }));
   }, [orders]);
 
   const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
+    new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(amount);
 
-  const formatDate = (ts: bigint) => {
-    const d = new Date(Number(ts) / 1_000_000);
-    return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-  };
-
-  const statCards = [
-    {
-      title: 'Total Revenue',
-      value: formatCurrency(stats.totalRevenue),
-      icon: IndianRupee,
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-50',
-    },
-    {
-      title: 'Total Orders',
-      value: stats.totalOrders.toString(),
-      icon: ShoppingCart,
-      color: 'text-blue-600',
-      bg: 'bg-blue-50',
-    },
-    {
-      title: 'Products',
-      value: stats.totalProducts.toString(),
-      icon: Package,
-      color: 'text-purple-600',
-      bg: 'bg-purple-50',
-    },
-    {
-      title: 'Registered Users',
-      value: stats.totalUsers.toString(),
-      icon: Users,
-      color: 'text-orange-600',
-      bg: 'bg-orange-50',
-    },
-  ];
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-28 rounded-xl" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Skeleton className="h-64 rounded-xl" />
+          <Skeleton className="h-64 rounded-xl" />
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
+      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-admin-fg">Dashboard</h1>
-        <p className="text-admin-muted text-sm mt-1">Welcome back! Here's your store overview.</p>
+        <p className="text-admin-muted text-sm mt-1">Overview of your store performance</p>
       </div>
 
-      {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        {statCards.map((card) => (
-          <Card key={card.title} className="bg-admin-card border-admin-border">
-            <CardContent className="p-5">
-              {isLoading ? (
-                <Skeleton className="h-16 w-full" />
-              ) : (
-                <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-xl ${card.bg} flex items-center justify-center flex-shrink-0`}>
-                    <card.icon className={`w-6 h-6 ${card.color}`} />
-                  </div>
-                  <div>
-                    <p className="text-admin-muted text-xs font-medium uppercase tracking-wide">{card.title}</p>
-                    <p className="text-admin-fg text-2xl font-bold mt-0.5">{card.value}</p>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="bg-admin-card border-admin-border">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-admin-muted text-xs uppercase tracking-wide">Revenue</span>
+              <IndianRupee className="w-4 h-4 text-admin-accent" />
+            </div>
+            <p className="text-2xl font-bold text-admin-fg">{formatCurrency(stats.totalRevenue)}</p>
+            <p className="text-admin-muted text-xs mt-1">{stats.paidOrders} paid orders</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-admin-card border-admin-border">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-admin-muted text-xs uppercase tracking-wide">Orders</span>
+              <ShoppingCart className="w-4 h-4 text-admin-accent" />
+            </div>
+            <p className="text-2xl font-bold text-admin-fg">{stats.totalOrders}</p>
+            <p className="text-admin-muted text-xs mt-1">{stats.pendingOrders} pending</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-admin-card border-admin-border">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-admin-muted text-xs uppercase tracking-wide">Products</span>
+              <Package className="w-4 h-4 text-admin-accent" />
+            </div>
+            <p className="text-2xl font-bold text-admin-fg">{stats.totalProducts}</p>
+            <p className="text-admin-muted text-xs mt-1">in catalogue</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-admin-card border-admin-border">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-admin-muted text-xs uppercase tracking-wide">Customers</span>
+              <Users className="w-4 h-4 text-admin-accent" />
+            </div>
+            <p className="text-2xl font-bold text-admin-fg">{stats.totalUsers}</p>
+            <p className="text-admin-muted text-xs mt-1">registered</p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Revenue Chart */}
-        <Card className="xl:col-span-2 bg-admin-card border-admin-border">
+        <Card className="bg-admin-card border-admin-border">
           <CardHeader className="pb-2">
-            <CardTitle className="text-admin-fg text-base flex items-center gap-2">
+            <CardTitle className="text-admin-fg text-sm font-semibold flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-admin-accent" />
-              Revenue Over Time (INR)
+              Revenue Trend
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-48 w-full" />
-            ) : (
-              <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={revenueByMonth} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
-                  <Tooltip formatter={(v: number) => formatCurrency(v)} />
-                  <Bar dataKey="revenue" fill="#2d6a4f" radius={[4, 4, 0, 0]} />
+            {revenueByMonth.length > 0 ? (
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={revenueByMonth}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--admin-border)" />
+                  <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'var(--admin-muted)' }} />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: 'var(--admin-muted)' }}
+                    tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
+                  />
+                  <Tooltip
+                    formatter={(value: number) => [formatCurrency(value), 'Revenue']}
+                    contentStyle={{
+                      background: 'var(--admin-card)',
+                      border: '1px solid var(--admin-border)',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                    }}
+                  />
+                  <Bar dataKey="revenue" fill="#5C7A4E" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
+            ) : (
+              <div className="h-48 flex items-center justify-center text-admin-muted text-sm">
+                No revenue data yet
+              </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Fulfillment Pie */}
+        {/* Fulfillment Pie Chart */}
         <Card className="bg-admin-card border-admin-border">
           <CardHeader className="pb-2">
-            <CardTitle className="text-admin-fg text-base">Order Status</CardTitle>
+            <CardTitle className="text-admin-fg text-sm font-semibold flex items-center gap-2">
+              <ShoppingCart className="w-4 h-4 text-admin-accent" />
+              Order Status
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-48 w-full" />
-            ) : fulfillmentData.length === 0 ? (
-              <div className="h-48 flex items-center justify-center text-admin-muted text-sm">No orders yet</div>
-            ) : (
-              <ResponsiveContainer width="100%" height={220}>
+            {fulfillmentData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
                   <Pie
                     data={fulfillmentData}
@@ -214,15 +222,31 @@ export default function AdminDashboard() {
                   >
                     {fulfillmentData.map((entry, index) => (
                       <Cell
-                        key={entry.name}
-                        fill={STATUS_COLORS[entry.name] || `hsl(${index * 60}, 60%, 50%)`}
+                        key={`cell-${index}`}
+                        fill={STATUS_COLORS[entry.name] || '#94a3b8'}
                       />
                     ))}
                   </Pie>
-                  <Tooltip />
-                  <Legend iconSize={10} />
+                  <Tooltip
+                    contentStyle={{
+                      background: 'var(--admin-card)',
+                      border: '1px solid var(--admin-border)',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                    }}
+                  />
+                  <Legend
+                    iconSize={10}
+                    formatter={(value) => (
+                      <span style={{ fontSize: '11px', color: 'var(--admin-muted)' }}>{value}</span>
+                    )}
+                  />
                 </PieChart>
               </ResponsiveContainer>
+            ) : (
+              <div className="h-48 flex items-center justify-center text-admin-muted text-sm">
+                No order data yet
+              </div>
             )}
           </CardContent>
         </Card>
@@ -231,50 +255,51 @@ export default function AdminDashboard() {
       {/* Recent Orders */}
       <Card className="bg-admin-card border-admin-border">
         <CardHeader className="pb-2">
-          <CardTitle className="text-admin-fg text-base">Recent Orders</CardTitle>
+          <CardTitle className="text-admin-fg text-sm font-semibold">Recent Orders</CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
-            </div>
-          ) : recentOrders.length === 0 ? (
+          {orders.length === 0 ? (
             <p className="text-admin-muted text-sm text-center py-8">No orders yet</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-admin-border">
-                    <th className="text-left py-2 px-3 text-admin-muted font-medium">Order ID</th>
-                    <th className="text-left py-2 px-3 text-admin-muted font-medium">Customer</th>
-                    <th className="text-left py-2 px-3 text-admin-muted font-medium">Date</th>
-                    <th className="text-left py-2 px-3 text-admin-muted font-medium">Amount</th>
-                    <th className="text-left py-2 px-3 text-admin-muted font-medium">Payment</th>
-                    <th className="text-left py-2 px-3 text-admin-muted font-medium">Fulfillment</th>
+                    <th className="text-left py-2 px-3 text-admin-muted font-medium text-xs uppercase tracking-wide">Order</th>
+                    <th className="text-left py-2 px-3 text-admin-muted font-medium text-xs uppercase tracking-wide">Customer</th>
+                    <th className="text-left py-2 px-3 text-admin-muted font-medium text-xs uppercase tracking-wide">Amount</th>
+                    <th className="text-left py-2 px-3 text-admin-muted font-medium text-xs uppercase tracking-wide">Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {recentOrders.map((order) => (
-                    <tr key={order.id.toString()} className="border-b border-admin-border/50 hover:bg-admin-hover/30">
-                      <td className="py-2.5 px-3 text-admin-fg font-mono">#{order.id.toString()}</td>
-                      <td className="py-2.5 px-3 text-admin-fg">{order.shippingDetails.fullName}</td>
-                      <td className="py-2.5 px-3 text-admin-muted">{formatDate(order.createdAt)}</td>
-                      <td className="py-2.5 px-3 text-admin-fg font-medium">{formatCurrency(Number(order.totalAmount))}</td>
-                      <td className="py-2.5 px-3">
-                        <Badge
-                          variant={order.paymentStatus === 'paid' ? 'default' : 'secondary'}
-                          className={order.paymentStatus === 'paid' ? 'bg-emerald-100 text-emerald-700 border-0' : 'bg-amber-100 text-amber-700 border-0'}
-                        >
-                          {order.paymentStatus}
-                        </Badge>
-                      </td>
-                      <td className="py-2.5 px-3">
-                        <Badge variant="outline" className="text-xs">
-                          {order.fulfillmentStatus}
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
+                  {[...orders]
+                    .sort((a, b) => Number(b.createdAt) - Number(a.createdAt))
+                    .slice(0, 5)
+                    .map((order) => {
+                      const gdi = order.guestDeliveryInfo;
+                      const di = order.deliveryInfo;
+                      const customerName = gdi?.fullName || di?.fullName || 'Unknown';
+                      return (
+                        <tr key={order.id.toString()} className="border-b border-admin-border/40 hover:bg-admin-hover/20">
+                          <td className="py-2.5 px-3 font-mono text-admin-fg text-xs">#{order.id.toString()}</td>
+                          <td className="py-2.5 px-3 text-admin-fg">{customerName}</td>
+                          <td className="py-2.5 px-3 text-admin-fg font-medium">
+                            {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(Number(order.totalAmount))}
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <Badge
+                              className="text-xs border-0"
+                              style={{
+                                background: `${STATUS_COLORS[order.fulfillmentStatus] || '#94a3b8'}20`,
+                                color: STATUS_COLORS[order.fulfillmentStatus] || '#94a3b8',
+                              }}
+                            >
+                              {order.fulfillmentStatus}
+                            </Badge>
+                          </td>
+                        </tr>
+                      );
+                    })}
                 </tbody>
               </table>
             </div>

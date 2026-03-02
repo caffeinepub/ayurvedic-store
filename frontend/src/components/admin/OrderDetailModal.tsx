@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, MapPin, Phone, Mail, Package, User, StickyNote, Hash } from 'lucide-react';
+import { Loader2, MapPin, Phone, Package, User, Hash } from 'lucide-react';
 import { useUpdateFulfillmentStatus } from '../../hooks/useQueries';
 import type { Order } from '../../backend';
 import { toast } from 'sonner';
@@ -55,19 +55,13 @@ export default function OrderDetailModal({ order, onClose }: OrderDetailModalPro
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
 
-  // Prefer guestDetails for display, fall back to shippingDetails
-  const gd = order.guestDetails;
-  const sd = order.shippingDetails;
+  // Use guestDeliveryInfo if available, otherwise fall back to deliveryInfo
+  const gdi = order.guestDeliveryInfo;
+  const di = order.deliveryInfo;
 
-  const displayName = gd?.fullName || sd.fullName || '—';
-  const displayEmail = gd?.email || sd.email || '—';
-  const displayPhone = gd?.phoneNumber || sd.phoneNumber || '—';
-  const displayAddress1 = gd?.addressLine1 || sd.addressLine1 || '';
-  const displayAddress2 = gd?.addressLine2 || sd.addressLine2 || '';
-  const displayCity = gd?.city || sd.city || '';
-  const displayState = gd?.state || sd.state || '';
-  const displayPincode = gd?.pincode || sd.pincode || '';
-  const displayNotes = gd?.orderNotes;
+  const displayName = gdi?.fullName || di?.fullName || 'Not provided';
+  const displayPhone = gdi?.phoneNumber || di?.phoneNumber || 'Not provided';
+  const displayAddress = gdi?.address || di?.address || 'Not provided';
 
   const isGuest = order.customerId.toString() === '2vxsx-fae';
 
@@ -116,53 +110,27 @@ export default function OrderDetailModal({ order, onClose }: OrderDetailModalPro
 
           <Separator className="bg-admin-border" />
 
-          {/* Customer Info */}
+          {/* Delivery Information */}
           <div>
-            <h4 className="text-admin-fg font-semibold text-sm mb-3">Customer Details</h4>
-            <div className="space-y-2 text-sm">
+            <h4 className="text-admin-fg font-semibold text-sm mb-3">Delivery Information</h4>
+            <div className="space-y-2.5 text-sm bg-admin-bg rounded-lg px-3 py-3">
               <div className="flex items-center gap-2 text-admin-fg">
                 <User className="w-4 h-4 text-admin-muted flex-shrink-0" />
+                <span className="text-admin-muted text-xs w-16">Name:</span>
                 <span className="font-medium">{displayName}</span>
               </div>
-              <div className="flex items-center gap-2 text-admin-muted">
-                <Mail className="w-4 h-4 flex-shrink-0" />
-                <span>{displayEmail}</span>
+              <div className="flex items-center gap-2 text-admin-fg">
+                <Phone className="w-4 h-4 text-admin-muted flex-shrink-0" />
+                <span className="text-admin-muted text-xs w-16">Phone:</span>
+                <span className="font-medium">{displayPhone}</span>
               </div>
-              <div className="flex items-center gap-2 text-admin-muted">
-                <Phone className="w-4 h-4 flex-shrink-0" />
-                <span>{displayPhone}</span>
-              </div>
-            </div>
-          </div>
-
-          <Separator className="bg-admin-border" />
-
-          {/* Shipping Address */}
-          <div>
-            <h4 className="text-admin-fg font-semibold text-sm mb-3">Delivery Address</h4>
-            <div className="flex items-start gap-2 text-sm text-admin-muted">
-              <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
-              <div>
-                <p>{displayAddress1}</p>
-                {displayAddress2 && <p>{displayAddress2}</p>}
-                <p>{[displayCity, displayState].filter(Boolean).join(', ')}{displayPincode ? ` – ${displayPincode}` : ''}</p>
+              <div className="flex items-start gap-2 text-admin-fg">
+                <MapPin className="w-4 h-4 text-admin-muted flex-shrink-0 mt-0.5" />
+                <span className="text-admin-muted text-xs w-16">Address:</span>
+                <span className="leading-relaxed">{displayAddress}</span>
               </div>
             </div>
           </div>
-
-          {/* Order Notes */}
-          {displayNotes ? (
-            <>
-              <Separator className="bg-admin-border" />
-              <div>
-                <h4 className="text-admin-fg font-semibold text-sm mb-2 flex items-center gap-1.5">
-                  <StickyNote className="w-4 h-4 text-admin-muted" />
-                  Order Notes
-                </h4>
-                <p className="text-sm text-admin-muted italic bg-admin-bg rounded-lg px-3 py-2">{displayNotes}</p>
-              </div>
-            </>
-          ) : null}
 
           <Separator className="bg-admin-border" />
 

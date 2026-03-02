@@ -1,36 +1,29 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Ayurvedic Facepack Ecommerce Store with admin access tied to deployer's Internet Identity principal. Admin credentials are hardcoded at deploy time and permanently preserved across all future builds/updates.",
+  "summary": "E-commerce project with Razorpay integration. Customer ordering flow needs a delivery details form (name, address, phone number) before payment, and admin panel must display this customer information for order fulfillment.",
   "architectural_notes": [
-    "Admin access is tied to the deployer's Internet Identity principal, hardcoded at deploy time and never reset during future deployments."
+    "Order flow: product selection → customer details form (name, address, phone) → Razorpay payment",
+    "Customer delivery details must be stored and visible in admin panel per order"
   ],
   "known_issues": [
-    "Admin access was lost after Version 33 deployment — rolling back to Version 32 and implementing permanent admin principal preservation."
+    "Currently skipping customer details form — goes directly from product selection to Razorpay payment page"
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-update-the-adminauthguard-component-and-adminlogin-page-so-that-admin-authentication-is-verified-exclusively-by-calling-the-backend-isadmin-check-against-the-authenticated-internet-identity-principal-remove-any-logic-that-could-silently-reset-reassign-or-fail-to-find-the-admin-principal-after-a-deployment-on-login-if-the-backend-confirms-the-principal-is-admin-grant-access-immediately-without-any-re-bootstrapping-that-could-overwrite-the-stored-principal",
-      "title": "Update the AdminAuthGuard component and AdminLogin page so that admin authentication is verified exclusively by calling the backend `isAdmin` check against the authenticated Internet Identity principal. Remove any logic that could silently reset, reassign, or fail to find the admin principal after a deployment. On login, if the backend confirms the principal is admin, grant access immediately without any re-bootstrapping that could overwrite the stored principal.",
+      "id": "feature-insert-a-customer-delivery-details-form-step-between-product-cart-selection-and-the-razorpay-payment-initiation-the-form-must-collect-full-name-delivery-address-multi-line-and-phone-number-validate-that-all-three-fields-are-non-empty-before-allowing-payment-to-proceed-this-applies-to-both-the-buy-now-flow-on-productdetail-page-and-the-checkout-flow-on-the-cart-page",
+      "title": "Insert a Customer Delivery Details form step between product/cart selection and the Razorpay payment initiation. The form must collect: Full Name, Delivery Address (multi-line), and Phone Number. Validate that all three fields are non-empty before allowing payment to proceed. This applies to both the 'Buy Now' flow on ProductDetail page and the checkout flow on the Cart page.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-restore-the-full-storefront-to-version-32-functionality-product-listings-on-the-home-and-shop-pages-product-detail-pages-cart-with-quantity-controls-checkout-form-with-shipping-details-and-razorpay-payment-integration-including-upi-as-a-visible-payment-method-on-both-mobile-and-desktop-ensure-the-upi-payment-option-appears-in-the-razorpay-checkout-modal-on-desktop-not-just-mobile",
-      "title": "Restore the full storefront to Version 32 functionality: product listings on the Home and Shop pages, product detail pages, cart with quantity controls, checkout form with shipping details, and Razorpay payment integration including UPI as a visible payment method on both mobile and desktop. Ensure the UPI payment option appears in the Razorpay checkout modal on desktop (not just mobile).",
+      "id": "feature-display-the-customer-delivery-information-full-name-delivery-address-phone-number-in-the-admin-orders-panel-show-these-fields-in-the-order-list-cards-and-in-the-orderdetailmodal-so-admins-can-fulfil-deliveries",
+      "title": "Display the customer delivery information (Full Name, Delivery Address, Phone Number) in the Admin Orders panel. Show these fields in the order list cards and in the OrderDetailModal so admins can fulfil deliveries.",
       "reqIds": [
         "REQ-3"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-the-backend-data-schema-product-catalog-order-management-user-management-site-settings-store-name-contact-email-announcement-banner-razorpay-key-whatsapp-number-and-all-admin-panel-pages-dashboard-products-orders-settings-users-are-fully-functional-as-they-were-in-version-32",
-      "title": "Ensure the backend data schema, product catalog, order management, user management, site settings (store name, contact email, announcement banner, Razorpay key, WhatsApp number), and all admin panel pages (Dashboard, Products, Orders, Settings, Users) are fully functional as they were in Version 32.",
-      "reqIds": [
-        "REQ-4"
       ],
       "version": 1
     }
@@ -38,19 +31,19 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Restore app to Version 32 functionality (product listings, cart, checkout, UPI payment)",
+      "summary": "Add a customer details form (name, address, phone number) that appears after product selection and before the Razorpay payment page",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Permanently tie admin access to deployer's Internet Identity principal so it is never lost or overwritten during future builds or updates",
+      "summary": "Display customer delivery information (name, address, phone number) in the admin panel for each order",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-3",
-      "summary": "In the backend, store the admin principal as a stable variable initialized exactly once at first deployment. On canister upgrade, never overwrite or reset this stable admin principal. Expose an `isAdmin(principal)` query that checks against this stored principal. If the stable admin principal is not yet set (empty/null), allow the first caller of a bootstrap function to claim admin status — after that, the principal is permanently locked.",
+      "summary": "Update the Order and related backend data types to include customer delivery fields: fullName (Text), address (Text), and phoneNumber (Text). Ensure these fields are stored with every order record.",
       "reqIds": [
         "REQ-1"
       ],
@@ -58,7 +51,7 @@
     }
   ],
   "gameProjectType": "none",
-  "projectName": "Ayurvedic Facepack Ecommerce Store",
+  "projectName": "Nature Glow Ayurvedic",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

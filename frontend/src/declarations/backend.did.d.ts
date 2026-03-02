@@ -10,16 +10,10 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
-export interface GuestDetails {
-  'city' : string,
+export interface DeliveryInfo {
   'fullName' : string,
-  'email' : string,
-  'state' : string,
-  'addressLine1' : string,
-  'addressLine2' : string,
-  'pincode' : string,
+  'address' : string,
   'phoneNumber' : string,
-  'orderNotes' : [] | [string],
 }
 export interface Order {
   'id' : bigint,
@@ -27,20 +21,20 @@ export interface Order {
   'paymentStatus' : string,
   'fulfillmentStatus' : string,
   'createdAt' : bigint,
-  'guestDetails' : [] | [GuestDetails],
+  'deliveryInfo' : DeliveryInfo,
   'razorpayOrderId' : string,
   'totalAmount' : bigint,
   'customerId' : Principal,
+  'guestDeliveryInfo' : [] | [DeliveryInfo],
   'items' : Array<OrderItem>,
-  'shippingDetails' : ShippingDetails,
 }
 export interface OrderInput {
   'razorpayPaymentId' : string,
-  'guestDetails' : GuestDetails,
+  'deliveryInfo' : DeliveryInfo,
   'razorpayOrderId' : string,
   'totalAmount' : bigint,
+  'guestDeliveryInfo' : DeliveryInfo,
   'items' : Array<OrderItem>,
-  'shippingDetails' : ShippingDetails,
 }
 export interface OrderItem {
   'productId' : bigint,
@@ -75,16 +69,6 @@ export type ProductStatus = { 'featured' : null } |
   { 'outOfStock' : null } |
   { 'notVisible' : null } |
   { 'visible' : null };
-export interface ShippingDetails {
-  'city' : string,
-  'fullName' : string,
-  'email' : string,
-  'state' : string,
-  'addressLine1' : string,
-  'addressLine2' : string,
-  'pincode' : string,
-  'phoneNumber' : string,
-}
 export interface ShoppingItem {
   'productName' : string,
   'currency' : string,
@@ -172,139 +156,45 @@ export interface _SERVICE {
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
-  /**
-   * / Order owner or admin: confirm payment for an order.
-   */
   'confirmPayment' : ActorMethod<[bigint, string], undefined>,
-  /**
-   * / Authenticated users only: create a Stripe checkout session.
-   */
   'createCheckoutSession' : ActorMethod<
     [Array<ShoppingItem>, string, string],
     string
   >,
-  /**
-   * / Authenticated users or guests: place a new order.
-   */
   'createOrder' : ActorMethod<[OrderInput], Order>,
-  /**
-   * / Admin-only: create a new product.
-   */
   'createProduct' : ActorMethod<[ProductInput], Product>,
-  /**
-   * / Admin-only: delete a product.
-   */
   'deleteProduct' : ActorMethod<[bigint], undefined>,
-  /**
-   * / Admin-only: get all products including hidden/draft ones.
-   */
   'getAllProducts' : ActorMethod<[], Array<Product>>,
-  /**
-   * / Admin-only: list all registered users with profile and order summary.
-   */
   'getAllUsers' : ActorMethod<[], Array<UserSummary>>,
-  /**
-   * / Authenticated users only: get the caller's own profile.
-   */
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
-  /**
-   * / Public: get featured products for the storefront.
-   * / Excludes #notVisible products.
-   */
   'getFeaturedProducts' : ActorMethod<[], Array<Product>>,
-  /**
-   * / Authenticated users only: list the caller's own orders.
-   */
   'getMyOrders' : ActorMethod<[], Array<Order>>,
-  /**
-   * / Order owner or admin: get a single order by id.
-   */
   'getOrderById' : ActorMethod<[bigint], [] | [Order]>,
-  /**
-   * / Admin-only: list all orders.
-   */
   'getOrders' : ActorMethod<[], Array<Order>>,
-  /**
-   * / Public: paginated product listing.
-   * / Excludes #notVisible products.
-   */
   'getPaginatedProducts' : ActorMethod<[bigint, bigint], Array<Product>>,
-  /**
-   * / Public: get a single product by id (storefront).
-   * / Returns null for #notVisible products to prevent information leakage.
-   */
   'getProductById' : ActorMethod<[bigint], [] | [Product]>,
-  /**
-   * / Public: browse products (storefront).
-   * / When statusFilter is empty, defaults to all statuses except #notVisible.
-   * / When statusFilter is provided, only returns products matching those statuses,
-   * / but always excludes #notVisible to prevent leaking hidden products publicly.
-   */
   'getProducts' : ActorMethod<[Array<ProductStatus>], Array<Product>>,
-  /**
-   * / Public: filter products by category.
-   * / Excludes #notVisible products.
-   */
   'getProductsByCategory' : ActorMethod<[string], Array<Product>>,
-  /**
-   * / Public: returns only the Razorpay public key needed by the checkout page.
-   * / The Razorpay Key ID is a client-side public key and must be readable by
-   * / any visitor so that the checkout flow works without authentication.
-   */
   'getRazorpayKeyId' : ActorMethod<[], string>,
-  /**
-   * / Admin-only: read the full site settings (includes sensitive config).
-   */
   'getSiteSettings' : ActorMethod<[], SiteSettings>,
   'getStripeSessionStatus' : ActorMethod<[string], StripeSessionStatus>,
-  /**
-   * / Owner or admin: get a specific user's profile.
-   */
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'getWhatsappButtonSettings' : ActorMethod<[], WhatsAppButtonSettings>,
   'getWhatsappNumber' : ActorMethod<[], string>,
   'isAdmin' : ActorMethod<[], boolean>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
-  /**
-   * / Public: check whether a product is in stock.
-   * / Returns false for #notVisible products.
-   */
   'isProductInStock' : ActorMethod<[bigint], boolean>,
   'isStripeConfigured' : ActorMethod<[], boolean>,
-  /**
-   * / Authenticated users only: save the caller's own profile.
-   */
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
-  /**
-   * / Public: full-text search over product name and description.
-   * / Excludes #notVisible products.
-   */
   'searchProducts' : ActorMethod<[string], Array<Product>>,
-  /**
-   * / Bootstrap or admin-only: set the admin principal.
-   * / When no admin has been set yet, any authenticated caller may claim admin.
-   * / Once an admin is set, only the current admin can change it.
-   */
   'setAdmin' : ActorMethod<[Principal], undefined>,
-  /**
-   * / Admin-only: persist updated site settings.
-   */
   'setSiteSettings' : ActorMethod<[SiteSettings], undefined>,
   'setStripeConfiguration' : ActorMethod<[StripeConfiguration], undefined>,
   'setWhatsappNumber' : ActorMethod<[string], undefined>,
   'transform' : ActorMethod<[TransformationInput], TransformationOutput>,
-  /**
-   * / Admin-only: update the fulfillment status of an order.
-   */
   'updateFulfillmentStatus' : ActorMethod<[bigint, string], undefined>,
-  /**
-   * / Admin-only: update an existing product.
-   */
   'updateProduct' : ActorMethod<[bigint, ProductInput], Product>,
-  /**
-   * / Admin-only: update stock quantity for a product.
-   */
   'updateStock' : ActorMethod<[bigint, bigint], undefined>,
   'updateWhatsappButtonSettings' : ActorMethod<
     [WhatsAppButtonSettings],

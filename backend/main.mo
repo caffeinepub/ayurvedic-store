@@ -6,6 +6,7 @@ import Time "mo:core/Time";
 import Nat "mo:core/Nat";
 import Iter "mo:core/Iter";
 import Principal "mo:core/Principal";
+import Migration "migration";
 
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
@@ -14,6 +15,8 @@ import Storage "blob-storage/Storage";
 import Stripe "stripe/stripe";
 import OutCall "http-outcalls/outcall";
 
+// Specify the data migration function in with-clause.
+(with migration = Migration.run)
 actor {
   include MixinStorage();
 
@@ -63,35 +66,18 @@ actor {
     unitPrice : Nat;
   };
 
-  public type ShippingDetails = {
+  public type DeliveryInfo = {
     fullName : Text;
-    email : Text;
+    address : Text;
     phoneNumber : Text;
-    addressLine1 : Text;
-    addressLine2 : Text;
-    city : Text;
-    state : Text;
-    pincode : Text;
-  };
-
-  public type GuestDetails = {
-    fullName : Text;
-    email : Text;
-    phoneNumber : Text;
-    addressLine1 : Text;
-    addressLine2 : Text;
-    city : Text;
-    state : Text;
-    pincode : Text;
-    orderNotes : ?Text;
   };
 
   public type Order = {
     id : Nat;
     customerId : Principal;
-    guestDetails : ?GuestDetails;
+    guestDeliveryInfo : ?DeliveryInfo;
     items : [OrderItem];
-    shippingDetails : ShippingDetails;
+    deliveryInfo : DeliveryInfo;
     totalAmount : Nat;
     razorpayOrderId : Text;
     razorpayPaymentId : ?Text;
@@ -102,7 +88,7 @@ actor {
 
   public type ExistingOrderInput = {
     items : [OrderItem];
-    shippingDetails : ShippingDetails;
+    deliveryInfo : DeliveryInfo;
     totalAmount : Nat;
     razorpayOrderId : Text;
     razorpayPaymentId : Text;
@@ -110,8 +96,8 @@ actor {
 
   public type OrderInput = {
     items : [OrderItem];
-    shippingDetails : ShippingDetails;
-    guestDetails : GuestDetails;
+    deliveryInfo : DeliveryInfo;
+    guestDeliveryInfo : DeliveryInfo;
     totalAmount : Nat;
     razorpayOrderId : Text;
     razorpayPaymentId : Text;
@@ -137,7 +123,6 @@ actor {
     whatsappNumber : Text;
   };
 
-  // WhatsApp Button Settings
   public type WhatsAppButtonSettings = {
     number : Text;
     enabled : Bool;
@@ -180,34 +165,23 @@ actor {
     icon = "whatsapp";
   };
 
-  // ── Helper: check if a principal is anonymous ────────────────────────────────
-
   func isAnonymous(p : Principal) : Bool {
     p.toText() == "2vxsx-fae";
   };
-
-  // ── Helper: check if a product is visible to the public ─────────────────────
 
   func isPubliclyVisible(p : Product) : Bool {
     p.status != #notVisible;
   };
 
-  // ── Admin functions ─────────────────────────────────────────────────────────
-
-  /// Bootstrap or admin-only: set the admin principal.
-  /// When no admin has been set yet, any authenticated caller may claim admin.
-  /// Once an admin is set, only the current admin can change it.
   public shared ({ caller }) func setAdmin(principal : Principal) : async () {
     if (isAnonymous(caller)) {
       Runtime.trap("Not authorized: Anonymous callers cannot set admin");
     };
     switch (adminPrincipal) {
       case (null) {
-        // Bootstrap: first authenticated caller claims admin
         adminPrincipal := ?principal;
       };
       case (?_existing) {
-        // Already bootstrapped: only current admin may reassign
         if (not isAdminOrAuthorized(caller)) {
           Runtime.trap("Not authorized: Only admin can assign admin role");
         };
@@ -224,8 +198,6 @@ actor {
     };
   };
 
-  // Check if the caller is the designated admin or has the correct role via AccessControl.
-  // Anonymous callers are always rejected.
   func isAdminOrAuthorized(caller : Principal) : Bool {
     if (isAnonymous(caller)) { return false };
     switch (adminPrincipal) {
@@ -234,14 +206,10 @@ actor {
     };
   };
 
-  // Check if the caller is authenticated (non-anonymous).
   func isAuthenticated(caller : Principal) : Bool {
     not isAnonymous(caller);
   };
 
-  // ── User profile functions ──────────────────────────────────────────────────
-
-  /// Authenticated users only: get the caller's own profile.
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not isAuthenticated(caller)) {
       Runtime.trap("Not authorized: Anonymous callers cannot access profiles");
@@ -249,12 +217,10 @@ actor {
     userProfiles.get(caller);
   };
 
-  /// Authenticated users only: save the caller's own profile.
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
     if (not isAuthenticated(caller)) {
       Runtime.trap("Not authorized: Anonymous callers cannot save a profile");
     };
-    // Record registration time on first save
     switch (userRegistrationTimes.get(caller)) {
       case (null) { userRegistrationTimes.add(caller, Time.now()) };
       case (?_) {};
@@ -262,7 +228,6 @@ actor {
     userProfiles.add(caller, profile);
   };
 
-  /// Owner or admin: get a specific user's profile.
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
     if (caller != user and not isAdminOrAuthorized(caller)) {
       Runtime.trap("Not authorized: Only admin or the owner can access profile");
@@ -270,7 +235,6 @@ actor {
     userProfiles.get(user);
   };
 
-  /// Admin-only: list all registered users with profile and order summary.
   public query ({ caller }) func getAllUsers() : async [UserSummary] {
     if (not isAdminOrAuthorized(caller)) {
       Runtime.trap("Not authorized: Only admin can view all users");
@@ -290,9 +254,6 @@ actor {
     );
   };
 
-  // ── Product functions ───────────────────────────────────────────────────────
-
-  /// Admin-only: create a new product.
   public shared ({ caller }) func createProduct(productInput : ProductInput) : async Product {
     if (not isAdminOrAuthorized(caller)) {
       Runtime.trap("Not authorized: Only admin can create product");
@@ -316,17 +277,11 @@ actor {
     product;
   };
 
-  /// Public: browse products (storefront).
-  /// When statusFilter is empty, defaults to all statuses except #notVisible.
-  /// When statusFilter is provided, only returns products matching those statuses,
-  /// but always excludes #notVisible to prevent leaking hidden products publicly.
   public query func getProducts(statusFilter : [ProductStatus]) : async [Product] {
     if (statusFilter.size() == 0) {
       return products.values().toArray().filter(isPubliclyVisible);
     };
 
-    // Even when a caller provides explicit statuses, #notVisible is always excluded
-    // from public-facing queries to prevent information leakage.
     products.values().toArray().filter(
       func(p) {
         if (not isPubliclyVisible(p)) { return false };
@@ -337,8 +292,6 @@ actor {
     );
   };
 
-  /// Public: get a single product by id (storefront).
-  /// Returns null for #notVisible products to prevent information leakage.
   public query func getProductById(id : Nat) : async ?Product {
     switch (products.get(id)) {
       case (?product) {
@@ -348,7 +301,6 @@ actor {
     };
   };
 
-  /// Admin-only: get all products including hidden/draft ones.
   public query ({ caller }) func getAllProducts() : async [Product] {
     if (not isAdminOrAuthorized(caller)) {
       Runtime.trap("Not authorized: Only admin can view all products");
@@ -356,7 +308,6 @@ actor {
     products.values().toArray();
   };
 
-  /// Admin-only: update an existing product.
   public shared ({ caller }) func updateProduct(id : Nat, productInput : ProductInput) : async Product {
     if (not isAdminOrAuthorized(caller)) {
       Runtime.trap("Not authorized: Only admin can update product");
@@ -383,7 +334,6 @@ actor {
     };
   };
 
-  /// Admin-only: delete a product.
   public shared ({ caller }) func deleteProduct(id : Nat) : async () {
     if (not isAdminOrAuthorized(caller)) {
       Runtime.trap("Not authorized: Only admin can delete products");
@@ -395,7 +345,6 @@ actor {
     };
   };
 
-  /// Admin-only: update stock quantity for a product.
   public shared ({ caller }) func updateStock(id : Nat, quantity : Nat) : async () {
     if (not isAdminOrAuthorized(caller)) {
       Runtime.trap("Not authorized: Only admin can update stock");
@@ -421,16 +370,12 @@ actor {
     };
   };
 
-  /// Public: get featured products for the storefront.
-  /// Excludes #notVisible products.
   public query func getFeaturedProducts() : async [Product] {
     products.values().toArray().filter(
       func(p) { p.isFeatured and isPubliclyVisible(p) }
     );
   };
 
-  /// Public: check whether a product is in stock.
-  /// Returns false for #notVisible products.
   public query func isProductInStock(productId : Nat) : async Bool {
     switch (products.get(productId)) {
       case (?product) { isPubliclyVisible(product) and product.stockQuantity > 0 };
@@ -438,16 +383,12 @@ actor {
     };
   };
 
-  /// Public: filter products by category.
-  /// Excludes #notVisible products.
   public query func getProductsByCategory(category : Text) : async [Product] {
     products.values().toArray().filter(
       func(p) { p.category == category and isPubliclyVisible(p) }
     );
   };
 
-  /// Public: full-text search over product name and description.
-  /// Excludes #notVisible products.
   public query func searchProducts(searchTerm : Text) : async [Product] {
     products.values().toArray().filter(
       func(p) {
@@ -459,8 +400,6 @@ actor {
     );
   };
 
-  /// Public: paginated product listing.
-  /// Excludes #notVisible products.
   public query func getPaginatedProducts(page : Nat, pageSize : Nat) : async [Product] {
     let allProducts = products.values().toArray().filter(isPubliclyVisible);
     let startIndex = page * pageSize;
@@ -477,17 +416,14 @@ actor {
     allProducts.sliceToArray(startIndex, actualEnd);
   };
 
-  // ── Order functions ─────────────────────────────────────────────────────────
-
-  /// Authenticated users or guests: place a new order.
   public shared ({ caller }) func createOrder(orderInput : OrderInput) : async Order {
     let orderId = nextOrderId;
     let order : Order = {
       id = orderId;
       customerId = caller;
-      guestDetails = ?orderInput.guestDetails;
+      guestDeliveryInfo = ?orderInput.guestDeliveryInfo;
       items = orderInput.items;
-      shippingDetails = orderInput.shippingDetails;
+      deliveryInfo = orderInput.deliveryInfo;
       totalAmount = orderInput.totalAmount;
       razorpayOrderId = orderInput.razorpayOrderId;
       razorpayPaymentId = ?orderInput.razorpayPaymentId;
@@ -501,7 +437,6 @@ actor {
     order;
   };
 
-  /// Order owner or admin: confirm payment for an order.
   public shared ({ caller }) func confirmPayment(orderId : Nat, razorpayPaymentId : Text) : async () {
     if (not isAuthenticated(caller)) {
       Runtime.trap("Not authenticated: Only authenticated users can confirm payment");
@@ -514,9 +449,9 @@ actor {
         let updatedOrder = {
           id = order.id;
           customerId = order.customerId;
-          guestDetails = order.guestDetails;
+          guestDeliveryInfo = order.guestDeliveryInfo;
           items = order.items;
-          shippingDetails = order.shippingDetails;
+          deliveryInfo = order.deliveryInfo;
           totalAmount = order.totalAmount;
           razorpayOrderId = order.razorpayOrderId;
           razorpayPaymentId = ?razorpayPaymentId;
@@ -530,7 +465,6 @@ actor {
     };
   };
 
-  /// Admin-only: list all orders.
   public query ({ caller }) func getOrders() : async [Order] {
     if (not isAdminOrAuthorized(caller)) {
       Runtime.trap("Not authorized: Only admin can view all orders");
@@ -538,7 +472,6 @@ actor {
     orders.values().toArray();
   };
 
-  /// Order owner or admin: get a single order by id.
   public query ({ caller }) func getOrderById(orderId : Nat) : async ?Order {
     if (not isAuthenticated(caller)) {
       Runtime.trap("Not authenticated: Only authenticated users can view orders");
@@ -554,7 +487,6 @@ actor {
     };
   };
 
-  /// Authenticated users only: list the caller's own orders.
   public query ({ caller }) func getMyOrders() : async [Order] {
     if (not isAuthenticated(caller)) {
       Runtime.trap("Not authenticated: Only authenticated users can view their orders");
@@ -562,7 +494,6 @@ actor {
     orders.values().toArray().filter(func(o) { o.customerId == caller });
   };
 
-  /// Admin-only: update the fulfillment status of an order.
   public shared ({ caller }) func updateFulfillmentStatus(orderId : Nat, status : Text) : async () {
     if (not isAdminOrAuthorized(caller)) {
       Runtime.trap("Not authorized: Only admin can update fulfillment status");
@@ -573,9 +504,9 @@ actor {
         let updatedOrder = {
           id = order.id;
           customerId = order.customerId;
-          guestDetails = order.guestDetails;
+          guestDeliveryInfo = order.guestDeliveryInfo;
           items = order.items;
-          shippingDetails = order.shippingDetails;
+          deliveryInfo = order.deliveryInfo;
           totalAmount = order.totalAmount;
           razorpayOrderId = order.razorpayOrderId;
           razorpayPaymentId = order.razorpayPaymentId;
@@ -589,16 +520,10 @@ actor {
     };
   };
 
-  // ── Site settings ───────────────────────────────────────────────────────────
-
-  /// Public: returns only the Razorpay public key needed by the checkout page.
-  /// The Razorpay Key ID is a client-side public key and must be readable by
-  /// any visitor so that the checkout flow works without authentication.
   public query func getRazorpayKeyId() : async Text {
     siteSettings.razorpayKeyId;
   };
 
-  /// Admin-only: read the full site settings (includes sensitive config).
   public query ({ caller }) func getSiteSettings() : async SiteSettings {
     if (not isAdminOrAuthorized(caller)) {
       Runtime.trap("Not authorized: Only admin can view site settings");
@@ -606,7 +531,6 @@ actor {
     siteSettings;
   };
 
-  /// Admin-only: persist updated site settings.
   public shared ({ caller }) func setSiteSettings(newSettings : SiteSettings) : async () {
     if (not isAdminOrAuthorized(caller)) {
       Runtime.trap("Not authorized: Only admin can update site settings");
@@ -614,7 +538,6 @@ actor {
     siteSettings := newSettings;
   };
 
-  // WhatsApp Number Management (public query and admin-only setter)
   public query func getWhatsappNumber() : async Text {
     siteSettings.whatsappNumber;
   };
@@ -623,18 +546,14 @@ actor {
     if (not isAdminOrAuthorized(caller)) {
       Runtime.trap("Not authorized: Only admin can set WhatsApp number");
     };
-    // Create new settings record
     let newSettings : SiteSettings = {
       siteSettings with whatsappNumber = number;
     };
     siteSettings := newSettings;
-    // Update WhatsApp button settings with the new number.
     whatsappButtonSettings := {
       whatsappButtonSettings with number = number;
     };
   };
-
-  // ---- Stripe integration methods --------------------------------------------
 
   public query func isStripeConfigured() : async Bool {
     stripeConfig != null;
@@ -658,7 +577,6 @@ actor {
     await Stripe.getSessionStatus(getStripeConfiguration(), sessionId, transform);
   };
 
-  /// Authenticated users only: create a Stripe checkout session.
   public shared ({ caller }) func createCheckoutSession(items : [Stripe.ShoppingItem], successUrl : Text, cancelUrl : Text) : async Text {
     if (not isAuthenticated(caller)) {
       Runtime.trap("Not authenticated: Only authenticated users can create checkout sessions");
@@ -670,7 +588,6 @@ actor {
     OutCall.transform(input);
   };
 
-  // WhatsApp Button Settings Queries and Updates
   public query func getWhatsappButtonSettings() : async WhatsAppButtonSettings {
     whatsappButtonSettings;
   };

@@ -97,6 +97,13 @@ function OrderCard({ order, products }: { order: Order; products: Product[] }) {
     return product ? product.imageUrl : null;
   };
 
+  // Use guestDeliveryInfo if available, otherwise fall back to deliveryInfo
+  const gdi = order.guestDeliveryInfo;
+  const di = order.deliveryInfo;
+  const displayName = gdi?.fullName || di?.fullName || 'Not provided';
+  const displayAddress = gdi?.address || di?.address || 'Not provided';
+  const displayPhone = gdi?.phoneNumber || di?.phoneNumber || 'Not provided';
+
   return (
     <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       {/* Order Header */}
@@ -165,17 +172,16 @@ function OrderCard({ order, products }: { order: Order; products: Product[] }) {
         </div>
       </div>
 
-      {/* Shipping Info */}
+      {/* Delivery Info */}
       <div className="px-6 pb-4 border-t border-border pt-4">
         <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mb-1">
           Shipping To
         </p>
-        <p className="text-sm text-foreground">
-          {order.shippingDetails.fullName} — {order.shippingDetails.addressLine1}
-          {order.shippingDetails.addressLine2 ? `, ${order.shippingDetails.addressLine2}` : ''},{' '}
-          {order.shippingDetails.city}, {order.shippingDetails.state} -{' '}
-          {order.shippingDetails.pincode}
-        </p>
+        <p className="text-sm text-foreground font-medium">{displayName}</p>
+        <p className="text-sm text-muted-foreground">{displayAddress}</p>
+        {displayPhone !== 'Not provided' && (
+          <p className="text-sm text-muted-foreground">📞 {displayPhone}</p>
+        )}
       </div>
     </div>
   );

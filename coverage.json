@@ -1,130 +1,72 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-03-01T22:06:49.543Z",
+  "generatedAt": "2026-03-02T05:06:29.620Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
-    "implemented": 3,
+    "total": 3,
+    "implemented": 2,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "In the backend, store the admin principal as a stable variable initialized exactly once at first deployment. On canister upgrade, never overwrite or reset this stable admin principal. Expose an `isAdmin(principal)` query that checks against this stored principal. If the stable admin principal is not yet set (empty/null), allow the first caller of a bootstrap function to claim admin status — after that, the principal is permanently locked.",
+        "summary": "Update the Order and related backend data types to include customer delivery fields: fullName (Text), address (Text), and phoneNumber (Text). Ensure these fields are stored with every order record.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
         "id": "REQ-2",
-        "summary": "Update the AdminAuthGuard component and AdminLogin page so that admin authentication is verified exclusively by calling the backend `isAdmin` check against the authenticated Internet Identity principal. Remove any logic that could silently reset, reassign, or fail to find the admin principal after a deployment. On login, if the backend confirms the principal is admin, grant access immediately without any re-bootstrapping that could overwrite the stored principal.",
+        "summary": "Insert a Customer Delivery Details form step between product/cart selection and the Razorpay payment initiation. The form must collect: Full Name, Delivery Address (multi-line), and Phone Number. Validate that all three fields are non-empty before allowing payment to proceed. This applies to both the 'Buy Now' flow on ProductDetail page and the checkout flow on the Cart page.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/admin/AdminLogin.tsx",
-          "frontend/src/components/admin/AdminAuthGuard.tsx"
+          "frontend/src/components/DeliveryDetailsModal.tsx",
+          "frontend/src/pages/ProductDetail.tsx",
+          "frontend/src/pages/Cart.tsx",
+          "frontend/src/hooks/useRazorpay.ts"
         ],
         "matchedFiles": [
-          "frontend/src/pages/admin/AdminLogin.tsx",
-          "frontend/src/components/admin/AdminAuthGuard.tsx"
+          "frontend/src/components/DeliveryDetailsModal.tsx",
+          "frontend/src/pages/ProductDetail.tsx",
+          "frontend/src/pages/Cart.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Restore the full storefront to Version 32 functionality: product listings on the Home and Shop pages, product detail pages, cart with quantity controls, checkout form with shipping details, and Razorpay payment integration including UPI as a visible payment method on both mobile and desktop. Ensure the UPI payment option appears in the Razorpay checkout modal on desktop (not just mobile).",
+        "summary": "Display the customer delivery information (Full Name, Delivery Address, Phone Number) in the Admin Orders panel. Show these fields in the order list cards and in the OrderDetailModal so admins can fulfil deliveries.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/Home.tsx",
-          "frontend/src/components/Hero.tsx",
-          "frontend/src/components/FeaturedProducts.tsx",
-          "frontend/src/components/Benefits.tsx",
-          "frontend/src/components/Testimonials.tsx",
-          "frontend/src/components/AboutAyurveda.tsx",
-          "frontend/src/pages/Shop.tsx",
-          "frontend/src/pages/ProductDetail.tsx",
-          "frontend/src/components/ProductCard.tsx",
-          "frontend/src/hooks/useRazorpay.ts",
-          "frontend/src/pages/Cart.tsx",
-          "frontend/src/components/CartDrawer.tsx",
-          "frontend/src/contexts/CartContext.tsx",
-          "frontend/src/pages/Orders.tsx",
-          "frontend/src/pages/PaymentSuccess.tsx",
-          "frontend/src/pages/PaymentFailure.tsx",
-          "frontend/src/components/Navbar.tsx",
-          "frontend/src/components/MobileNavDrawer.tsx",
-          "frontend/src/components/FloatingWhatsApp.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/Home.tsx",
-          "frontend/src/components/Hero.tsx",
-          "frontend/src/components/FeaturedProducts.tsx",
-          "frontend/src/components/Benefits.tsx",
-          "frontend/src/components/Testimonials.tsx",
-          "frontend/src/components/AboutAyurveda.tsx",
-          "frontend/src/pages/Shop.tsx",
-          "frontend/src/pages/ProductDetail.tsx",
-          "frontend/src/components/ProductCard.tsx",
-          "frontend/src/hooks/useRazorpay.ts",
-          "frontend/src/pages/Cart.tsx",
-          "frontend/src/components/CartDrawer.tsx"
-        ]
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Ensure the backend data schema, product catalog, order management, user management, site settings (store name, contact email, announcement banner, Razorpay key, WhatsApp number), and all admin panel pages (Dashboard, Products, Orders, Settings, Users) are fully functional as they were in Version 32.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/admin/AdminDashboard.tsx",
-          "frontend/src/pages/admin/AdminProducts.tsx",
-          "frontend/src/components/admin/ProductFormModal.tsx",
-          "frontend/src/components/admin/AIImageGenerator.tsx",
           "frontend/src/pages/admin/AdminOrders.tsx",
-          "frontend/src/components/admin/OrderDetailModal.tsx",
-          "frontend/src/pages/admin/AdminSettings.tsx",
-          "frontend/src/pages/admin/AdminUsers.tsx",
-          "frontend/src/components/admin/UserDetailModal.tsx",
-          "frontend/src/components/admin/AdminLayout.tsx",
-          "frontend/src/components/admin/StatusBadge.tsx",
-          "frontend/src/App.tsx",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/SeedProducts.tsx",
-          "frontend/src/utils/seedProducts.ts",
-          "frontend/src/components/Footer.tsx"
+          "frontend/src/components/admin/OrderDetailModal.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/admin/AdminSettings.tsx",
-          "frontend/src/App.tsx",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/pages/admin/AdminOrders.tsx",
+          "frontend/src/components/admin/OrderDetailModal.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
-    "frontend/src/components/AboutAyurveda.tsx",
-    "frontend/src/components/Benefits.tsx",
-    "frontend/src/components/CartDrawer.tsx",
-    "frontend/src/components/FeaturedProducts.tsx",
-    "frontend/src/components/Hero.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/DeliveryDetailsModal.tsx",
     "frontend/src/components/ProductCard.tsx",
-    "frontend/src/components/Testimonials.tsx",
-    "frontend/src/components/admin/AdminAuthGuard.tsx",
-    "frontend/src/context/CartContext.tsx",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/hooks/useRazorpay.ts",
+    "frontend/src/components/admin/OrderDetailModal.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
     "frontend/src/pages/Cart.tsx",
-    "frontend/src/pages/Checkout.tsx",
-    "frontend/src/pages/Home.tsx",
+    "frontend/src/pages/Orders.tsx",
     "frontend/src/pages/ProductDetail.tsx",
-    "frontend/src/pages/Shop.tsx",
-    "frontend/src/pages/admin/AdminLogin.tsx",
-    "frontend/src/pages/admin/AdminSettings.tsx",
+    "frontend/src/pages/admin/AdminDashboard.tsx",
+    "frontend/src/pages/admin/AdminOrders.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

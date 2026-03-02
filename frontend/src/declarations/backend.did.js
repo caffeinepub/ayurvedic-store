@@ -31,39 +31,23 @@ export const ShoppingItem = IDL.Record({
   'priceInCents' : IDL.Nat,
   'productDescription' : IDL.Text,
 });
-export const GuestDetails = IDL.Record({
-  'city' : IDL.Text,
+export const DeliveryInfo = IDL.Record({
   'fullName' : IDL.Text,
-  'email' : IDL.Text,
-  'state' : IDL.Text,
-  'addressLine1' : IDL.Text,
-  'addressLine2' : IDL.Text,
-  'pincode' : IDL.Text,
+  'address' : IDL.Text,
   'phoneNumber' : IDL.Text,
-  'orderNotes' : IDL.Opt(IDL.Text),
 });
 export const OrderItem = IDL.Record({
   'productId' : IDL.Nat,
   'quantity' : IDL.Nat,
   'unitPrice' : IDL.Nat,
 });
-export const ShippingDetails = IDL.Record({
-  'city' : IDL.Text,
-  'fullName' : IDL.Text,
-  'email' : IDL.Text,
-  'state' : IDL.Text,
-  'addressLine1' : IDL.Text,
-  'addressLine2' : IDL.Text,
-  'pincode' : IDL.Text,
-  'phoneNumber' : IDL.Text,
-});
 export const OrderInput = IDL.Record({
   'razorpayPaymentId' : IDL.Text,
-  'guestDetails' : GuestDetails,
+  'deliveryInfo' : DeliveryInfo,
   'razorpayOrderId' : IDL.Text,
   'totalAmount' : IDL.Nat,
+  'guestDeliveryInfo' : DeliveryInfo,
   'items' : IDL.Vec(OrderItem),
-  'shippingDetails' : ShippingDetails,
 });
 export const Order = IDL.Record({
   'id' : IDL.Nat,
@@ -71,12 +55,12 @@ export const Order = IDL.Record({
   'paymentStatus' : IDL.Text,
   'fulfillmentStatus' : IDL.Text,
   'createdAt' : IDL.Int,
-  'guestDetails' : IDL.Opt(GuestDetails),
+  'deliveryInfo' : DeliveryInfo,
   'razorpayOrderId' : IDL.Text,
   'totalAmount' : IDL.Nat,
   'customerId' : IDL.Principal,
+  'guestDeliveryInfo' : IDL.Opt(DeliveryInfo),
   'items' : IDL.Vec(OrderItem),
-  'shippingDetails' : ShippingDetails,
 });
 export const ProductStatus = IDL.Variant({
   'featured' : IDL.Null,
@@ -288,39 +272,23 @@ export const idlFactory = ({ IDL }) => {
     'priceInCents' : IDL.Nat,
     'productDescription' : IDL.Text,
   });
-  const GuestDetails = IDL.Record({
-    'city' : IDL.Text,
+  const DeliveryInfo = IDL.Record({
     'fullName' : IDL.Text,
-    'email' : IDL.Text,
-    'state' : IDL.Text,
-    'addressLine1' : IDL.Text,
-    'addressLine2' : IDL.Text,
-    'pincode' : IDL.Text,
+    'address' : IDL.Text,
     'phoneNumber' : IDL.Text,
-    'orderNotes' : IDL.Opt(IDL.Text),
   });
   const OrderItem = IDL.Record({
     'productId' : IDL.Nat,
     'quantity' : IDL.Nat,
     'unitPrice' : IDL.Nat,
   });
-  const ShippingDetails = IDL.Record({
-    'city' : IDL.Text,
-    'fullName' : IDL.Text,
-    'email' : IDL.Text,
-    'state' : IDL.Text,
-    'addressLine1' : IDL.Text,
-    'addressLine2' : IDL.Text,
-    'pincode' : IDL.Text,
-    'phoneNumber' : IDL.Text,
-  });
   const OrderInput = IDL.Record({
     'razorpayPaymentId' : IDL.Text,
-    'guestDetails' : GuestDetails,
+    'deliveryInfo' : DeliveryInfo,
     'razorpayOrderId' : IDL.Text,
     'totalAmount' : IDL.Nat,
+    'guestDeliveryInfo' : DeliveryInfo,
     'items' : IDL.Vec(OrderItem),
-    'shippingDetails' : ShippingDetails,
   });
   const Order = IDL.Record({
     'id' : IDL.Nat,
@@ -328,12 +296,12 @@ export const idlFactory = ({ IDL }) => {
     'paymentStatus' : IDL.Text,
     'fulfillmentStatus' : IDL.Text,
     'createdAt' : IDL.Int,
-    'guestDetails' : IDL.Opt(GuestDetails),
+    'deliveryInfo' : DeliveryInfo,
     'razorpayOrderId' : IDL.Text,
     'totalAmount' : IDL.Nat,
     'customerId' : IDL.Principal,
+    'guestDeliveryInfo' : IDL.Opt(DeliveryInfo),
     'items' : IDL.Vec(OrderItem),
-    'shippingDetails' : ShippingDetails,
   });
   const ProductStatus = IDL.Variant({
     'featured' : IDL.Null,

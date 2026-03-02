@@ -1,231 +1,61 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Restore Version 32 & Permanently Preserve Admin Internet Identity Principal",
+  "title": "Add Customer Delivery Details Form Before Razorpay Payment",
   "requirements": [
     {
       "id": "REQ-2",
-      "summary": "Update admin authentication to verify exclusively via backend isAdmin check, removing any logic that could reset or fail to find the admin principal after deployment",
+      "summary": "Insert a Customer Delivery Details form step between product/cart selection and Razorpay payment initiation, collecting Full Name, Delivery Address, and Phone Number with validation before allowing payment to proceed",
       "acceptanceCriteria": [
-        "Logging in with the admin Internet Identity principal grants full admin panel access.",
-        "Logging in with any non-admin principal shows an 'Access Denied' state.",
-        "After any future deployment or build, the admin principal can still log in without re-bootstrapping.",
-        "AdminLogin does not call any bootstrap/claim function if an admin principal is already set in the backend."
+        "Clicking 'Buy Now' on the product detail page shows the delivery details form before opening Razorpay",
+        "Proceeding through the Cart/Checkout page shows the delivery details form before opening Razorpay",
+        "Form has labeled input fields for Full Name, Delivery Address, and Phone Number",
+        "Submitting with any empty field shows a validation error and blocks payment",
+        "Razorpay checkout is only initiated after valid form submission",
+        "Collected name, address, and phone number are passed along with the order creation call"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/admin/AdminLogin.tsx",
-          "operation": "modify",
-          "description": "Remove all bootstrap/claim logic and verify admin status exclusively by calling the backend isCallerAdmin() query after Internet Identity authentication. On successful admin verification, navigate to /admin/products. On failed verification, display an 'Access Denied' message without attempting to set or claim admin status. Use the authorization component's backend capability to check if the authenticated principal is admin."
+          "path": "frontend/src/components/DeliveryDetailsModal.tsx",
+          "operation": "create",
+          "description": "Create a modal dialog component that collects customer delivery details (Full Name, Delivery Address as textarea, Phone Number) with validation ensuring all three fields are non-empty. Include a submit button that triggers the onSubmit callback with the collected DeliveryInfo data. Use shadcn/ui Dialog, Input, Textarea, Label, and Button components for consistent styling."
         },
         {
-          "path": "frontend/src/components/admin/AdminAuthGuard.tsx",
+          "path": "frontend/src/pages/ProductDetail.tsx",
           "operation": "modify",
-          "description": "Verify admin privileges by calling the backend isCallerAdmin() query against the authenticated Internet Identity principal. Remove any fallback logic that could silently reset or reassign the admin principal. Show loading state while checking, 'Access Denied' for non-admin principals, and render children only when backend confirms admin status. Use the authorization component to support role-based access control."
+          "description": "Integrate DeliveryDetailsModal into the Buy Now flow. When 'Buy Now' is clicked, open the delivery details modal first. On modal submission with valid data, store the DeliveryInfo and then trigger the existing Razorpay checkout with the collected delivery information included in the order creation payload. Update the useRazorpay hook call to pass guestDeliveryInfo containing the collected name, address, and phone number."
+        },
+        {
+          "path": "frontend/src/pages/Cart.tsx",
+          "operation": "modify",
+          "description": "Integrate DeliveryDetailsModal into the Cart checkout flow. Replace or precede the existing checkout button action with a flow that opens the delivery details modal. On modal submission with valid data, store the DeliveryInfo and then proceed with Razorpay payment, passing the collected delivery information (fullName, address, phoneNumber) in the guestDeliveryInfo field of the OrderInput when creating the order."
+        },
+        {
+          "path": "frontend/src/hooks/useRazorpay.ts",
+          "operation": "modify",
+          "description": "Update the useRazorpay hook to accept an optional guestDeliveryInfo parameter of type DeliveryInfo. Modify the createOrder call to include this guestDeliveryInfo in the OrderInput payload when present. Ensure backward compatibility by making the parameter optional with a default empty or null value."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Restore the full storefront to Version 32 functionality including product listings, cart, checkout, and Razorpay payment with UPI visible on both mobile and desktop",
+      "summary": "Display customer delivery information (Full Name, Delivery Address, Phone Number) in the Admin Orders panel, both in order list cards and in the OrderDetailModal",
       "acceptanceCriteria": [
-        "Home page displays hero section, featured products, benefits, testimonials, and About Ayurveda section.",
-        "Shop page shows all visible products with search and category filters.",
-        "Product detail page renders correctly with add-to-cart and buy-now buttons.",
-        "Cart drawer and Cart page work with quantity controls and checkout form.",
-        "Razorpay checkout modal shows UPI as a payment option on both desktop and mobile.",
-        "Orders page displays authenticated user's order history.",
-        "Payment success and failure pages render correctly after checkout."
+        "AdminOrders page shows customer name and phone number on each order card",
+        "OrderDetailModal displays Full Name, Delivery Address, and Phone Number in a clearly labeled section",
+        "Fields are visible for all new orders containing delivery details",
+        "If an older order has no delivery details, the fields display a fallback such as 'Not provided'"
       ],
       "file_operations": [
-        {
-          "path": "frontend/src/pages/Home.tsx",
-          "operation": "modify",
-          "description": "Ensure the Home page renders the Hero component, SeedProducts component (for initial data seeding), FeaturedProducts component, Benefits component, Testimonials component, and AboutAyurveda component in that order. Verify the hero background image uses the workspace file path frontend/public/assets/generated/ayurvedic-hero-kenburns.dim_1920x1080.png. Confirm all sections are wired and displayed correctly."
-        },
-        {
-          "path": "frontend/src/components/Hero.tsx",
-          "operation": "modify",
-          "description": "Verify the hero section uses the Ken Burns animated background image from frontend/public/assets/generated/ayurvedic-hero-kenburns.dim_1920x1080.png, displays the Nature Glow brand name, tagline, and CTA buttons (Shop Now linking to /shop, Learn More scrolling to benefits). Ensure mount-state entrance animations work correctly."
-        },
-        {
-          "path": "frontend/src/components/FeaturedProducts.tsx",
-          "operation": "modify",
-          "description": "Verify the component fetches featured products using the useGetFeaturedProducts hook, filters out notVisible products, displays a grid of product cards using the ProductCard component, shows loading skeletons during fetch, and includes a 'View All Products' link navigating to /shop."
-        },
-        {
-          "path": "frontend/src/components/Benefits.tsx",
-          "operation": "modify",
-          "description": "Confirm the Benefits section renders six benefit cards (100% Natural, Chemical-Free, Ayurvedic Wisdom, Sustainable, Cruelty-Free, Handcrafted) with icons and scroll-triggered fade-in animations using IntersectionObserver."
-        },
-        {
-          "path": "frontend/src/components/Testimonials.tsx",
-          "operation": "modify",
-          "description": "Verify the Testimonials section displays an animated grid of customer testimonial cards with star ratings, quotes, product tags, and intersection-observer-based fade-in animations."
-        },
-        {
-          "path": "frontend/src/components/AboutAyurveda.tsx",
-          "operation": "modify",
-          "description": "Ensure the About Ayurveda section displays the Ayurvedic philosophy content with scroll-triggered slide-in animations for left and right columns, including the three doshas description and a link to the shop page."
-        },
-        {
-          "path": "frontend/src/pages/Shop.tsx",
-          "operation": "modify",
-          "description": "Verify the Shop page lists all visible products using the useGetProducts hook, applies search and category filters client-side using memoized filtering logic, and excludes notVisible products from the display. Ensure the search bar and category filter controls work correctly."
-        },
-        {
-          "path": "frontend/src/pages/ProductDetail.tsx",
-          "operation": "modify",
-          "description": "Confirm the product detail page fetches a single product by ID using useGetProductById, displays product information with quantity selection controls, add-to-cart button, and buy-now button that triggers Razorpay checkout. Handle loading, not-found, and out-of-stock states appropriately."
-        },
-        {
-          "path": "frontend/src/components/ProductCard.tsx",
-          "operation": "modify",
-          "description": "Ensure ProductCard displays product image, name, price, status badges, add-to-cart button, and buy-now button. The buy-now flow should use the useRazorpay hook to open Razorpay checkout with device-aware payment method configuration. Hide notVisible products. Verify product images render correctly from imageUrl field."
-        },
-        {
-          "path": "frontend/src/hooks/useRazorpay.ts",
-          "operation": "modify",
-          "description": "Verify the useRazorpay hook opens Razorpay checkout with device-aware payment method configuration. On desktop, explicitly enable UPI in the payment methods configuration alongside card, netbanking, and wallet. On mobile, ensure UPI is also visible. After successful payment, create an order via the backend createOrder function and navigate to /payment-success. Handle payment failures by navigating to /payment-failure."
-        },
-        {
-          "path": "frontend/src/pages/Cart.tsx",
-          "operation": "modify",
-          "description": "Verify the Cart page displays cart items from CartContext with quantity controls, collects shipping and checkout form data, validates the form, and processes payment via the useRazorpay hook. On successful payment, create an order using the backend createOrder function and navigate to /payment-success."
-        },
-        {
-          "path": "frontend/src/components/CartDrawer.tsx",
-          "operation": "modify",
-          "description": "Ensure the CartDrawer slide-out component displays cart items using CartContext with quantity controls (increment, decrement, remove) and a checkout button that navigates to /cart when clicked."
-        },
-        {
-          "path": "frontend/src/contexts/CartContext.tsx",
-          "operation": "modify",
-          "description": "Verify the CartContext persists cart items to sessionStorage, supports add, remove, update quantity, and clear operations, and exposes a cart-open toggle for the CartDrawer. Ensure cart state survives page refreshes via sessionStorage."
-        },
-        {
-          "path": "frontend/src/pages/Orders.tsx",
-          "operation": "modify",
-          "description": "Confirm the Orders page fetches the authenticated user's order history using the useGetMyOrders hook and displays order cards showing product details, payment status badges, and fulfillment status badges. Show loading state during fetch and empty state when no orders exist."
-        },
-        {
-          "path": "frontend/src/pages/PaymentSuccess.tsx",
-          "operation": "modify",
-          "description": "Verify the payment success page invalidates the orders query cache on mount to refresh order data, displays a success message, and offers navigation buttons to view orders or continue shopping."
-        },
-        {
-          "path": "frontend/src/pages/PaymentFailure.tsx",
-          "operation": "modify",
-          "description": "Ensure the payment failure page displays an error message and offers buttons to retry payment via the cart or return to the shop."
-        },
-        {
-          "path": "frontend/src/components/Navbar.tsx",
-          "operation": "modify",
-          "description": "Verify the sticky navigation bar displays desktop nav links (Home, Shop, Orders), cart icon with item count badge from CartContext, mobile hamburger menu triggering MobileNavDrawer, and logout/login actions using Internet Identity. Ensure the cart badge updates in real-time as items are added."
-        },
-        {
-          "path": "frontend/src/components/MobileNavDrawer.tsx",
-          "operation": "modify",
-          "description": "Confirm the mobile navigation drawer renders nav links (Home, Shop, Orders) and an auth button (Login/Logout) using Internet Identity, visible only on small screens."
-        },
-        {
-          "path": "frontend/src/components/FloatingWhatsApp.tsx",
-          "operation": "modify",
-          "description": "Verify the floating WhatsApp button uses the backend-configured WhatsApp number via useGetWhatsappNumber hook with a fallback, displays pulse animation and tooltip, and opens a pre-filled WhatsApp chat on click."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Ensure all admin panel pages (Dashboard, Products, Orders, Settings, Users) are fully functional as in Version 32",
-      "acceptanceCriteria": [
-        "Admin Dashboard shows revenue, order, product, and user stats with charts.",
-        "Admin Products page allows creating, editing, and deleting products.",
-        "Admin Orders page allows viewing and updating fulfillment status.",
-        "Admin Settings page saves store configuration including Razorpay key and WhatsApp number.",
-        "Admin Users page displays all registered users with detail modal.",
-        "Backend persists all state (products, orders, users, settings) correctly across upgrades."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/admin/AdminDashboard.tsx",
-          "operation": "modify",
-          "description": "Verify the admin dashboard displays summary stats (revenue, orders, products, users) using hooks from useQueries.ts, renders bar charts for revenue trends and pie charts for fulfillment status distribution, and shows a recent orders table. Ensure all data is fetched correctly and charts render using a charting library."
-        },
-        {
-          "path": "frontend/src/pages/admin/AdminProducts.tsx",
-          "operation": "modify",
-          "description": "Confirm the admin products page displays a searchable product catalog with status-based summary stats, supports adding new products via ProductFormModal, editing existing products by clicking a product card, and deleting products with confirmation. Use useGetAllProducts, useCreateProduct, useUpdateProduct, and useDeleteProduct hooks."
-        },
-        {
-          "path": "frontend/src/components/admin/ProductFormModal.tsx",
-          "operation": "modify",
-          "description": "Verify the ProductFormModal supports creating and editing products with fields for name, price, category, stock, status, specifications (key-value pairs), image URL input, and AI image generation via AIImageGenerator component. On save, call the appropriate backend mutation and close the modal. Handle validation errors appropriately."
-        },
-        {
-          "path": "frontend/src/components/admin/AIImageGenerator.tsx",
-          "operation": "modify",
-          "description": "Ensure the AIImageGenerator widget maps a text prompt to a curated Unsplash botanical image, displays a preview, and provides a button to apply the selected image URL to the product form."
-        },
         {
           "path": "frontend/src/pages/admin/AdminOrders.tsx",
           "operation": "modify",
-          "description": "Verify the admin orders page displays sortable, searchable order cards using useGetOrders hook, shows customer details and order items, and allows updating fulfillment status via a dropdown in OrderDetailModal. Ensure status updates trigger backend mutations and optimistic UI updates."
+          "description": "Update each order card in the AdminOrders list to display the customer's full name and phone number from order.guestDeliveryInfo. Add these fields below or alongside existing order details (order ID, total, status). If guestDeliveryInfo is missing or fields are empty, display 'Not provided' as a fallback."
         },
         {
           "path": "frontend/src/components/admin/OrderDetailModal.tsx",
           "operation": "modify",
-          "description": "Confirm the OrderDetailModal displays full order details (customer info, shipping details, items, payment status) and provides a dropdown to update fulfillment status. Use the useUpdateFulfillmentStatus mutation with optimistic updates and toast feedback."
-        },
-        {
-          "path": "frontend/src/pages/admin/AdminSettings.tsx",
-          "operation": "modify",
-          "description": "Verify the admin settings page allows configuring store name, contact email, announcement banner, Razorpay key ID, and WhatsApp number using the useGetSiteSettings and useUpdateSiteSettings hooks. Include validation for live vs test Razorpay keys and provide a save button with success/error feedback."
-        },
-        {
-          "path": "frontend/src/pages/admin/AdminUsers.tsx",
-          "operation": "modify",
-          "description": "Confirm the admin users page displays a searchable, filterable table of all registered users using the useGetAllUsers hook. Each user row should be clickable to open a UserDetailModal showing profile details, principal ID, registration date, and order count. Include loading skeletons and empty states."
-        },
-        {
-          "path": "frontend/src/components/admin/UserDetailModal.tsx",
-          "operation": "modify",
-          "description": "Verify the UserDetailModal is a read-only dialog displaying a user's profile (name, email), principal ID, registration date, and order count. No edit functionality is required."
-        },
-        {
-          "path": "frontend/src/components/admin/AdminLayout.tsx",
-          "operation": "modify",
-          "description": "Ensure the AdminLayout provides the admin panel shell with a responsive sidebar (desktop and mobile overlay) containing navigation links (Dashboard, Products, Orders, Settings, Users), branding, and a sign-out button that clears Internet Identity and query cache. Verify all admin routes are wrapped in this layout."
-        },
-        {
-          "path": "frontend/src/components/admin/StatusBadge.tsx",
-          "operation": "modify",
-          "description": "Verify StatusBadge renders styled badges for ProductStatus enum values (featured, visible, launchingSoon, outOfStock, notVisible), mapping each status to an appropriate label and color class."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Confirm all customer routes (/, /shop, /product/:id, /cart, /orders, /payment-success, /payment-failure) and protected admin routes (/admin/login, /admin/dashboard, /admin/products, /admin/orders, /admin/settings, /admin/users) are registered in the TanStack Router configuration. Ensure admin routes are wrapped with AdminAuthGuard and use AdminLayout. Verify payment success and failure routes are correctly wired to their respective page components."
-        },
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Verify all React Query hooks for backend operations are defined correctly, including useGetProducts, useGetFeaturedProducts, useGetProductById, useGetAllProducts, useCreateProduct, useUpdateProduct, useDeleteProduct, useGetOrders, useGetMyOrders, useUpdateFulfillmentStatus, useGetAllUsers, useGetCallerUserProfile, useSaveCallerUserProfile, useGetSiteSettings, useUpdateSiteSettings, useGetRazorpayKeyId, useGetWhatsappNumber, and useUpdateWhatsappNumber. Ensure mutations invalidate appropriate query keys on success."
-        },
-        {
-          "path": "frontend/src/components/SeedProducts.tsx",
-          "operation": "modify",
-          "description": "Verify the SeedProducts utility component seeds the backend with sample products from frontend/src/utils/seedProducts.ts on mount if no products exist yet. This component should render nothing and only perform the seeding side effect once."
-        },
-        {
-          "path": "frontend/src/utils/seedProducts.ts",
-          "operation": "modify",
-          "description": "Confirm the sampleProducts array contains five ProductInput objects representing Ayurvedic skincare products (e.g., Neem Face Pack, Sandalwood Glow Cream, Turmeric Ubtan, Rose Water Toner, Anti-Acne Gel) with appropriate names, descriptions, categories, prices, stock quantities, and image URLs. These products are used to seed the product catalog."
-        },
-        {
-          "path": "frontend/src/components/Footer.tsx",
-          "operation": "modify",
-          "description": "Verify the site footer displays brand info, social media links (placeholder icons), quick navigation links (Home, Shop, About, Contact), product category links, and contact details (email, phone), styled with the forest/cream Ayurvedic color scheme."
+          "description": "Add a 'Delivery Information' section to the OrderDetailModal that displays Full Name, Delivery Address (with line breaks preserved), and Phone Number from order.guestDeliveryInfo. Use clear labels and formatting. If guestDeliveryInfo is missing or any field is empty, display 'Not provided' for that field. Place this section prominently near the top of the modal after customer principal or before order items."
         }
       ]
     }

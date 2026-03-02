@@ -2,11 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-adminauthguard-component-and-adminlogin-page-so-that-admin-authentication-is-verified-exclusively-by-calling-the-backend-isadmin-check-against-the-authenticated-internet-identity-principal-remove-any-logic-that-could-silently-reset-reassign-or-fail-to-find-the-admin-principal-after-a-deployment-on-login-if-the-backend-confirms-the-principal-is-admin-grant-access-immediately-without-any-re-bootstrapping-that-could-overwrite-the-stored-principal",
-      "featureTitle": "Update the AdminAuthGuard component and AdminLogin page so that admin authentication is verified exclusively by calling the backend `isAdmin` check against the authenticated Internet Identity principal. Remove any logic that could silently reset, reassign, or fail to find the admin principal after a deployment. On login, if the backend confirms the principal is admin, grant access immediately without any re-bootstrapping that could overwrite the stored principal.",
+      "featureId": "feature-insert-a-customer-delivery-details-form-step-between-product-cart-selection-and-the-razorpay-payment-initiation-the-form-must-collect-full-name-delivery-address-multi-line-and-phone-number-validate-that-all-three-fields-are-non-empty-before-allowing-payment-to-proceed-this-applies-to-both-the-buy-now-flow-on-productdetail-page-and-the-checkout-flow-on-the-cart-page",
+      "featureTitle": "Insert a Customer Delivery Details form step between product/cart selection and the Razorpay payment initiation. The form must collect: Full Name, Delivery Address (multi-line), and Phone Number. Validate that all three fields are non-empty before allowing payment to proceed. This applies to both the 'Buy Now' flow on ProductDetail page and the checkout flow on the Cart page.",
       "files": [
-        "frontend/src/components/admin/AdminAuthGuard.tsx",
-        "frontend/src/pages/admin/AdminLogin.tsx"
+        "frontend/src/components/DeliveryDetailsModal.tsx",
+        "frontend/src/pages/Cart.tsx",
+        "frontend/src/pages/ProductDetail.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -25,21 +26,11 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-restore-the-full-storefront-to-version-32-functionality-product-listings-on-the-home-and-shop-pages-product-detail-pages-cart-with-quantity-controls-checkout-form-with-shipping-details-and-razorpay-payment-integration-including-upi-as-a-visible-payment-method-on-both-mobile-and-desktop-ensure-the-upi-payment-option-appears-in-the-razorpay-checkout-modal-on-desktop-not-just-mobile",
-      "featureTitle": "Restore the full storefront to Version 32 functionality: product listings on the Home and Shop pages, product detail pages, cart with quantity controls, checkout form with shipping details, and Razorpay payment integration including UPI as a visible payment method on both mobile and desktop. Ensure the UPI payment option appears in the Razorpay checkout modal on desktop (not just mobile).",
+      "featureId": "feature-display-the-customer-delivery-information-full-name-delivery-address-phone-number-in-the-admin-orders-panel-show-these-fields-in-the-order-list-cards-and-in-the-orderdetailmodal-so-admins-can-fulfil-deliveries",
+      "featureTitle": "Display the customer delivery information (Full Name, Delivery Address, Phone Number) in the Admin Orders panel. Show these fields in the order list cards and in the OrderDetailModal so admins can fulfil deliveries.",
       "files": [
-        "frontend/src/components/AboutAyurveda.tsx",
-        "frontend/src/components/Benefits.tsx",
-        "frontend/src/components/CartDrawer.tsx",
-        "frontend/src/components/FeaturedProducts.tsx",
-        "frontend/src/components/Hero.tsx",
-        "frontend/src/components/ProductCard.tsx",
-        "frontend/src/components/Testimonials.tsx",
-        "frontend/src/hooks/useRazorpay.ts",
-        "frontend/src/pages/Cart.tsx",
-        "frontend/src/pages/Home.tsx",
-        "frontend/src/pages/ProductDetail.tsx",
-        "frontend/src/pages/Shop.tsx"
+        "frontend/src/components/admin/OrderDetailModal.tsx",
+        "frontend/src/pages/admin/AdminOrders.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -54,30 +45,6 @@
       ],
       "testIds": [
         "REQ-3"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-ensure-the-backend-data-schema-product-catalog-order-management-user-management-site-settings-store-name-contact-email-announcement-banner-razorpay-key-whatsapp-number-and-all-admin-panel-pages-dashboard-products-orders-settings-users-are-fully-functional-as-they-were-in-version-32",
-      "featureTitle": "Ensure the backend data schema, product catalog, order management, user management, site settings (store name, contact email, announcement banner, Razorpay key, WhatsApp number), and all admin panel pages (Dashboard, Products, Orders, Settings, Users) are fully functional as they were in Version 32.",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/pages/admin/AdminSettings.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-4"
       ],
       "confidence": "high"
     }

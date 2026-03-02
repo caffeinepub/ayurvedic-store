@@ -8,6 +8,7 @@ import { ProductStatus, OrderInput } from '../backend';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import StatusBadge from '../components/admin/StatusBadge';
+import DeliveryDetailsModal, { DeliveryFormData } from '../components/DeliveryDetailsModal';
 
 // We read the id from the URL via window.location since the route path
 // is nested under the customer-layout and the full route id is long.
@@ -29,6 +30,7 @@ export default function ProductDetail() {
   const productId = useProductId();
   const [quantity, setQuantity] = useState(1);
   const [buyingNow, setBuyingNow] = useState(false);
+  const [showDeliveryModal, setShowDeliveryModal] = useState(false);
 
   const { data: product, isLoading } = useGetProductById(productId);
   const { data: razorpayKeyId } = useGetRazorpayKeyId();
@@ -53,10 +55,21 @@ export default function ProductDetail() {
     toast.success(`${product.name} added to cart!`);
   };
 
-  const handleBuyNow = async () => {
+  const handleBuyNowClick = () => {
     if (!product || isOutOfStock || isLaunchingSoon || !razorpayKeyId) return;
+    setShowDeliveryModal(true);
+  };
+
+  const handleDeliverySubmit = async (deliveryData: DeliveryFormData) => {
+    if (!product || !razorpayKeyId) return;
     setBuyingNow(true);
     try {
+      const deliveryInfo = {
+        fullName: deliveryData.fullName,
+        address: deliveryData.address,
+        phoneNumber: deliveryData.phoneNumber,
+      };
+
       const orderInput: OrderInput = {
         items: [
           {
@@ -65,31 +78,14 @@ export default function ProductDetail() {
             unitPrice: product.priceInr,
           },
         ],
-        shippingDetails: {
-          fullName: '',
-          email: '',
-          phoneNumber: '',
-          addressLine1: '',
-          addressLine2: '',
-          city: '',
-          state: '',
-          pincode: '',
-        },
-        guestDetails: {
-          fullName: '',
-          email: '',
-          phoneNumber: '',
-          addressLine1: '',
-          addressLine2: '',
-          city: '',
-          state: '',
-          pincode: '',
-          orderNotes: undefined,
-        },
+        deliveryInfo,
+        guestDeliveryInfo: deliveryInfo,
         totalAmount: product.priceInr * BigInt(quantity),
         razorpayOrderId: `order_${Date.now()}`,
         razorpayPaymentId: '',
       };
+
+      setShowDeliveryModal(false);
 
       await openCheckout({
         keyId: razorpayKeyId,
@@ -97,8 +93,13 @@ export default function ProductDetail() {
         name: 'Nature Glow',
         description: product.name,
         orderInput,
-        prefill: {},
+        prefill: {
+          name: deliveryData.fullName,
+          contact: deliveryData.phoneNumber,
+        },
       });
+    } catch (err) {
+      toast.error('Failed to initiate payment. Please try again.');
     } finally {
       setBuyingNow(false);
     }
@@ -253,7 +254,7 @@ export default function ProductDetail() {
               </button>
               {!isOutOfStock && !isLaunchingSoon && razorpayKeyId && (
                 <button
-                  onClick={handleBuyNow}
+                  onClick={handleBuyNowClick}
                   disabled={buyingNow || isCreatingOrder}
                   className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-gold hover:bg-gold/90 text-forest font-semibold rounded-xl transition-colors disabled:opacity-50"
                 >
@@ -283,6 +284,15 @@ export default function ProductDetail() {
           </div>
         </div>
       </div>
+
+      {/* Delivery Details Modal */}
+      <DeliveryDetailsModal
+        open={showDeliveryModal}
+        onClose={() => setShowDeliveryModal(false)}
+        onSubmit={handleDeliverySubmit}
+        isLoading={buyingNow || isCreatingOrder}
+        productName={product?.name}
+      />
     </div>
   );
 }

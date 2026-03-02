@@ -1,23 +1,58 @@
 import Map "mo:core/Map";
 import Nat "mo:core/Nat";
 import Principal "mo:core/Principal";
-import Stripe "stripe/stripe";
 
 module {
-  type Specification = {
-    key : Text;
-    value : Text;
+  public type OldOrder = {
+    id : Nat;
+    customerId : Principal;
+    items : [OrderItem];
+    shippingDetails : ShippingDetails;
+    totalAmount : Nat;
+    razorpayOrderId : Text;
+    razorpayPaymentId : ?Text;
+    paymentStatus : Text;
+    fulfillmentStatus : Text;
+    createdAt : Int;
+    guestDetails : ?GuestDetails;
   };
 
-  type ProductStatus = {
-    #visible;
-    #outOfStock;
-    #launchingSoon;
-    #featured;
-    #notVisible;
+  public type GuestDetails = {
+    fullName : Text;
+    email : Text;
+    phoneNumber : Text;
+    addressLine1 : Text;
+    addressLine2 : Text;
+    city : Text;
+    state : Text;
+    pincode : Text;
+    orderNotes : ?Text;
   };
 
-  type Product = {
+  public type DeliveryInfo = {
+    fullName : Text;
+    address : Text;
+    phoneNumber : Text;
+  };
+
+  public type OrderItem = {
+    productId : Nat;
+    quantity : Nat;
+    unitPrice : Nat;
+  };
+
+  public type ShippingDetails = {
+    fullName : Text;
+    email : Text;
+    phoneNumber : Text;
+    addressLine1 : Text;
+    addressLine2 : Text;
+    city : Text;
+    state : Text;
+    pincode : Text;
+  };
+
+  public type Product = {
     id : Nat;
     name : Text;
     description : Text;
@@ -30,124 +65,91 @@ module {
     specifications : [Specification];
   };
 
-  type OrderItem = {
-    productId : Nat;
-    quantity : Nat;
-    unitPrice : Nat;
+  public type Specification = {
+    key : Text;
+    value : Text;
   };
 
-  type ShippingDetails = {
-    fullName : Text;
-    email : Text;
-    phoneNumber : Text;
-    addressLine1 : Text;
-    addressLine2 : Text;
-    city : Text;
-    state : Text;
-    pincode : Text;
-  };
-
-  // Guest details used for new records
-  type GuestDetails = {
-    fullName : Text;
-    email : Text;
-    phoneNumber : Text;
-    addressLine1 : Text;
-    addressLine2 : Text;
-    city : Text;
-    state : Text;
-    pincode : Text;
-    orderNotes : ?Text;
-  };
-
-  // Mapping old Order type to new one
-  type OldOrder = {
-    id : Nat;
-    customerId : Principal;
-    items : [OrderItem];
-    shippingDetails : ShippingDetails;
-    totalAmount : Nat;
-    razorpayOrderId : Text;
-    razorpayPaymentId : ?Text;
-    paymentStatus : Text;
-    fulfillmentStatus : Text;
-    createdAt : Int;
-  };
-
-  type NewOrder = {
-    id : Nat;
-    customerId : Principal;
-    guestDetails : ?GuestDetails;
-    items : [OrderItem];
-    shippingDetails : ShippingDetails;
-    totalAmount : Nat;
-    razorpayOrderId : Text;
-    razorpayPaymentId : ?Text;
-    paymentStatus : Text;
-    fulfillmentStatus : Text;
-    createdAt : Int;
-  };
-
-  type UserProfile = {
+  public type UserProfile = {
     name : Text;
     email : Text;
   };
 
-  type SiteSettings = {
-    razorpayKeyId : Text;
-    storeName : Text;
-    contactEmail : Text;
-    announcementBanner : Text;
-    whatsappNumber : Text;
+  public type ProductStatus = {
+    #visible;
+    #outOfStock;
+    #launchingSoon;
+    #featured;
+    #notVisible;
   };
 
-  type WhatsAppButtonSettings = {
-    number : Text;
-    enabled : Bool;
-    animation : Text;
-    tooltip : Text;
-    ringEffect : Bool;
-    pulseRingColor : Text;
-    buttonColor : Text;
-    icon : Text;
+  public type NewOrder = {
+    id : Nat;
+    customerId : Principal;
+    guestDeliveryInfo : ?DeliveryInfo;
+    items : [OrderItem];
+    deliveryInfo : DeliveryInfo;
+    totalAmount : Nat;
+    razorpayOrderId : Text;
+    razorpayPaymentId : ?Text;
+    paymentStatus : Text;
+    fulfillmentStatus : Text;
+    createdAt : Int;
   };
 
   type OldActor = {
-    nextProductId : Nat;
-    nextOrderId : Nat;
-    products : Map.Map<Nat, Product>;
     orders : Map.Map<Nat, OldOrder>;
+    products : Map.Map<Nat, Product>;
     userProfiles : Map.Map<Principal, UserProfile>;
     userRegistrationTimes : Map.Map<Principal, Int>;
-    siteSettings : SiteSettings;
-    stripeConfig : ?Stripe.StripeConfiguration;
-    whatsappButtonSettings : WhatsAppButtonSettings;
-    adminPrincipal : ?Principal;
   };
 
   type NewActor = {
-    nextProductId : Nat;
-    nextOrderId : Nat;
-    products : Map.Map<Nat, Product>;
     orders : Map.Map<Nat, NewOrder>;
+    products : Map.Map<Nat, Product>;
     userProfiles : Map.Map<Principal, UserProfile>;
     userRegistrationTimes : Map.Map<Principal, Int>;
-    siteSettings : SiteSettings;
-    stripeConfig : ?Stripe.StripeConfiguration;
-    whatsappButtonSettings : WhatsAppButtonSettings;
-    adminPrincipal : ?Principal;
   };
 
-  /// Convert old-style orders to the new format.
   public func run(old : OldActor) : NewActor {
     let newOrders = old.orders.map<Nat, OldOrder, NewOrder>(
       func(_id, oldOrder) {
         {
-          oldOrder with
-          guestDetails = null
+          id = oldOrder.id;
+          customerId = oldOrder.customerId;
+          guestDeliveryInfo = oldOrder.guestDetails.map(mapGuestDetailsToDeliveryInfo);
+          items = oldOrder.items;
+          deliveryInfo = mapShippingDetailsToDeliveryInfo(oldOrder.shippingDetails);
+          totalAmount = oldOrder.totalAmount;
+          razorpayOrderId = oldOrder.razorpayOrderId;
+          razorpayPaymentId = oldOrder.razorpayPaymentId;
+          paymentStatus = oldOrder.paymentStatus;
+          fulfillmentStatus = oldOrder.fulfillmentStatus;
+          createdAt = oldOrder.createdAt;
         };
       }
     );
-    { old with orders = newOrders };
+    {
+      orders = newOrders;
+      products = old.products;
+      userProfiles = old.userProfiles;
+      userRegistrationTimes = old.userRegistrationTimes;
+    };
+  };
+
+  func mapShippingDetailsToDeliveryInfo(details : ShippingDetails) : DeliveryInfo {
+    {
+      fullName = details.fullName;
+      address = details.addressLine1 # " " # details.addressLine2 # ", " # details.city # ", " # details.state # ", " # details.pincode;
+      phoneNumber = details.phoneNumber;
+    };
+  };
+
+  func mapGuestDetailsToDeliveryInfo(details : GuestDetails) : DeliveryInfo {
+    {
+      fullName = details.fullName;
+      address = details.addressLine1 # " " # details.addressLine2 # ", " # details.city # ", " # details.state # ", " # details.pincode;
+      phoneNumber = details.phoneNumber;
+    };
   };
 };

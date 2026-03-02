@@ -9,7 +9,6 @@ import { toast } from 'sonner';
 
 interface CheckoutForm {
   fullName: string;
-  email: string;
   phoneNumber: string;
   addressLine1: string;
   addressLine2: string;
@@ -21,7 +20,6 @@ interface CheckoutForm {
 
 const INITIAL_FORM: CheckoutForm = {
   fullName: '',
-  email: '',
   phoneNumber: '',
   addressLine1: '',
   addressLine2: '',
@@ -44,9 +42,7 @@ export default function Cart() {
   const validateForm = (): boolean => {
     const newErrors: Partial<CheckoutForm> = {};
     if (!form.fullName.trim()) newErrors.fullName = 'Full name is required';
-    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
-      newErrors.email = 'Valid email is required';
-    if (!form.phoneNumber.trim() || !/^\d{10}$/.test(form.phoneNumber.replace(/\s/g, '')))
+    if (!form.phoneNumber.trim() || !/^\d{10}$/.test(form.phoneNumber.replace(/[\s\-]/g, '')))
       newErrors.phoneNumber = 'Valid 10-digit phone number is required';
     if (!form.addressLine1.trim()) newErrors.addressLine1 = 'Address is required';
     if (!form.city.trim()) newErrors.city = 'City is required';
@@ -61,15 +57,20 @@ export default function Cart() {
     if (!validateForm() || !razorpayKeyId) return;
     setIsProcessing(true);
     try {
-      const shippingDetails = {
+      // Build the full address string for the new DeliveryInfo format
+      const addressParts = [
+        form.addressLine1,
+        form.addressLine2,
+        form.city,
+        form.state,
+        form.pincode,
+      ].filter(Boolean);
+      const fullAddress = addressParts.join(', ');
+
+      const deliveryInfo = {
         fullName: form.fullName,
-        email: form.email,
+        address: fullAddress,
         phoneNumber: form.phoneNumber,
-        addressLine1: form.addressLine1,
-        addressLine2: form.addressLine2,
-        city: form.city,
-        state: form.state,
-        pincode: form.pincode,
       };
 
       const orderInput: OrderInput = {
@@ -78,11 +79,8 @@ export default function Cart() {
           quantity: BigInt(item.quantity),
           unitPrice: item.priceInr,
         })),
-        shippingDetails,
-        guestDetails: {
-          ...shippingDetails,
-          orderNotes: form.orderNotes || undefined,
-        },
+        deliveryInfo,
+        guestDeliveryInfo: deliveryInfo,
         totalAmount: totalPrice,
         razorpayOrderId: `order_${Date.now()}`,
         razorpayPaymentId: '',
@@ -96,7 +94,6 @@ export default function Cart() {
         orderInput,
         prefill: {
           name: form.fullName,
-          email: form.email,
           contact: form.phoneNumber,
         },
         onSuccess: () => {
@@ -163,7 +160,7 @@ export default function Cart() {
           <div className="flex-1 h-px bg-forest/20" />
           <div className={`flex items-center gap-2 text-sm font-medium ${step === 'checkout' ? 'text-forest' : 'text-forest/40'}`}>
             <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step === 'checkout' ? 'bg-forest text-cream' : 'bg-forest/20 text-forest/60'}`}>2</div>
-            Checkout
+            Delivery Details
           </div>
         </div>
 
@@ -221,11 +218,16 @@ export default function Cart() {
             ) : (
               /* Checkout Form */
               <div className="bg-white rounded-2xl p-6 border border-forest/10">
-                <h2 className="font-serif text-xl text-forest mb-6">Shipping Details</h2>
+                <h2 className="font-serif text-xl text-forest mb-2">Delivery Details</h2>
+                <p className="text-forest/60 text-sm mb-6">
+                  Please fill in your delivery information so we can ship your order to you.
+                </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Full Name */}
                   <div className="sm:col-span-2">
-                    <label className="block text-forest/70 text-sm font-medium mb-1">Full Name *</label>
+                    <label className="block text-forest/70 text-sm font-medium mb-1">
+                      Full Name <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       value={form.fullName}
@@ -236,35 +238,27 @@ export default function Cart() {
                     {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
                   </div>
 
-                  {/* Email */}
-                  <div>
-                    <label className="block text-forest/70 text-sm font-medium mb-1">Email *</label>
-                    <input
-                      type="email"
-                      value={form.email}
-                      onChange={(e) => updateField('email', e.target.value)}
-                      className={`w-full px-4 py-3 rounded-xl border ${errors.email ? 'border-red-400' : 'border-forest/20'} focus:outline-none focus:ring-2 focus:ring-forest/30 text-forest`}
-                      placeholder="your@email.com"
-                    />
-                    {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
-                  </div>
-
                   {/* Phone */}
-                  <div>
-                    <label className="block text-forest/70 text-sm font-medium mb-1">Phone Number *</label>
+                  <div className="sm:col-span-2">
+                    <label className="block text-forest/70 text-sm font-medium mb-1">
+                      Phone Number <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="tel"
                       value={form.phoneNumber}
                       onChange={(e) => updateField('phoneNumber', e.target.value)}
                       className={`w-full px-4 py-3 rounded-xl border ${errors.phoneNumber ? 'border-red-400' : 'border-forest/20'} focus:outline-none focus:ring-2 focus:ring-forest/30 text-forest`}
                       placeholder="10-digit mobile number"
+                      maxLength={10}
                     />
                     {errors.phoneNumber && <p className="text-red-500 text-xs mt-1">{errors.phoneNumber}</p>}
                   </div>
 
                   {/* Address Line 1 */}
                   <div className="sm:col-span-2">
-                    <label className="block text-forest/70 text-sm font-medium mb-1">Address Line 1 *</label>
+                    <label className="block text-forest/70 text-sm font-medium mb-1">
+                      Address Line 1 <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       value={form.addressLine1}
@@ -289,7 +283,9 @@ export default function Cart() {
 
                   {/* City */}
                   <div>
-                    <label className="block text-forest/70 text-sm font-medium mb-1">City *</label>
+                    <label className="block text-forest/70 text-sm font-medium mb-1">
+                      City <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       value={form.city}
@@ -302,7 +298,9 @@ export default function Cart() {
 
                   {/* State */}
                   <div>
-                    <label className="block text-forest/70 text-sm font-medium mb-1">State *</label>
+                    <label className="block text-forest/70 text-sm font-medium mb-1">
+                      State <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       value={form.state}
@@ -315,7 +313,9 @@ export default function Cart() {
 
                   {/* Pincode */}
                   <div>
-                    <label className="block text-forest/70 text-sm font-medium mb-1">Pincode *</label>
+                    <label className="block text-forest/70 text-sm font-medium mb-1">
+                      Pincode <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       value={form.pincode}
@@ -392,6 +392,10 @@ export default function Cart() {
                   Payment gateway not configured. Please contact support.
                 </p>
               )}
+
+              <p className="text-forest/40 text-xs text-center mt-4">
+                🔒 Secured by Razorpay
+              </p>
             </div>
           </div>
         </div>
